@@ -2,47 +2,47 @@ import { Outlet, NavLink } from 'react-router-dom';
 import { LayoutList, PieChart, Settings } from 'lucide-react';
 
 export default function Layout() {
-    return (
-        <div className="app-container">
-            <main className="content">
-                <Outlet />
-            </main>
+  return (
+    <div className="app-container">
+      <nav className="top-nav">
+        <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <LayoutList size={24} />
+          <span>Transacciones</span>
+        </NavLink>
+        <NavLink to="/reports" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <PieChart size={24} />
+          <span>Informes</span>
+        </NavLink>
+        <NavLink to="/admin" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <Settings size={24} />
+          <span>Admin</span>
+        </NavLink>
+      </nav>
 
-            <nav className="bottom-nav">
-                <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                    <LayoutList size={24} />
-                    <span>Transacciones</span>
-                </NavLink>
-                <NavLink to="/reports" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                    <PieChart size={24} />
-                    <span>Informes</span>
-                </NavLink>
-                <NavLink to="/admin" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                    <Settings size={24} />
-                    <span>Admin</span>
-                </NavLink>
-            </nav>
+      <main className="content">
+        <Outlet />
+      </main>
 
-            <style>{`
+      <style>{`
         .app-container {
           display: flex;
           flex-direction: column;
           min-height: 100vh;
-          padding-bottom: 70px; /* Nav height */
+          padding-top: 70px; /* Nav height */
         }
-        .bottom-nav {
+        .top-nav {
           position: fixed;
-          bottom: 0;
+          top: 0;
           left: 0;
           right: 0;
           height: 64px;
           background: var(--md-sys-color-surface);
-          border-top: 1px solid #eee;
+          border-bottom: 1px solid #eee;
           display: flex;
           justify-content: space-around;
           align-items: center;
           z-index: 1000;
-          box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+          box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .nav-item {
           display: flex;
@@ -72,13 +72,13 @@ export default function Layout() {
               min-height: 100vh;
               box-shadow: 0 0 20px rgba(0,0,0,0.05);
            }
-           .bottom-nav {
+           .top-nav {
              max-width: 600px;
              left: 50%;
              transform: translateX(-50%);
            }
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }
