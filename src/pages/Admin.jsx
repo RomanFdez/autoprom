@@ -12,8 +12,8 @@ const COLORS = [
 
 export default function Admin() {
     const {
-        categories, addCategory, removeCategory,
-        tags, addTag, removeTag,
+        categories, addCategory, updateCategory, removeCategory,
+        tags, addTag, updateTag, removeTag,
         settings, updateSettings
     } = useData();
 
@@ -40,7 +40,11 @@ export default function Admin() {
     const handleSaveCategory = (e) => {
         e.preventDefault();
         const code = editingItem.code || editingItem.name.substring(0, 4).toUpperCase();
-        addCategory({ ...editingItem, code }); // This handles upsert
+        if (editingItem.id) {
+            updateCategory({ ...editingItem, code });
+        } else {
+            addCategory({ ...editingItem, code });
+        }
         setIsCatModalOpen(false);
         setEditingItem(null);
     };
@@ -48,7 +52,11 @@ export default function Admin() {
     const handleSaveTag = (e) => {
         e.preventDefault();
         const code = editingItem.code || editingItem.name.substring(0, 4).toUpperCase();
-        addTag({ ...editingItem, code }); // This handles upsert
+        if (editingItem.id) {
+            updateTag({ ...editingItem, code });
+        } else {
+            addTag({ ...editingItem, code });
+        }
         setIsTagModalOpen(false);
         setEditingItem(null);
     };
@@ -155,6 +163,20 @@ export default function Admin() {
                                     onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
                                 />
                             </div>
+
+                            {isCatModalOpen && (
+                                <div className="input-group">
+                                    <label className="input-label">Deuda Actual (€)</label>
+                                    <input
+                                        type="number"
+                                        className="form-input"
+                                        placeholder="0.00"
+                                        value={editingItem.debt || ''}
+                                        onChange={e => setEditingItem({ ...editingItem, debt: parseFloat(e.target.value) || 0 })}
+                                    />
+                                    <small style={{ color: '#888' }}>Si se añade gasto a esta categoría, se reducirá de esta deuda.</small>
+                                </div>
+                            )}
 
                             <div className="input-group">
                                 <label className="input-label">Color</label>

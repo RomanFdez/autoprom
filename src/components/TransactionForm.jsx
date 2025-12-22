@@ -25,10 +25,18 @@ export default function TransactionForm({ onClose, initialData = null }) {
             setIsPinned(initialData.isPinned || false);
             setDescription(initialData.description || '');
         } else {
-            // Default to first category if available
+            // Default: if income selected (unlikely on fresh load unless defaulted), set INGR.
+            // On fresh load, Expense is default.
             if (categories.length > 0) setCategoryId(categories[0].id);
         }
     }, [initialData, categories]);
+
+    useEffect(() => {
+        if (type === 'income') {
+            const incomeCat = categories.find(c => c.code === 'INGR');
+            if (incomeCat) setCategoryId(incomeCat.id);
+        }
+    }, [type, categories]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -98,6 +106,7 @@ export default function TransactionForm({ onClose, initialData = null }) {
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             required
+                            autoFocus
                         />
                     </div>
 
@@ -111,7 +120,6 @@ export default function TransactionForm({ onClose, initialData = null }) {
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             required
-                            autoFocus
                         />
                     </div>
 
@@ -149,14 +157,21 @@ export default function TransactionForm({ onClose, initialData = null }) {
                             {categories.map(cat => {
                                 const Icon = getIcon(cat.icon);
                                 const isSelected = categoryId === cat.id;
+                                // If Type is Income, only allow 'INGR' or disable others
+                                const isIncome = type === 'income';
+                                const isIngr = cat.code === 'INGR';
+
+                                if (isIncome && !isIngr) return null; // Hide others when Income
+
                                 return (
                                     <div
                                         key={cat.id}
                                         className={`category-item ${isSelected ? 'selected' : ''}`}
-                                        onClick={() => setCategoryId(cat.id)}
+                                        onClick={() => !isIncome && setCategoryId(cat.id)}
                                         style={{
                                             borderColor: isSelected ? cat.color : 'transparent',
-                                            backgroundColor: isSelected ? `${cat.color}20` : '#f5f5f5' // 20 hex alpha
+                                            backgroundColor: isSelected ? `${cat.color}20` : '#f5f5f5',
+                                            cursor: isIncome ? 'default' : 'pointer'
                                         }}
                                     >
                                         <div

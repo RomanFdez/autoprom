@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 const DataContext = createContext();
 
 const INITIAL_CATEGORIES = [
+    { id: 'cat_0', code: 'INGR', name: 'Ingresos', color: '#4caf50', icon: 'trending_up', isFixed: true },
     { id: 'cat_1', code: 'PROJ', name: 'Proyecto y Documentación', color: '#795548', icon: 'description' },
     { id: 'cat_2', code: 'TERR', name: 'Terreno', color: '#4caf50', icon: 'landscape' },
     { id: 'cat_3', code: 'CONS', name: 'Construcción', color: '#ff9800', icon: 'construction' },
@@ -65,8 +66,24 @@ export const DataProvider = ({ children }) => {
     const addTransaction = (t) => {
         const newT = { ...t, id: t.id || uuidv4() };
         const newTransactions = [...transactions, newT];
+
+        // Handle Debt Reduction
+        let newCategories = null;
+        if (newT.amount < 0 && newT.categoryId) { // Expense
+            const catIndex = categories.findIndex(c => c.id === newT.categoryId);
+            if (catIndex !== -1 && categories[catIndex].debt > 0) {
+                const updatedCat = { ...categories[catIndex] };
+                // Reduce debt by the absolute amount of the expense
+                updatedCat.debt = Math.max(0, updatedCat.debt - Math.abs(newT.amount));
+
+                newCategories = [...categories];
+                newCategories[catIndex] = updatedCat;
+                setCategories(newCategories);
+            }
+        }
+
         setTransactions(newTransactions);
-        syncData(newTransactions, null, null, null);
+        syncData(newTransactions, newCategories, null, null);
     };
 
     const updateTransaction = (t) => {
@@ -88,6 +105,12 @@ export const DataProvider = ({ children }) => {
         syncData(null, newCategories, null, null);
     };
 
+    const updateCategory = (c) => {
+        const newCategories = categories.map(cat => cat.id === c.id ? c : cat);
+        setCategories(newCategories);
+        syncData(null, newCategories, null, null);
+    };
+
     const removeCategory = (id) => {
         const newCategories = categories.filter(c => c.id !== id);
         setCategories(newCategories);
@@ -97,6 +120,12 @@ export const DataProvider = ({ children }) => {
     const addTag = (t) => {
         const newT = { ...t, id: t.id || uuidv4() };
         const newTags = [...tags, newT];
+        setTags(newTags);
+        syncData(null, null, newTags, null);
+    };
+
+    const updateTag = (t) => {
+        const newTags = tags.map(tag => tag.id === t.id ? t : tag);
         setTags(newTags);
         syncData(null, null, newTags, null);
     };
@@ -132,8 +161,10 @@ export const DataProvider = ({ children }) => {
             updateTransaction,
             removeTransaction,
             addCategory,
+            updateCategory,
             removeCategory,
             addTag,
+            updateTag,
             removeTag,
             updateSettings,
             importData,
