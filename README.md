@@ -1,16 +1,51 @@
-# React + Vite
+# Proyecto Sierra de la Espada 30
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Gestiona tus gastos e ingresos de forma sencilla.
 
-Currently, two official plugins are available:
+## Características
+- Registro de transacciones con importe, fecha, categoría, etiquetas, y descripción.
+- Filtros por día, semana, mes, o todo.
+- Gráficos y reportes con "drilldown" (click para ver detalles).
+- Exportación e importación CSV compatible con Excel.
+- Presupuesto inicial configurable.
+- Persistencia de datos en servidor (Docker ready).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Requisitos
+- Node.js 18+
+- Docker & Docker Compose (Opcional, recomendado para producción)
 
-## React Compiler
+## Instalación y Desarrollo Local
+1. Instalar dependencias:
+   ```bash
+   npm install
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+2. Iniciar servidor backend (para persistencia):
+   ```bash
+   node server.js
+   ```
 
-## Expanding the ESLint configuration
+3. Iniciar frontend (en otra terminal):
+   ```bash
+   npm run dev
+   ```
+   Accede a http://localhost:5173 (El frontend se conectará al backend en el puerto 3030).
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Despliegue con Docker
+Para desplegar la aplicación con persistencia de datos:
+
+1. Construir y levantar el contenedor:
+   ```bash
+   docker-compose up --build -d
+   ```
+
+2. Acceder a la aplicación:
+   http://localhost:3030
+
+Los datos se guardarán en la carpeta `./data` del host.
+
+## Estructura del Proyecto
+- `src/` - Código fuente React.
+- `server.js` - Servidor Express para servir la app y API de datos.
+- `data/` - Carpeta donde se guarda `db.json` (persistencia).
+- `docker-compose.yml` - Configuración para despliegue.
