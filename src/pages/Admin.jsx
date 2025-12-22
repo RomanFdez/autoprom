@@ -113,6 +113,11 @@ export default function Admin() {
                             </div>
                             <div className="item-details">
                                 <div className="item-name">{cat.name}</div>
+                                {cat.debt > 0 && (
+                                    <div className="item-code" style={{ color: '#888', fontSize: '0.8rem' }}>
+                                        Deuda: {cat.debt.toFixed(2)}€
+                                    </div>
+                                )}
                             </div>
                             <div className="item-actions">
                                 <button className="icon-btn" onClick={() => openCatModal(cat)}><Edit2 size={16} /></button>
