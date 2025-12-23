@@ -137,19 +137,12 @@ export default function Reports() {
                                             outerRadius={80}
                                             paddingAngle={2}
                                             dataKey="value"
-                                            onClick={(data) => {
-                                                setSelectedCategory(data.name === selectedCategory ? null : data.name);
-                                                onPieClick(data, 'category');
-                                            }}
-                                            style={{ cursor: 'pointer' }}
                                         >
                                             {categoryData.map((entry, index) => (
                                                 <Cell
                                                     key={`cell-${index}`}
                                                     fill={entry.color}
-                                                    stroke={selectedCategory === entry.name ? '#000' : 'none'}
-                                                    strokeWidth={2}
-                                                    style={{ opacity: selectedCategory && selectedCategory !== entry.name ? 0.3 : 1 }}
+                                                    stroke="none"
                                                 />
                                             ))}
                                         </Pie>
@@ -197,8 +190,6 @@ export default function Reports() {
                                             outerRadius={80}
                                             paddingAngle={2}
                                             dataKey="value"
-                                            onClick={(data) => onPieClick(data, 'tag')}
-                                            style={{ cursor: 'pointer' }}
                                         >
                                             {tagData.map((entry, index) => (
                                                 <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
