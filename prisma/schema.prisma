@@ -16,6 +16,7 @@ model User {
 model Settings {
   id             String @id @default("settings")
   initialBalance Float  @default(0)
+  darkMode       Boolean @default(false)
 }
 
 model Category {
