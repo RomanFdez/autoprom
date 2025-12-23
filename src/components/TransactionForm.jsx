@@ -15,9 +15,11 @@ export default function TransactionForm({ onClose, initialData = null }) {
     const [isPinned, setIsPinned] = useState(false);
     const [description, setDescription] = useState(''); // Optional, not explicitly requested but useful.
 
+    // 1. Initialization Effect
     useEffect(() => {
         if (initialData) {
-            setType(initialData.amount >= 0 ? 'income' : 'expense');
+            const initialType = initialData.amount >= 0 ? 'income' : 'expense';
+            setType(initialType);
             setAmount(Math.abs(initialData.amount).toString());
             setDate(initialData.date);
             setCategoryId(initialData.categoryId);
@@ -25,29 +27,32 @@ export default function TransactionForm({ onClose, initialData = null }) {
             setIsPinned(initialData.isPinned || false);
             setDescription(initialData.description || '');
         } else {
-            // Default: if income selected (unlikely on fresh load unless defaulted), set INGR.
-            // On fresh load, Expense is default.
-            if (categories.length > 0) setCategoryId(categories[0].id);
+            // Default on new transaction
+            if (categories.length > 0) {
+                // Pick first valid expense category by default
+                const firstExp = categories.find(c => c.showInExpense !== false);
+                if (firstExp) setCategoryId(firstExp.id);
+                else setCategoryId(categories[0].id);
+            }
         }
-    }, [initialData, categories]);
+    }, [initialData]); // Run only when initialData changes (or mount)
 
+    // 2. Type Change Effect
+    // Only run this when TYPE changes. This prevents overwriting category on mount.
     useEffect(() => {
-        // When type changes, ensure selected category is valid for that type.
-        // If not valid, select the first valid one.
-        const currentCat = categories.find(c => c.id === categoryId);
-        let isValid = false;
-
-        // Exception: If we are editing and the category matches the original one, 
-        // keep it even if it's technically "hidden" in the picker, 
-        // provided the type hasn't changed from the original.
-        if (initialData && categoryId === initialData.categoryId) {
+        // If we just loaded (initialData exists), and the type matches initial type, 
+        // DO NOT change category. This guards against the effect running on mount.
+        if (initialData) {
             const initialType = initialData.amount >= 0 ? 'income' : 'expense';
-            if (type === initialType) {
-                isValid = true;
+            if (type === initialType && categoryId === initialData.categoryId) {
+                return;
             }
         }
 
-        if (!isValid && currentCat) {
+        const currentCat = categories.find(c => c.id === categoryId);
+        let isValid = false;
+
+        if (currentCat) {
             if (type === 'income') {
                 isValid = currentCat.showInIncome !== false;
             } else {
@@ -64,7 +69,7 @@ export default function TransactionForm({ onClose, initialData = null }) {
                 setCategoryId(firstValid.id);
             }
         }
-    }, [type, categories, categoryId, initialData]);
+    }, [type]); // Dependencies: ONLY type. (categories is stable enough, or add it if lint complains, but mainly TYPE triggers the switch)
 
     const handleSubmit = (e) => {
         e.preventDefault();
