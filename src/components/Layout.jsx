@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutList, PieChart, Settings, LogOut, Search, Moon, Sun, X } from 'lucide-react';
+import { LayoutList, PieChart, Settings, LogOut, Search, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import { useData } from '../context/DataContext';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -10,7 +9,6 @@ import { getIcon } from '../utils/icons';
 
 export default function Layout() {
   const { logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const { transactions, categories } = useData();
   const navigate = useNavigate();
 
@@ -39,9 +37,6 @@ export default function Layout() {
         <div className="nav-left">
           <button className="icon-btn-nav" onClick={() => setIsSearchOpen(true)}>
             <Search size={20} />
-          </button>
-          <button className="icon-btn-nav" onClick={toggleTheme}>
-            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </button>
         </div>
 

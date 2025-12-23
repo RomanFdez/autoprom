@@ -93,36 +93,6 @@ export default function Admin() {
         <div className="admin-page">
             <h2 style={{ marginBottom: '1rem' }}>Administración</h2>
 
-            {/* Backups */}
-            <div className="card" style={{ marginBottom: '1rem' }}>
-                <h3>Backup</h3>
-                <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
-                    Descarga una copia completa de tus datos en formato JSON.
-                </p>
-                <button className="btn btn-primary" onClick={handleBackup}>
-                    <Download size={18} /> Descargar Backup
-                </button>
-            </div>
-
-            {/* Initial Balance */}
-            <div className="card">
-                <h3>Saldo Inicial</h3>
-                <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
-                    El saldo con el que empieza la cuenta antes de las transacciones registradas.
-                </p>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                    <input
-                        type="number"
-                        className="form-input"
-                        value={balance}
-                        onChange={(e) => setBalance(e.target.value)}
-                    />
-                    <button className="btn btn-primary" onClick={handleUpdateBalance}>
-                        <Save size={18} /> Guardar
-                    </button>
-                </div>
-            </div>
-
             {/* Categories */}
             <div className="section-header">
                 <h3>Categorías</h3>
@@ -177,6 +147,36 @@ export default function Admin() {
                         </div>
                     </div>
                 ))}
+            </div>
+
+            {/* Initial Balance */}
+            <div className="card" style={{ marginTop: '2rem' }}>
+                <h3>Saldo Inicial</h3>
+                <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
+                    El saldo con el que empieza la cuenta antes de las transacciones registradas.
+                </p>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                        type="number"
+                        className="form-input"
+                        value={balance}
+                        onChange={(e) => setBalance(e.target.value)}
+                    />
+                    <button className="btn btn-primary" onClick={handleUpdateBalance}>
+                        <Save size={18} /> Guardar
+                    </button>
+                </div>
+            </div>
+
+            {/* Backups */}
+            <div className="card" style={{ marginTop: '1rem' }}>
+                <h3>Backup</h3>
+                <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
+                    Descarga una copia completa de tus datos en formato JSON.
+                </p>
+                <button className="btn btn-primary" onClick={handleBackup}>
+                    <Download size={18} /> Descargar Backup
+                </button>
             </div>
 
             {/* Modals */}
