@@ -143,29 +143,33 @@ app.post('/api/data', authMiddleware, async (req, res) => {
 
             // 3. Insert Categories
             if (categories && categories.length > 0) {
-                await tx.category.createMany({
-                    data: categories.map(c => ({
-                        id: c.id,
-                        code: c.code || '',
-                        name: c.name,
-                        color: c.color,
-                        icon: c.icon || 'category',
-                        isFixed: !!c.isFixed, // Ensure boolean
-                        debt: parseFloat(c.debt || 0) // Ensure float
-                    }))
-                });
+                for (const c of categories) {
+                    await tx.category.create({
+                        data: {
+                            id: c.id,
+                            code: c.code || '',
+                            name: c.name,
+                            color: c.color,
+                            icon: c.icon || 'category',
+                            isFixed: !!c.isFixed,
+                            debt: parseFloat(c.debt || 0)
+                        }
+                    });
+                }
             }
 
             // 4. Insert Tags
             if (tags && tags.length > 0) {
-                await tx.tag.createMany({
-                    data: tags.map(t => ({
-                        id: t.id,
-                        code: t.code || '',
-                        name: t.name,
-                        color: t.color
-                    }))
-                });
+                for (const t of tags) {
+                    await tx.tag.create({
+                        data: {
+                            id: t.id,
+                            code: t.code || '',
+                            name: t.name,
+                            color: t.color
+                        }
+                    });
+                }
             }
 
             // 5. Insert Transactions (one by one to handle many-to-many relations with tags)
