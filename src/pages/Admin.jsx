@@ -177,6 +177,13 @@ export default function Admin() {
                 <form onSubmit={async (e) => {
                     e.preventDefault();
                     const newPass = e.target.newPassword.value;
+                    const confirmPass = e.target.confirmPassword.value;
+
+                    if (newPass !== confirmPass) {
+                        alert('Las contraseñas no coinciden');
+                        return;
+                    }
+
                     if (newPass) {
                         const success = await api.changePassword(newPass);
                         if (success) {
@@ -186,17 +193,26 @@ export default function Admin() {
                             alert('Error al actualizar la contraseña');
                         }
                     }
-                }} style={{ display: 'flex', gap: '8px' }}>
-                    <input
-                        name="newPassword"
-                        type="password"
-                        className="form-input"
-                        placeholder="Nueva contraseña"
-                        required
-                    />
-                    <button type="submit" className="btn btn-primary">
-                        <Lock size={18} /> Actualizar
-                    </button>
+                }} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                            name="newPassword"
+                            type="password"
+                            className="form-input"
+                            placeholder="Nueva contraseña"
+                            required
+                        />
+                        <input
+                            name="confirmPassword"
+                            type="password"
+                            className="form-input"
+                            placeholder="Repetir contraseña"
+                            required
+                        />
+                        <button type="submit" className="btn btn-primary" style={{ whiteSpace: 'nowrap' }}>
+                            <Lock size={18} /> Actualizar
+                        </button>
+                    </div>
                 </form>
             </div>
 
