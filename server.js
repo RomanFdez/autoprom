@@ -3,6 +3,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
 
@@ -28,7 +29,7 @@ const initUser = async () => {
             await prisma.user.create({
                 data: {
                     username: 'admin',
-                    password: 'password123' // Consider hashing passwords in a real app
+                    password: 'password123'
                 }
             });
             console.log('Default admin user created.');
@@ -37,7 +38,94 @@ const initUser = async () => {
         console.error('Failed to initialize user:', e);
     }
 };
+
+const initData = async () => {
+    try {
+        const txCount = await prisma.transaction.count();
+        const catCount = await prisma.category.count();
+
+        if (txCount === 0 && catCount === 0) {
+            const seedPath = path.join(__dirname, 'initial_seed.json');
+            if (fs.existsSync(seedPath)) {
+                console.log('Seeding database from initial_seed.json...');
+                const rawData = fs.readFileSync(seedPath, 'utf-8');
+                const seedData = JSON.parse(rawData);
+                const { transactions, categories, tags, settings } = seedData;
+
+                await prisma.$transaction(async (tx) => {
+                    // Insert Settings
+                    if (settings) {
+                        await tx.settings.create({
+                            data: {
+                                id: 'settings',
+                                initialBalance: parseFloat(settings.initialBalance || 0)
+                            }
+                        });
+                    }
+
+                    // Insert Categories
+                    if (categories && categories.length > 0) {
+                        for (const c of categories) {
+                            await tx.category.create({
+                                data: {
+                                    id: c.id,
+                                    code: c.code || '',
+                                    name: c.name,
+                                    color: c.color,
+                                    icon: c.icon || 'category',
+                                    isFixed: !!c.isFixed,
+                                    debt: parseFloat(c.debt || 0)
+                                }
+                            });
+                        }
+                    }
+
+                    // Insert Tags
+                    if (tags && tags.length > 0) {
+                        // Deduplicate tags
+                        const uniqueTags = new Map();
+                        tags.forEach(t => uniqueTags.set(t.id, t));
+
+                        for (const t of uniqueTags.values()) {
+                            await tx.tag.create({
+                                data: {
+                                    id: t.id,
+                                    code: t.code || '',
+                                    name: t.name,
+                                    color: t.color
+                                }
+                            });
+                        }
+                    }
+
+                    // Insert Transactions
+                    if (transactions && transactions.length > 0) {
+                        for (const t of transactions) {
+                            await tx.transaction.create({
+                                data: {
+                                    id: t.id,
+                                    date: t.date,
+                                    description: t.description || '',
+                                    amount: parseFloat(t.amount),
+                                    categoryId: t.categoryId || null,
+                                    tags: {
+                                        connect: (t.tagIds || []).map(tid => ({ id: tid }))
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+                console.log('Database seeded successfully!');
+            }
+        }
+    } catch (e) {
+        console.error('Failed to seed data:', e);
+    }
+};
+
 initUser();
+initData();
 
 // Auth Middleware
 const authMiddleware = (req, res, next) => {
