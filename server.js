@@ -186,11 +186,12 @@ app.post('/api/change-password', authMiddleware, async (req, res) => {
 // API Routes
 app.get('/api/data', authMiddleware, async (req, res) => {
     try {
-        const [transactions, categories, tags, settings] = await Promise.all([
+        const [transactions, categories, tags, settings, todos] = await Promise.all([
             prisma.transaction.findMany({ include: { tags: true } }),
             prisma.category.findMany(),
             prisma.tag.findMany(),
-            prisma.settings.findUnique({ where: { id: 'settings' } }) // Assuming a single settings record with a fixed ID
+            prisma.settings.findUnique({ where: { id: 'settings' } }),
+            prisma.todo.findMany()
         ]);
 
         // Transform transactions to include tagIds array for frontend compatibility
@@ -204,7 +205,8 @@ app.get('/api/data', authMiddleware, async (req, res) => {
             transactions: formattedTransactions,
             categories,
             tags,
-            settings: settings || { id: 'settings', initialBalance: 0 } // Provide default if settings not found
+            settings: settings || { id: 'settings', initialBalance: 0 },
+            todos: todos || []
         });
     } catch (err) {
         console.error(err);
@@ -214,7 +216,7 @@ app.get('/api/data', authMiddleware, async (req, res) => {
 
 // Full Sync / Restore
 app.post('/api/data', authMiddleware, async (req, res) => {
-    const { transactions, categories, tags, settings } = req.body;
+    const { transactions, categories, tags, settings, todos } = req.body;
 
     try {
         await prisma.$transaction(async (tx) => {
@@ -223,6 +225,7 @@ app.post('/api/data', authMiddleware, async (req, res) => {
             await tx.tag.deleteMany();
             await tx.category.deleteMany();
             await tx.settings.deleteMany();
+            await tx.todo.deleteMany();
 
             // 2. Insert Settings
             if (settings) {
@@ -280,6 +283,20 @@ app.post('/api/data', authMiddleware, async (req, res) => {
                             tags: {
                                 connect: (t.tagIds || []).map(tid => ({ id: tid })) // Connect existing tags
                             }
+                        }
+                    });
+                }
+            }
+
+            // 6. Insert Todos
+            if (todos && todos.length > 0) {
+                for (const todo of todos) {
+                    await tx.todo.create({
+                        data: {
+                            id: todo.id,
+                            text: todo.text,
+                            done: !!todo.done,
+                            createdAt: todo.createdAt ? new Date(todo.createdAt) : new Date()
                         }
                     });
                 }

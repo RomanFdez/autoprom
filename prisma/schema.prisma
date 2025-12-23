@@ -48,3 +48,10 @@ model Transaction {
   category    Category? @relation(fields: [categoryId], references: [id])
   tags        Tag[]
 }
+
+model Todo {
+  id        String   @id
+  text      String
+  done      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

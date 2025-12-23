@@ -10,6 +10,7 @@ const Transactions = lazy(() => import('./pages/Transactions'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Admin = lazy(() => import('./pages/Admin'));
 const Login = lazy(() => import('./pages/Login'));
+const Todos = lazy(() => import('./pages/Todos'));
 
 const LoadingFallback = () => (
   <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -43,6 +44,7 @@ function App() {
             <Route path="/" element={<ProtectedRoute />}>
               <Route index element={<Reports />} />
               <Route path="transactions" element={<Transactions />} />
+              <Route path="todos" element={<Todos />} />
               <Route path="admin" element={<Admin />} />
             </Route>
           </Routes>

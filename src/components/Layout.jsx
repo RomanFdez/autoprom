@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutList, PieChart, Settings, LogOut, Search, X } from 'lucide-react';
+import { LayoutList, PieChart, Settings, LogOut, Search, X, ListTodo } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { format, parseISO } from 'date-fns';
@@ -50,6 +50,10 @@ export default function Layout() {
           <NavLink to="/transactions" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <LayoutList size={18} />
             <span>Transacciones</span>
+          </NavLink>
+          <NavLink to="/todos" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <ListTodo size={18} />
+            <span>Tareas</span>
           </NavLink>
           <NavLink to="/admin" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <Settings size={18} />

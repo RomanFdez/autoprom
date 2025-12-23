@@ -30,16 +30,18 @@ export const DataProvider = ({ children }) => {
     const [transactions, setTransactions] = useState([]);
     const [categories, setCategories] = useState([]);
     const [tags, setTags] = useState([]);
+    const [todos, setTodos] = useState([]);
     const [settings, setSettings] = useState(INITIAL_SETTINGS);
     const [loading, setLoading] = useState(true);
 
     // Helper to sync all data
-    const syncData = async (newTransactions, newCategories, newTags, newSettings) => {
+    const syncData = async (newTransactions, newCategories, newTags, newSettings, newTodos) => {
         const payload = {
             transactions: newTransactions || transactions,
             categories: newCategories || categories,
             tags: newTags || tags,
             settings: newSettings || settings,
+            todos: newTodos || todos
         };
         await api.saveData(payload);
     };
@@ -55,6 +57,7 @@ export const DataProvider = ({ children }) => {
                 setCategories(data.categories && data.categories.length > 0 ? data.categories : INITIAL_CATEGORIES);
                 setTags(data.tags && data.tags.length > 0 ? data.tags : INITIAL_TAGS);
                 setSettings(data.settings || INITIAL_SETTINGS);
+                setTodos(data.todos || []);
             } else {
                 // If data is null, it likely means fetch failed (possibly 401).
                 // In a robust app, api.loadData should throw, but here it returns null.
@@ -93,63 +96,88 @@ export const DataProvider = ({ children }) => {
         }
 
         setTransactions(newTransactions);
-        syncData(newTransactions, newCategories, null, null);
+        syncData(newTransactions, newCategories, null, null, null);
     };
 
     const updateTransaction = (t) => {
         const newTransactions = transactions.map(tr => tr.id === t.id ? t : tr);
         setTransactions(newTransactions);
-        syncData(newTransactions, null, null, null);
+        syncData(newTransactions, null, null, null, null);
     };
 
     const removeTransaction = (id) => {
         const newTransactions = transactions.filter(t => t.id !== id);
         setTransactions(newTransactions);
-        syncData(newTransactions, null, null, null);
+        syncData(newTransactions, null, null, null, null);
     };
 
     const addCategory = (c) => {
         const newC = { ...c, id: c.id || uuidv4() };
         const newCategories = [...categories, newC];
         setCategories(newCategories);
-        syncData(null, newCategories, null, null);
+        syncData(null, newCategories, null, null, null);
     };
 
     const updateCategory = (c) => {
         const newCategories = categories.map(cat => cat.id === c.id ? c : cat);
         setCategories(newCategories);
-        syncData(null, newCategories, null, null);
+        syncData(null, newCategories, null, null, null);
     };
 
     const removeCategory = (id) => {
         const newCategories = categories.filter(c => c.id !== id);
         setCategories(newCategories);
-        syncData(null, newCategories, null, null);
+        syncData(null, newCategories, null, null, null);
     };
 
     const addTag = (t) => {
         const newT = { ...t, id: t.id || uuidv4() };
         const newTags = [...tags, newT];
         setTags(newTags);
-        syncData(null, null, newTags, null);
+        syncData(null, null, newTags, null, null);
     };
 
     const updateTag = (t) => {
         const newTags = tags.map(tag => tag.id === t.id ? t : tag);
         setTags(newTags);
-        syncData(null, null, newTags, null);
+        syncData(null, null, newTags, null, null);
     };
 
     const removeTag = (id) => {
         const newTags = tags.filter(t => t.id !== id);
         setTags(newTags);
-        syncData(null, null, newTags, null);
+        syncData(null, null, newTags, null, null);
     };
 
     const updateSettings = (s) => {
         const newSettings = { ...settings, ...s };
         setSettings(newSettings);
-        syncData(null, null, null, newSettings);
+        syncData(null, null, null, newSettings, null);
+    };
+
+    // Todo Logic
+    const addTodo = (text) => {
+        const newTodo = {
+            id: uuidv4(),
+            text,
+            done: false,
+            createdAt: new Date().toISOString()
+        };
+        const newTodos = [...todos, newTodo];
+        setTodos(newTodos);
+        syncData(null, null, null, null, newTodos);
+    };
+
+    const toggleTodo = (id) => {
+        const newTodos = todos.map(t => t.id === id ? { ...t, done: !t.done } : t);
+        setTodos(newTodos);
+        syncData(null, null, null, null, newTodos);
+    };
+
+    const deleteTodo = (id) => {
+        const newTodos = todos.filter(t => t.id !== id);
+        setTodos(newTodos);
+        syncData(null, null, null, null, newTodos);
     };
 
     const importData = (data) => {
@@ -157,7 +185,8 @@ export const DataProvider = ({ children }) => {
         if (data.categories) setCategories(data.categories);
         if (data.tags) setTags(data.tags);
         if (data.settings) setSettings(data.settings);
-        syncData(data.transactions, data.categories, data.tags, data.settings);
+        if (data.todos) setTodos(data.todos);
+        syncData(data.transactions, data.categories, data.tags, data.settings, data.todos);
     };
 
     return (
@@ -166,6 +195,7 @@ export const DataProvider = ({ children }) => {
             categories,
             tags,
             settings,
+            todos,
             loading,
             addTransaction,
             updateTransaction,
@@ -177,6 +207,9 @@ export const DataProvider = ({ children }) => {
             updateTag,
             removeTag,
             updateSettings,
+            addTodo,
+            toggleTodo,
+            deleteTodo,
             importData,
             refreshData
         }}>
