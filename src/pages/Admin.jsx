@@ -301,26 +301,33 @@ export default function Admin() {
                             )}
 
                             {isCatModalOpen && (
-                                <div className="input-group" style={{ flexDirection: 'row', gap: '20px', alignItems: 'center' }}>
-                                    <label className="checkbox-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={editingItem.showInExpense !== false}
-                                            onChange={e => setEditingItem({ ...editingItem, showInExpense: e.target.checked })}
-                                            style={{ width: '18px', height: '18px', accentColor: 'var(--md-sys-color-primary, #4caf50)' }}
-                                        />
-                                        <span>Visible en Gastos</span>
-                                    </label>
+                                <div className="input-group">
+                                    <label className="input-label">Visibilidad</label>
+                                    <div style={{ display: 'flex', gap: '24px', marginTop: '8px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <label className="toggle-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={editingItem.showInExpense !== false}
+                                                    onChange={e => setEditingItem({ ...editingItem, showInExpense: e.target.checked })}
+                                                />
+                                                <span className="slider"></span>
+                                            </label>
+                                            <span style={{ fontSize: '0.9rem' }}>En Gastos</span>
+                                        </div>
 
-                                    <label className="checkbox-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={editingItem.showInIncome !== false}
-                                            onChange={e => setEditingItem({ ...editingItem, showInIncome: e.target.checked })}
-                                            style={{ width: '18px', height: '18px', accentColor: 'var(--md-sys-color-primary, #4caf50)' }}
-                                        />
-                                        <span>Visible en Ingresos</span>
-                                    </label>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <label className="toggle-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={editingItem.showInIncome !== false}
+                                                    onChange={e => setEditingItem({ ...editingItem, showInIncome: e.target.checked })}
+                                                />
+                                                <span className="slider"></span>
+                                            </label>
+                                            <span style={{ fontSize: '0.9rem' }}>En Ingresos</span>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
@@ -498,6 +505,45 @@ export default function Admin() {
         .text-btn {
           background: none;
           color: #666;
+        }
+
+        /* Toggle Switch Styles */
+        .toggle-switch {
+          position: relative;
+          display: inline-block;
+          width: 44px;
+          height: 24px;
+        }
+        .toggle-switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background-color: #ccc;
+          transition: .3s;
+          border-radius: 24px;
+        }
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 18px;
+          width: 18px;
+          left: 3px;
+          bottom: 3px;
+          background-color: white;
+          transition: .3s;
+          border-radius: 50%;
+          box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        input:checked + .slider {
+          background-color: #ff9800; /* Orange to match user request */
+        }
+        input:checked + .slider:before {
+          transform: translateX(20px);
         }
       `}</style>
         </div>
