@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useData } from '../context/DataContext';
+import { api } from '../utils/api';
 import { ICON_KEYS, getIcon } from '../utils/icons';
-import { Plus, X, Edit2, Trash2, Check, Save } from 'lucide-react';
+import { Plus, X, Edit2, Trash2, Check, Save, Download } from 'lucide-react';
 
 const COLORS = [
     '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
@@ -27,6 +28,21 @@ export default function Admin() {
         alert('Saldo inicial actualizado');
     };
 
+    const handleBackup = async () => {
+        const data = await api.loadData();
+        if (!data) return alert('Error al cargar datos');
+        const json = JSON.stringify(data, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `backup_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    // ... existing modals ...
     const openCatModal = (cat = null) => {
         setEditingItem(cat ? { ...cat } : { name: '', code: '', color: COLORS[0], icon: 'category' });
         setIsCatModalOpen(true);
@@ -76,6 +92,17 @@ export default function Admin() {
     return (
         <div className="admin-page">
             <h2 style={{ marginBottom: '1rem' }}>Administración</h2>
+
+            {/* Backups */}
+            <div className="card" style={{ marginBottom: '1rem' }}>
+                <h3>Backup</h3>
+                <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
+                    Descarga una copia completa de tus datos en formato JSON.
+                </p>
+                <button className="btn btn-primary" onClick={handleBackup}>
+                    <Download size={18} /> Descargar Backup
+                </button>
+            </div>
 
             {/* Initial Balance */}
             <div className="card">

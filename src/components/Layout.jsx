@@ -1,22 +1,35 @@
-import { Outlet, NavLink } from 'react-router-dom';
-import { LayoutList, PieChart, Settings } from 'lucide-react';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { LayoutList, PieChart, Settings, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Layout() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
   return (
     <div className="app-container">
       <nav className="top-nav">
         <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <PieChart size={24} />
+          <span>Resumen</span>
+        </NavLink>
+        <NavLink to="/transactions" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <LayoutList size={24} />
           <span>Transacciones</span>
-        </NavLink>
-        <NavLink to="/reports" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <PieChart size={24} />
-          <span>Informes</span>
         </NavLink>
         <NavLink to="/admin" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <Settings size={24} />
           <span>Admin</span>
         </NavLink>
+        <button className="nav-item logout-btn" onClick={handleLogout}>
+          <LogOut size={24} />
+          <span>Salir</span>
+        </button>
       </nav>
 
       <main className="content">
@@ -56,9 +69,15 @@ export default function Layout() {
           transition: color 0.2s;
           width: 100%;
           height: 100%;
+          background: none;
+          border: none;
+          cursor: pointer;
         }
         .nav-item.active {
           color: var(--md-sys-color-primary);
+        }
+        .logout-btn {
+            color: #d32f2f; /* Red for logout */
         }
         .content {
           flex: 1;
