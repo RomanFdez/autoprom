@@ -42,13 +42,16 @@ export default function Layout() {
 
         <div className="nav-center">
           <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-            Resumen
+            <PieChart size={18} />
+            <span>Resumen</span>
           </NavLink>
           <NavLink to="/transactions" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-            Transacciones
+            <LayoutList size={18} />
+            <span>Transacciones</span>
           </NavLink>
           <NavLink to="/admin" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-            Admin
+            <Settings size={18} />
+            <span>Admin</span>
           </NavLink>
         </div>
 
@@ -147,9 +150,13 @@ export default function Layout() {
             text-decoration: none;
             color: var(--md-sys-color-secondary);
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.75rem; /* Smaller font for icon label */
             position: relative;
-            padding: 4px 0;
+            padding: 4px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
             transition: color 0.2s;
         }
         .nav-link.active {
