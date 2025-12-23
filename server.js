@@ -1,42 +1,43 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
+import { PrismaClient } from '@prisma/client';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 3030;
-const DATA_FILE = path.join(__dirname, 'data', 'db.json');
-const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 
 // Simple In-Memory Session Store
 const sessions = new Set();
 
 app.use(cors());
-app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.json({ limit: '50mb' })); // Increased limit for potentially large data syncs
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// Ensure data files exist
-if (!fs.existsSync(DATA_FILE)) {
-    fs.outputJsonSync(DATA_FILE, {
-        transactions: [],
-        categories: [],
-        tags: [],
-        settings: {}
-    });
-}
-
-if (!fs.existsSync(USERS_FILE)) {
-    fs.outputJsonSync(USERS_FILE, {
-        username: 'admin',
-        password: 'password123'
-    });
-}
+// Initialize Admin User if not exists
+const initUser = async () => {
+    try {
+        const count = await prisma.user.count();
+        if (count === 0) {
+            await prisma.user.create({
+                data: {
+                    username: 'admin',
+                    password: 'password123' // Consider hashing passwords in a real app
+                }
+            });
+            console.log('Default admin user created.');
+        }
+    } catch (e) {
+        console.error('Failed to initialize user:', e);
+    }
+};
+initUser();
 
 // Auth Middleware
 const authMiddleware = (req, res, next) => {
@@ -52,8 +53,8 @@ const authMiddleware = (req, res, next) => {
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     try {
-        const user = await fs.readJson(USERS_FILE);
-        if (username === user.username && password === user.password) {
+        const user = await prisma.user.findUnique({ where: { username } });
+        if (user && user.password === password) { // In a real app, compare hashed passwords
             const token = crypto.randomBytes(16).toString('hex');
             sessions.add(token);
             res.json({ token, user: { username } });
@@ -77,9 +78,11 @@ app.post('/api/change-password', authMiddleware, async (req, res) => {
     if (!newPassword) return res.status(400).json({ error: 'Password required' });
 
     try {
-        const user = await fs.readJson(USERS_FILE);
-        user.password = newPassword;
-        await fs.writeJson(USERS_FILE, user);
+        // Assuming a single admin user for this personal app, or you'd find by session/user ID
+        await prisma.user.update({
+            where: { username: 'admin' }, // Update the admin user
+            data: { password: newPassword } // In a real app, hash newPassword
+        });
         res.json({ success: true });
     } catch (err) {
         console.error(err);
@@ -90,21 +93,104 @@ app.post('/api/change-password', authMiddleware, async (req, res) => {
 // API Routes
 app.get('/api/data', authMiddleware, async (req, res) => {
     try {
-        const data = await fs.readJson(DATA_FILE);
-        res.json(data);
+        const [transactions, categories, tags, settings] = await Promise.all([
+            prisma.transaction.findMany({ include: { tags: true } }),
+            prisma.category.findMany(),
+            prisma.tag.findMany(),
+            prisma.settings.findUnique({ where: { id: 'settings' } }) // Assuming a single settings record with a fixed ID
+        ]);
+
+        // Transform transactions to include tagIds array for frontend compatibility
+        const formattedTransactions = transactions.map(t => ({
+            ...t,
+            tagIds: t.tags.map(tag => tag.id),
+            tags: undefined // Remove the nested tags object
+        }));
+
+        res.json({
+            transactions: formattedTransactions,
+            categories,
+            tags,
+            settings: settings || { id: 'settings', initialBalance: 0 } // Provide default if settings not found
+        });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Failed to read data' });
+        res.status(500).json({ error: 'Failed to load data' });
     }
 });
 
+// Full Sync / Restore
 app.post('/api/data', authMiddleware, async (req, res) => {
+    const { transactions, categories, tags, settings } = req.body;
+
     try {
-        await fs.writeJson(DATA_FILE, req.body);
+        await prisma.$transaction(async (tx) => {
+            // 1. Clean existing data (order matters due to foreign key constraints)
+            await tx.transaction.deleteMany();
+            await tx.tag.deleteMany();
+            await tx.category.deleteMany();
+            await tx.settings.deleteMany();
+
+            // 2. Insert Settings
+            if (settings) {
+                await tx.settings.create({
+                    data: {
+                        id: 'settings', // Fixed ID for the single settings record
+                        initialBalance: parseFloat(settings.initialBalance || 0)
+                    }
+                });
+            }
+
+            // 3. Insert Categories
+            if (categories && categories.length > 0) {
+                await tx.category.createMany({
+                    data: categories.map(c => ({
+                        id: c.id,
+                        code: c.code || '',
+                        name: c.name,
+                        color: c.color,
+                        icon: c.icon || 'category',
+                        isFixed: !!c.isFixed, // Ensure boolean
+                        debt: parseFloat(c.debt || 0) // Ensure float
+                    }))
+                });
+            }
+
+            // 4. Insert Tags
+            if (tags && tags.length > 0) {
+                await tx.tag.createMany({
+                    data: tags.map(t => ({
+                        id: t.id,
+                        code: t.code || '',
+                        name: t.name,
+                        color: t.color
+                    }))
+                });
+            }
+
+            // 5. Insert Transactions (one by one to handle many-to-many relations with tags)
+            if (transactions && transactions.length > 0) {
+                for (const t of transactions) {
+                    await tx.transaction.create({
+                        data: {
+                            id: t.id,
+                            date: t.date,
+                            description: t.description || '',
+                            amount: parseFloat(t.amount), // Ensure float
+                            categoryId: t.categoryId || null, // Can be null
+                            tags: {
+                                connect: (t.tagIds || []).map(tid => ({ id: tid })) // Connect existing tags
+                            }
+                        }
+                    });
+                }
+            }
+        });
+
         res.json({ success: true });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Failed to save data' });
+        console.error('Sync failed:', err);
+        res.status(500).json({ error: 'Failed to sync data' });
     }
 });
 
@@ -114,5 +200,5 @@ app.get(/(.*)/, (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
