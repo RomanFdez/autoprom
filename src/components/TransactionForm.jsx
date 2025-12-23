@@ -210,9 +210,23 @@ export default function TransactionForm({ onClose, initialData = null }) {
                         </div>
                     </div>
 
-                    <button type="submit" className="btn btn-primary full-width">
-                        Guardar
-                    </button>
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                        <button
+                            type="button"
+                            className="btn"
+                            onClick={onClose}
+                            style={{ flex: 1, backgroundColor: '#f5f5f5', border: '1px solid #ddd' }}
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            className="btn btn-primary"
+                            style={{ flex: 1 }}
+                        >
+                            Guardar
+                        </button>
+                    </div>
                 </form>
             </div>
             <style>{`
