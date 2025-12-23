@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { api } from '../utils/api';
 import { ICON_KEYS, getIcon } from '../utils/icons';
-import { Plus, X, Edit2, Trash2, Check, Save, Download, Lock } from 'lucide-react';
+import { Plus, X, Edit2, Trash2, Check, Save, Download, Lock, Upload } from 'lucide-react';
 
 const COLORS = [
     '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
@@ -204,11 +204,53 @@ export default function Admin() {
             <div className="card" style={{ marginTop: '1rem' }}>
                 <h3>Backup</h3>
                 <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
-                    Descarga una copia completa de tus datos en formato JSON.
+                    Gestión de copias de seguridad de tus datos.
                 </p>
-                <button className="btn btn-primary" onClick={handleBackup}>
-                    <Download size={18} /> Descargar Backup
-                </button>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button className="btn btn-primary" onClick={handleBackup}>
+                        <Download size={18} /> Descargar
+                    </button>
+
+                    <label className="btn" style={{ border: '1px solid #ccc', backgroundColor: '#f5f5f5' }}>
+                        <Upload size={18} /> Restaurar
+                        <input
+                            type="file"
+                            accept=".json"
+                            style={{ display: 'none' }}
+                            onChange={async (e) => {
+                                const file = e.target.files[0];
+                                if (!file) return;
+
+                                if (!confirm('¡ATENCIÓN! Esto sobrescribirá todos los datos actuales con los del archivo de respaldo. ¿Estás seguro?')) {
+                                    e.target.value = '';
+                                    return;
+                                }
+
+                                const reader = new FileReader();
+                                reader.onload = async (e) => {
+                                    try {
+                                        const json = JSON.parse(e.target.result);
+                                        // Basic validation
+                                        if (!json.transactions || !json.categories) {
+                                            throw new Error('Formato de archivo inválido');
+                                        }
+                                        const success = await api.saveData(json);
+                                        if (success) {
+                                            alert('Datos restaurados correctamente. La página se recargará.');
+                                            window.location.reload();
+                                        } else {
+                                            alert('Error al guardar los datos restaurados.');
+                                        }
+                                    } catch (err) {
+                                        console.error(err);
+                                        alert('Error al procesar el archivo: ' + err.message);
+                                    }
+                                };
+                                reader.readAsText(file);
+                            }}
+                        />
+                    </label>
+                </div>
             </div>
 
             {/* Modals */}
