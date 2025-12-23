@@ -64,5 +64,20 @@ export const api = {
             console.error("Failed to save data to API:", error);
             return false;
         }
+    },
+
+    changePassword: async (newPassword) => {
+        try {
+            const response = await fetch('/api/change-password', {
+                method: 'POST',
+                headers: api.getHeaders(),
+                body: JSON.stringify({ newPassword })
+            });
+            if (!response.ok) return false;
+            return true;
+        } catch (error) {
+            console.error("Failed to change password:", error);
+            return false;
+        }
     }
 };

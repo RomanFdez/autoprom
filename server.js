@@ -12,22 +12,29 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3030;
 const DATA_FILE = path.join(__dirname, 'data', 'db.json');
+const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 
 // Simple In-Memory Session Store
 const sessions = new Set();
-const USER_CREDENTIALS = { username: 'admin', password: 'password123' }; // CHANGE THIS IN PROD
 
 app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// Ensure data file exists
+// Ensure data files exist
 if (!fs.existsSync(DATA_FILE)) {
     fs.outputJsonSync(DATA_FILE, {
         transactions: [],
         categories: [],
         tags: [],
         settings: {}
+    });
+}
+
+if (!fs.existsSync(USERS_FILE)) {
+    fs.outputJsonSync(USERS_FILE, {
+        username: 'admin',
+        password: 'password123'
     });
 }
 
@@ -42,15 +49,20 @@ const authMiddleware = (req, res, next) => {
 };
 
 // Auth Routes
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
-    if (username === USER_CREDENTIALS.username && password === USER_CREDENTIALS.password) {
-        const token = crypto.randomBytes(16).toString('hex');
-        sessions.add(token);
-        // Clean up session logic omitted for brevity in prototype
-        res.json({ token, user: { username } });
-    } else {
-        res.status(401).json({ error: 'Invalid credentials' });
+    try {
+        const user = await fs.readJson(USERS_FILE);
+        if (username === user.username && password === user.password) {
+            const token = crypto.randomBytes(16).toString('hex');
+            sessions.add(token);
+            res.json({ token, user: { username } });
+        } else {
+            res.status(401).json({ error: 'Invalid credentials' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Auth error' });
     }
 });
 
@@ -58,6 +70,21 @@ app.post('/api/logout', (req, res) => {
     const authHeader = req.headers.authorization;
     if (authHeader) sessions.delete(authHeader);
     res.json({ success: true });
+});
+
+app.post('/api/change-password', authMiddleware, async (req, res) => {
+    const { newPassword } = req.body;
+    if (!newPassword) return res.status(400).json({ error: 'Password required' });
+
+    try {
+        const user = await fs.readJson(USERS_FILE);
+        user.password = newPassword;
+        await fs.writeJson(USERS_FILE, user);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to update password' });
+    }
 });
 
 // API Routes

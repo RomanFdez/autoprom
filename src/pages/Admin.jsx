@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { api } from '../utils/api';
 import { ICON_KEYS, getIcon } from '../utils/icons';
-import { Plus, X, Edit2, Trash2, Check, Save, Download } from 'lucide-react';
+import { Plus, X, Edit2, Trash2, Check, Save, Download, Lock } from 'lucide-react';
 
 const COLORS = [
     '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
@@ -166,6 +166,38 @@ export default function Admin() {
                         <Save size={18} /> Guardar
                     </button>
                 </div>
+            </div>
+
+            {/* Account Settings */}
+            <div className="card" style={{ marginTop: '1rem' }}>
+                <h3>Configuración de Cuenta</h3>
+                <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
+                    Cambiar contraseña de acceso.
+                </p>
+                <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    const newPass = e.target.newPassword.value;
+                    if (newPass) {
+                        const success = await api.changePassword(newPass);
+                        if (success) {
+                            alert('Contraseña actualizada correctamente');
+                            e.target.reset();
+                        } else {
+                            alert('Error al actualizar la contraseña');
+                        }
+                    }
+                }} style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                        name="newPassword"
+                        type="password"
+                        className="form-input"
+                        placeholder="Nueva contraseña"
+                        required
+                    />
+                    <button type="submit" className="btn btn-primary">
+                        <Lock size={18} /> Actualizar
+                    </button>
+                </form>
             </div>
 
             {/* Backups */}
