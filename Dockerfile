@@ -18,8 +18,8 @@ RUN npx prisma generate
 # Build frontend
 RUN npm run build
 
-# Create data directory
-RUN mkdir -p data
+# Create data directory and ensure permissions
+RUN mkdir -p data && chmod 777 data
 
 # Expose port
 EXPOSE 3030
