@@ -443,8 +443,8 @@ export default function Transactions() {
 
         .fab {
           position: fixed;
-          bottom: 100px;
-          right: 16px;
+          bottom: 24px;
+          right: 24px;
           width: 56px;
           height: 56px;
           border-radius: 28px;
@@ -455,7 +455,7 @@ export default function Transactions() {
           justify-content: center;
           box-shadow: var(--elevation-3);
           border: none;
-          z-index: 100;
+          z-index: 1000;
         }
         
         .empty-state {
