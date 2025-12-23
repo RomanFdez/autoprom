@@ -282,15 +282,18 @@ export default function Transactions() {
           white-space: nowrap;
           padding: 6px 14px;
           border-radius: 20px;
-          border: 1px solid #ddd;
-          background: white;
+          border: 1px solid var(--md-sys-color-outline);
+          background: var(--md-sys-color-surface);
           font-size: 0.85rem;
-          color: #666;
+          color: var(--md-sys-color-on-surface);
+          opacity: 0.7;
+          transition: all 0.2s;
         }
         .filter-chip.active {
           background: var(--md-sys-color-primary);
-          color: white;
+          color: var(--md-sys-color-on-primary);
           border-color: var(--md-sys-color-primary);
+          opacity: 1;
         }
         
         .header-actions {
@@ -298,7 +301,7 @@ export default function Transactions() {
           gap: 8px;
           flex-shrink: 0;
           padding-left: 8px;
-          border-left: 1px solid #eee;
+          border-left: 1px solid var(--md-sys-color-outline);
         }
         
         .icon-action-btn {
@@ -306,21 +309,21 @@ export default function Transactions() {
           height: 36px;
           border-radius: 50%;
           border: none;
-          background: white;
+          background: var(--md-sys-color-surface);
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #555;
+          color: var(--md-sys-color-on-surface);
           cursor: pointer;
           box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
         .icon-action-btn:active {
-          background: #f0f0f0;
+          background: var(--md-sys-color-background);
         }
 
         /* Balance Display */
         .balance-display {
-            background: white;
+            background: var(--md-sys-color-surface);
             border-radius: 12px;
             padding: 12px 16px;
             margin-bottom: 1rem;
@@ -331,22 +334,24 @@ export default function Transactions() {
         }
         .balance-label {
             font-weight: 500;
-            color: #555;
+            color: var(--md-sys-color-on-surface);
+            opacity: 0.8;
             font-size: 0.95rem;
         }
         .balance-amount {
             font-size: 1.25rem;
             font-weight: 700;
         }
-        .balance-amount.income { color: #2e7d32; } /* Green for positive balance */
-        .balance-amount.expense { color: #d32f2f; } /* Red for negative balance */
+        .balance-amount.income { color: var(--color-income); }
+        .balance-amount.expense { color: var(--color-expense); }
 
         .section-group {
           margin-bottom: 1rem;
         }
         .section-title {
           font-size: 0.75rem;
-          color: #999;
+          color: var(--md-sys-color-on-surface);
+          opacity: 0.6;
           margin-bottom: 0.5rem;
           display: flex;
           align-items: center;
@@ -354,7 +359,7 @@ export default function Transactions() {
         }
 
         .transaction-item {
-          background: white;
+          background: var(--md-sys-color-surface);
           padding: 12px;
           border-radius: 12px;
           margin-bottom: 8px;
@@ -363,6 +368,7 @@ export default function Transactions() {
           box-shadow: 0 1px 2px rgba(0,0,0,0.05);
           position: relative;
           overflow: hidden;
+          transition: background-color 0.3s ease;
         }
         .t-icon {
           width: 44px;
@@ -388,28 +394,29 @@ export default function Transactions() {
         .t-concept {
           font-weight: 500;
           font-size: 0.95rem;
-          color: #333;
+          color: var(--md-sys-color-on-surface);
         }
         .t-cat-name {
           font-size: 0.8rem;
           font-weight: 500;
         }
         .separator {
-            color: #ccc;
+            color: var(--md-sys-color-outline);
         }
         .t-amount {
           font-weight: 600;
           font-size: 1rem;
         }
-        .t-amount.income { color: var(--color-income); } /* Yellow */
-        .t-amount.expense { color: var(--color-expense); } /* Red */
+        .t-amount.income { color: var(--color-income); } 
+        .t-amount.expense { color: var(--color-expense); } 
         
         .t-row-2 {
           display: flex;
           align-items: center;
           gap: 8px;
           font-size: 0.8rem;
-          color: #888;
+          color: var(--md-sys-color-on-surface);
+          opacity: 0.7;
         }
         .mini-tag {
           font-size: 0.7rem;
@@ -437,9 +444,10 @@ export default function Transactions() {
           background: none;
           padding: 4px;
           cursor: pointer;
-          color: #666;
+          color: var(--md-sys-color-on-surface);
+          opacity: 0.6;
         }
-        .t-actions button.danger { color: #d32f2f; }
+        .t-actions button.danger { color: #ef5350; }
 
         .fab {
           position: fixed;
@@ -449,7 +457,7 @@ export default function Transactions() {
           height: 56px;
           border-radius: 28px;
           background-color: var(--md-sys-color-primary);
-          color: white;
+          color: var(--md-sys-color-on-primary);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -461,7 +469,8 @@ export default function Transactions() {
         .empty-state {
           text-align: center;
           padding: 2rem;
-          color: #999;
+          color: var(--md-sys-color-on-surface);
+          opacity: 0.5;
           font-style: italic;
         }
       `}</style>

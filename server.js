@@ -61,7 +61,8 @@ const initData = async () => {
                         await tx.settings.create({
                             data: {
                                 id: 'settings',
-                                initialBalance: parseFloat(settings.initialBalance || 0)
+                                initialBalance: parseFloat(settings.initialBalance || 0),
+                                darkMode: !!settings.darkMode
                             }
                         });
                     }
@@ -232,7 +233,8 @@ app.post('/api/data', authMiddleware, async (req, res) => {
                 await tx.settings.create({
                     data: {
                         id: 'settings', // Fixed ID for the single settings record
-                        initialBalance: parseFloat(settings.initialBalance || 0)
+                        initialBalance: parseFloat(settings.initialBalance || 0),
+                        darkMode: !!settings.darkMode
                     }
                 });
             }

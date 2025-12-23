@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutList, PieChart, Settings, LogOut, Search, X, ListTodo } from 'lucide-react';
+import { LayoutList, PieChart, Settings, LogOut, Search, X, ListTodo, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { format, parseISO } from 'date-fns';
@@ -11,7 +11,7 @@ import PullToRefresh from './PullToRefresh';
 
 export default function Layout() {
   const { logout } = useAuth();
-  const { transactions, categories, refreshData } = useData();
+  const { transactions, categories, refreshData, settings, updateSettings } = useData();
   const navigate = useNavigate();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -20,6 +20,10 @@ export default function Layout() {
   const handleLogout = async () => {
     await logout();
     navigate('/login');
+  };
+
+  const toggleTheme = () => {
+    updateSettings({ darkMode: !settings.darkMode });
   };
 
   const filteredResults = transactions.filter(t => {
@@ -62,6 +66,9 @@ export default function Layout() {
         </div>
 
         <div className="nav-right">
+          <button className="icon-btn-nav" onClick={toggleTheme}>
+            {settings.darkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
           <button className="icon-btn-nav logout-btn" onClick={handleLogout}>
             <LogOut size={20} />
           </button>

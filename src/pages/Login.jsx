@@ -73,23 +73,24 @@ export default function Login() {
                     align-items: center;
                     justify-content: center;
                     min-height: 100vh;
-                    background-color: #f5f5f5;
+                    background-color: var(--md-sys-color-background);
                     padding: 1rem;
                 }
                 .login-card {
-                    background: white;
+                    background: var(--md-sys-color-surface);
                     padding: 2rem;
                     border-radius: 24px;
                     width: 100%;
                     max-width: 400px;
                     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+                    color: var(--md-sys-color-on-surface);
                 }
                 .login-header {
                     text-align: center;
                     margin-bottom: 2rem;
                 }
                 .login-header h2 { margin-bottom: 0.5rem; }
-                .login-header p { color: #666; margin: 0; font-size: 0.9rem; }
+                .login-header p { color: var(--md-sys-color-on-surface); opacity: 0.7; margin: 0; font-size: 0.9rem; }
                 
                 .login-form {
                     display: flex;
@@ -104,14 +105,14 @@ export default function Login() {
                 .input-field label {
                     font-size: 0.85rem;
                     font-weight: 500;
-                    color: #333;
+                    color: var(--md-sys-color-on-surface);
                 }
                 .input-wrapper {
                     display: flex;
                     align-items: center;
                     gap: 10px;
-                    background: #f9f9f9;
-                    border: 1px solid #eee;
+                    background: var(--md-sys-color-surface-variant);
+                    border: 1px solid var(--md-sys-color-outline);
                     padding: 12px;
                     border-radius: 12px;
                     transition: border-color 0.2s;
@@ -124,8 +125,9 @@ export default function Login() {
                     background: none;
                     flex: 1;
                     outline: none;
+                    color: var(--md-sys-color-on-surface-variant);
                 }
-                .input-wrapper svg { color: #999; }
+                .input-wrapper svg { color: var(--md-sys-color-on-surface-variant); opacity: 0.6; }
                 
                 .login-btn {
                     background: var(--md-sys-color-primary, #4caf50);
@@ -151,7 +153,8 @@ export default function Login() {
                 .login-footer {
                     margin-top: 2rem;
                     text-align: center;
-                    color: #999;
+                    color: var(--md-sys-color-on-surface);
+                    opacity: 0.5;
                 }
             `}</style>
         </div>

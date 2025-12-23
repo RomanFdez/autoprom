@@ -200,15 +200,15 @@ export default function TransactionForm({ onClose, initialData = null }) {
                                         onClick={() => setCategoryId(cat.id)}
                                         style={{
                                             borderColor: isSelected ? cat.color : 'transparent',
-                                            backgroundColor: isSelected ? `${cat.color}20` : '#f5f5f5',
+                                            backgroundColor: isSelected ? `${cat.color}20` : 'var(--md-sys-color-surface-variant)',
                                             cursor: 'pointer'
                                         }}
                                     >
                                         <div
                                             className="cat-icon"
-                                            style={{ backgroundColor: isSelected ? cat.color : '#e0e0e0' }}
+                                            style={{ backgroundColor: isSelected ? cat.color : 'var(--md-sys-color-surface)' }}
                                         >
-                                            <Icon size={18} color={isSelected ? 'white' : '#757575'} />
+                                            <Icon size={18} color={isSelected ? 'white' : 'var(--md-sys-color-on-surface)'} />
                                         </div>
                                         <span className="cat-name">{cat.name}</span>
                                     </div>
@@ -229,8 +229,8 @@ export default function TransactionForm({ onClose, initialData = null }) {
                                         className={`tag-chip ${isSelected ? 'selected' : ''}`}
                                         onClick={() => toggleTag(tag.id)}
                                         style={{
-                                            backgroundColor: isSelected ? tag.color : '#f0f0f0',
-                                            color: isSelected ? 'white' : '#333'
+                                            backgroundColor: isSelected ? tag.color : 'var(--md-sys-color-surface-variant)',
+                                            color: isSelected ? 'white' : 'var(--md-sys-color-on-surface)'
                                         }}
                                     >
                                         {tag.name}
@@ -245,7 +245,7 @@ export default function TransactionForm({ onClose, initialData = null }) {
                             type="button"
                             className="btn"
                             onClick={onClose}
-                            style={{ flex: 1, backgroundColor: '#f5f5f5', border: '1px solid #ddd' }}
+                            style={{ flex: 1, backgroundColor: 'transparent', border: '1px solid var(--md-sys-color-outline)', color: 'var(--md-sys-color-on-surface)' }}
                         >
                             Cancelar
                         </button>
@@ -265,10 +265,11 @@ export default function TransactionForm({ onClose, initialData = null }) {
           justify-content: space-between;
           align-items: center;
           margin-bottom: 1.5rem;
+          color: var(--md-sys-color-on-surface);
         }
         .type-toggle {
           display: flex;
-          background: #f0f0f0;
+          background: var(--md-sys-color-background);
           border-radius: 24px;
           padding: 4px;
           margin-bottom: 1.5rem;
@@ -280,20 +281,20 @@ export default function TransactionForm({ onClose, initialData = null }) {
           border-radius: 20px;
           cursor: pointer;
           font-weight: 500;
-          color: #666;
+          color: var(--md-sys-color-on-surface);
+          opacity: 0.7;
           transition: all 0.2s;
         }
         .type-option.active {
-          background: white;
-          color: black;
+          background: var(--md-sys-color-surface);
+          color: var(--md-sys-color-on-surface);
+          opacity: 1;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .type-option.active.expense {
           color: var(--color-expense);
         }
         .type-option.active.income {
-          color: var(--color-income); // Yellow can be hard to read on white, maybe darken text?
-          /* Using a darker yellow/orange for text readability if needed, but keeping logic simpler */
           color: #ffb300; 
         }
 
@@ -303,9 +304,10 @@ export default function TransactionForm({ onClose, initialData = null }) {
           font-weight: bold;
           border: none;
           background: transparent;
-          border-bottom: 2px solid #ddd;
+          border-bottom: 2px solid var(--md-sys-color-outline);
           border-radius: 0;
           padding: 0.5rem;
+          color: var(--md-sys-color-on-surface);
         }
         .amount-input:focus {
           outline: none;
@@ -326,6 +328,7 @@ export default function TransactionForm({ onClose, initialData = null }) {
           border: 2px solid transparent;
           cursor: pointer;
           text-align: center;
+          color: var(--md-sys-color-on-surface);
         }
         .cat-icon {
           width: 40px;
@@ -359,20 +362,22 @@ export default function TransactionForm({ onClose, initialData = null }) {
         
         .pin-btn {
           background: none;
-          border: 1px solid #ddd;
+          border: 1px solid var(--md-sys-color-outline);
           width: 44px;
           height: 44px;
           border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #999;
+          color: var(--md-sys-color-on-surface);
+          opacity: 0.5;
           cursor: pointer;
         }
         .pin-btn.active {
           border-color: var(--md-sys-color-primary);
           color: var(--md-sys-color-primary);
           background: var(--md-sys-color-primary-container);
+          opacity: 1;
         }
         .fill-current {
           fill: currentColor;

@@ -24,7 +24,7 @@ const INITIAL_TAGS = [
     { id: 'tag_3', code: 'NOT', name: 'Notaría', color: '#673ab7' },
 ];
 
-const INITIAL_SETTINGS = { initialBalance: 0 };
+const INITIAL_SETTINGS = { initialBalance: 0, darkMode: false };
 
 export const DataProvider = ({ children }) => {
     const [transactions, setTransactions] = useState([]);
@@ -33,6 +33,15 @@ export const DataProvider = ({ children }) => {
     const [todos, setTodos] = useState([]);
     const [settings, setSettings] = useState(INITIAL_SETTINGS);
     const [loading, setLoading] = useState(true);
+
+    // Apply Dark Mode
+    useEffect(() => {
+        if (settings.darkMode) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+        }
+    }, [settings.darkMode]);
 
     // Helper to sync all data
     const syncData = async (newTransactions, newCategories, newTags, newSettings, newTodos) => {
