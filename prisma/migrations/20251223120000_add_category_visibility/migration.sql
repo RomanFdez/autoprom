@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Category" ADD COLUMN "showInExpense" BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE "Category" ADD COLUMN "showInIncome" BOOLEAN NOT NULL DEFAULT true;

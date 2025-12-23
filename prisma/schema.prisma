@@ -26,6 +26,8 @@ model Category {
   icon         String
   isFixed      Boolean       @default(false)
   debt         Float         @default(0)
+  showInExpense Boolean      @default(true)
+  showInIncome  Boolean      @default(true)
   transactions Transaction[]
 }
 

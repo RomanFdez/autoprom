@@ -32,9 +32,24 @@ export default function TransactionForm({ onClose, initialData = null }) {
     }, [initialData, categories]);
 
     useEffect(() => {
-        if (type === 'income') {
-            const incomeCat = categories.find(c => c.code === 'INGR');
-            if (incomeCat) setCategoryId(incomeCat.id);
+        // When type changes, ensure selected category is valid for that type.
+        // If not valid, select the first valid one.
+        const currentCat = categories.find(c => c.id === categoryId);
+        let isValid = false;
+        if (currentCat) {
+            if (type === 'income') {
+                isValid = currentCat.showInIncome !== false;
+            } else {
+                isValid = currentCat.showInExpense !== false;
+            }
+        }
+
+        if (!isValid) {
+            const firstValid = categories.find(c => {
+                if (type === 'income') return c.showInIncome !== false;
+                return c.showInExpense !== false;
+            });
+            if (firstValid) setCategoryId(firstValid.id);
         }
     }, [type, categories]);
 
@@ -157,11 +172,15 @@ export default function TransactionForm({ onClose, initialData = null }) {
                             {categories.map(cat => {
                                 const Icon = getIcon(cat.icon);
                                 const isSelected = categoryId === cat.id;
-                                // If Type is Income, only allow 'INGR' or disable others
-                                const isIncome = type === 'income';
-                                const isIngr = cat.code === 'INGR';
 
-                                if (isIncome && !isIngr) return null; // Hide others when Income
+                                const isIncome = type === 'income';
+                                // Visibility Check
+                                if (isIncome) {
+                                    if (cat.showInIncome === false) return null;
+                                } else {
+                                    // Expense
+                                    if (cat.showInExpense === false) return null;
+                                }
 
                                 return (
                                     <div

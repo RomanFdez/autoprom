@@ -44,7 +44,7 @@ export default function Admin() {
 
     // ... existing modals ...
     const openCatModal = (cat = null) => {
-        setEditingItem(cat ? { ...cat } : { name: '', code: '', color: COLORS[0], icon: 'category' });
+        setEditingItem(cat ? { ...cat } : { name: '', code: '', color: COLORS[0], icon: 'category', showInExpense: true, showInIncome: true });
         setIsCatModalOpen(true);
     };
 
@@ -297,6 +297,30 @@ export default function Admin() {
                                         onChange={e => setEditingItem({ ...editingItem, debt: parseFloat(e.target.value) || 0 })}
                                     />
                                     <small style={{ color: '#888' }}>Si se añade gasto a esta categoría, se reducirá de esta deuda.</small>
+                                </div>
+                            )}
+
+                            {isCatModalOpen && (
+                                <div className="input-group" style={{ flexDirection: 'row', gap: '20px', alignItems: 'center' }}>
+                                    <label className="checkbox-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={editingItem.showInExpense !== false}
+                                            onChange={e => setEditingItem({ ...editingItem, showInExpense: e.target.checked })}
+                                            style={{ width: '18px', height: '18px', accentColor: 'var(--md-sys-color-primary, #4caf50)' }}
+                                        />
+                                        <span>Visible en Gastos</span>
+                                    </label>
+
+                                    <label className="checkbox-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={editingItem.showInIncome !== false}
+                                            onChange={e => setEditingItem({ ...editingItem, showInIncome: e.target.checked })}
+                                            style={{ width: '18px', height: '18px', accentColor: 'var(--md-sys-color-primary, #4caf50)' }}
+                                        />
+                                        <span>Visible en Ingresos</span>
+                                    </label>
                                 </div>
                             )}
 

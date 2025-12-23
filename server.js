@@ -74,7 +74,9 @@ const initData = async () => {
                                     color: c.color,
                                     icon: c.icon || 'category',
                                     isFixed: !!c.isFixed,
-                                    debt: parseFloat(c.debt || 0)
+                                    debt: parseFloat(c.debt || 0),
+                                    showInExpense: c.showInExpense !== undefined ? c.showInExpense : true,
+                                    showInIncome: c.showInIncome !== undefined ? c.showInIncome : true
                                 }
                             });
                         }
@@ -240,7 +242,9 @@ app.post('/api/data', authMiddleware, async (req, res) => {
                             color: c.color,
                             icon: c.icon || 'category',
                             isFixed: !!c.isFixed,
-                            debt: parseFloat(c.debt || 0)
+                            debt: parseFloat(c.debt || 0),
+                            showInExpense: c.showInExpense !== undefined ? c.showInExpense : true,
+                            showInIncome: c.showInIncome !== undefined ? c.showInIncome : true
                         }
                     });
                 }
