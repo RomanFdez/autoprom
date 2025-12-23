@@ -1,23 +1,29 @@
 :root {
-  /* Material Design Colors */
-  --md-sys-color-primary: #00695c; /* Teal 800 */
+  /* Material Design Colors - Light */
+  --md-sys-color-primary: #00695c;
+  /* Teal 800 */
   --md-sys-color-on-primary: #ffffff;
   --md-sys-color-primary-container: #b2dfdb;
   --md-sys-color-on-primary-container: #004d40;
-  
-  --md-sys-color-secondary: #455a64; /* Blue Grey 700 */
+
+  --md-sys-color-secondary: #455a64;
+  /* Blue Grey 700 */
   --md-sys-color-on-secondary: #ffffff;
-  
+
   --md-sys-color-background: #f5f5f5;
   --md-sys-color-on-background: #1c1b1f;
-  
+
   --md-sys-color-surface: #ffffff;
   --md-sys-color-on-surface: #1c1b1f;
-  
+
+  --md-sys-color-outline: #e0e0e0;
+
   /* Transaction Colors (User Requested) */
-  --color-income: #ffca28; /* Amber 400 - Yellowish */
-  --color-expense: #d32f2f; /* Red 700 */
-  
+  --color-income: #ffca28;
+  /* Amber 400 - Yellowish */
+  --color-expense: #d32f2f;
+  /* Red 700 */
+
   /* Elevtion */
   --elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.3);
   --elevation-2: 0px 4px 6px -2px rgba(0, 0, 0, 0.05), 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -28,6 +34,32 @@
   --radius-md: 8px;
   --radius-lg: 16px;
   --radius-xl: 28px;
+}
+
+:root[data-theme='dark'] {
+  /* Material Design Colors - Dark */
+  --md-sys-color-primary: #80cbc4;
+  /* Teal 200 */
+  --md-sys-color-on-primary: #003730;
+  --md-sys-color-primary-container: #004d40;
+  --md-sys-color-on-primary-container: #b2dfdb;
+
+  --md-sys-color-secondary: #b0bec5;
+  /* Blue Grey 200 */
+  --md-sys-color-on-secondary: #000000;
+
+  --md-sys-color-background: #121212;
+  --md-sys-color-on-background: #e2e2e2;
+
+  --md-sys-color-surface: #1e1e1e;
+  --md-sys-color-on-surface: #e2e2e2;
+
+  --md-sys-color-outline: #444444;
+
+  --color-income: #ffd54f;
+  /* Amber 300 */
+  --color-expense: #ef5350;
+  /* Red 400 */
 }
 
 * {
@@ -59,7 +91,8 @@ a {
   max-width: 600px;
   margin: 0 auto;
   padding: 1rem;
-  padding-bottom: 80px; /* Space for bottom nav */
+  padding-bottom: 80px;
+  /* Space for bottom nav */
 }
 
 /* Material Components Classes */

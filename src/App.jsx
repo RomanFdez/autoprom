@@ -6,6 +6,7 @@ import Admin from './pages/Admin';
 import Login from './pages/Login';
 import { DataProvider } from './context/DataContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 const ProtectedRoute = () => {
   const { user, loading } = useAuth();
@@ -23,19 +24,21 @@ const ProtectedRoute = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
 
-          <Route path="/" element={<ProtectedRoute />}>
-            <Route index element={<Reports />} /> {/* Resumen/Informes como Home */}
-            <Route path="transactions" element={<Transactions />} />
-            <Route path="admin" element={<Admin />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+            <Route path="/" element={<ProtectedRoute />}>
+              <Route index element={<Reports />} /> {/* Resumen/Informes como Home */}
+              <Route path="transactions" element={<Transactions />} />
+              <Route path="admin" element={<Admin />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
