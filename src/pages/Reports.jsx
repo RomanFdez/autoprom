@@ -260,10 +260,11 @@ export default function Reports() {
             <style>{`
         .toggle-container {
           display: flex;
-          background: #e0e0e0;
+          background: var(--md-sys-color-background);
           padding: 4px;
           border-radius: 20px;
           margin-bottom: 1.5rem;
+          border: 1px solid var(--md-sys-color-outline);
         }
         .toggle-btn {
           flex: 1;
@@ -272,12 +273,15 @@ export default function Reports() {
           padding: 8px;
           border-radius: 16px;
           font-weight: 500;
-          color: #666;
+          color: var(--md-sys-color-on-surface);
+          opacity: 0.6;
           transition: all 0.2s;
         }
         .toggle-btn.active {
-          background: white;
+          background: var(--md-sys-color-surface);
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          opacity: 1;
+          color: var(--md-sys-color-on-surface);
         }
         .toggle-btn.active.expense { color: var(--color-expense); }
         .toggle-btn.active.income { color: var(--color-income); }
@@ -298,18 +302,20 @@ export default function Reports() {
         }
         .total-label {
           font-size: 0.8rem;
-          color: #999;
+          color: var(--md-sys-color-on-surface);
+          opacity: 0.6;
           text-transform: uppercase;
         }
         .total-value {
           font-size: 1.2rem;
           font-weight: bold;
+          color: var(--md-sys-color-on-surface);
         }
         .expense-text { color: var(--color-expense); }
         .income-text { color: var(--color-income); }
 
         .list-group {
-          background: white;
+          background: var(--md-sys-color-surface);
           border-radius: 12px;
           padding: 8px;
           box-shadow: 0 1px 3px rgba(0,0,0,0.05);
@@ -318,14 +324,15 @@ export default function Reports() {
           display: flex;
           justify-content: space-between;
           padding: 12px;
-          border-bottom: 1px solid #f0f0f0;
+          border-bottom: 1px solid var(--md-sys-color-outline);
           transition: background-color 0.2s;
+          color: var(--md-sys-color-on-surface);
         }
         .list-row.clickable {
             cursor: pointer;
         }
         .list-row.clickable:active {
-            background-color: #f5f5f5;
+            background-color: var(--md-sys-color-background);
         }
         .list-row:last-child {
           border-bottom: none;
@@ -343,7 +350,8 @@ export default function Reports() {
         .empty-state {
           text-align: center;
           padding: 3rem;
-          color: #999;
+          color: var(--md-sys-color-on-surface);
+          opacity: 0.5;
         }
 
         /* Modal Styles */
@@ -353,9 +361,10 @@ export default function Reports() {
             background: rgba(0,0,0,0.6);
             z-index: 2000;
             display: flex;
-            align-items: flex-end; /* Bottom sheet on mobile? Or center? -> Center is safer generic */
+            align-items: flex-end; 
             justify-content: center;
             padding: 1rem;
+            backdrop-filter: blur(2px);
         }
         @media (min-width: 600px) {
             .modal-overlay {
@@ -363,7 +372,7 @@ export default function Reports() {
             }
         }
         .modal.drilldown-modal {
-            background: white;
+            background: var(--md-sys-color-surface);
             width: 100%;
             max-width: 500px;
             max-height: 80vh;
@@ -371,11 +380,12 @@ export default function Reports() {
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            color: var(--md-sys-color-on-surface);
         }
         .modal-header {
             padding: 16px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--md-sys-color-outline);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -387,7 +397,8 @@ export default function Reports() {
         .close-btn {
             background: none;
             border: none;
-            color: #999;
+            color: var(--md-sys-color-on-surface);
+            opacity: 0.6;
             cursor: pointer;
             padding: 4px;
         }
@@ -400,7 +411,7 @@ export default function Reports() {
             align-items: center;
             gap: 12px;
             padding: 12px 0;
-            border-bottom: 1px solid #f9f9f9;
+            border-bottom: 1px solid var(--md-sys-color-outline);
         }
         .d-icon {
             width: 32px;
@@ -417,11 +428,12 @@ export default function Reports() {
         .d-desc {
             font-weight: 500;
             font-size: 0.9rem;
-            color: #333;
+            color: var(--md-sys-color-on-surface);
         }
         .d-date {
             font-size: 0.75rem;
-            color: #888;
+            color: var(--md-sys-color-on-surface);
+            opacity: 0.7;
         }
         .d-amount {
             font-weight: 600;
@@ -429,7 +441,8 @@ export default function Reports() {
         }
         .empty-msg {
             text-align: center;
-            color: #999;
+            color: var(--md-sys-color-on-surface);
+            opacity: 0.5;
             font-style: italic;
         }
       `}</style>

@@ -200,15 +200,15 @@ export default function TransactionForm({ onClose, initialData = null }) {
                                         onClick={() => setCategoryId(cat.id)}
                                         style={{
                                             borderColor: isSelected ? cat.color : 'transparent',
-                                            backgroundColor: isSelected ? `${cat.color}20` : '#f5f5f5',
+                                            backgroundColor: isSelected ? `${cat.color}20` : 'var(--md-sys-color-surface-variant)',
                                             cursor: 'pointer'
                                         }}
                                     >
                                         <div
                                             className="cat-icon"
-                                            style={{ backgroundColor: isSelected ? cat.color : '#e0e0e0' }}
+                                            style={{ backgroundColor: isSelected ? cat.color : 'var(--md-sys-color-surface)' }}
                                         >
-                                            <Icon size={18} color={isSelected ? 'white' : '#757575'} />
+                                            <Icon size={18} color={isSelected ? 'white' : 'var(--md-sys-color-on-surface)'} />
                                         </div>
                                         <span className="cat-name">{cat.name}</span>
                                     </div>
@@ -229,8 +229,8 @@ export default function TransactionForm({ onClose, initialData = null }) {
                                         className={`tag-chip ${isSelected ? 'selected' : ''}`}
                                         onClick={() => toggleTag(tag.id)}
                                         style={{
-                                            backgroundColor: isSelected ? tag.color : '#f0f0f0',
-                                            color: isSelected ? 'white' : '#333'
+                                            backgroundColor: isSelected ? tag.color : 'var(--md-sys-color-surface-variant)',
+                                            color: isSelected ? 'white' : 'var(--md-sys-color-on-surface)'
                                         }}
                                     >
                                         {tag.name}
@@ -245,7 +245,7 @@ export default function TransactionForm({ onClose, initialData = null }) {
                             type="button"
                             className="btn"
                             onClick={onClose}
-                            style={{ flex: 1, backgroundColor: '#f5f5f5', border: '1px solid #ddd' }}
+                            style={{ flex: 1, backgroundColor: 'transparent', border: '1px solid var(--md-sys-color-outline)', color: 'var(--md-sys-color-on-surface)' }}
                         >
                             Cancelar
                         </button>

@@ -111,7 +111,7 @@ export default function Admin() {
                             <div className="item-details">
                                 <div className="item-name">{cat.name}</div>
                                 {cat.debt > 0 && (
-                                    <div className="item-code" style={{ color: '#888', fontSize: '0.8rem' }}>
+                                    <div className="item-code" style={{ color: 'var(--md-sys-color-on-surface)', opacity: 0.6, fontSize: '0.8rem' }}>
                                         Deuda: {cat.debt.toFixed(2)}€
                                     </div>
                                 )}
@@ -152,7 +152,7 @@ export default function Admin() {
             {/* Initial Balance */}
             <div className="card" style={{ marginTop: '2rem' }}>
                 <h3>Saldo Inicial</h3>
-                <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
+                <p style={{ fontSize: '0.9rem', color: 'var(--md-sys-color-on-surface)', opacity: 0.7, marginBottom: '1rem' }}>
                     El saldo con el que empieza la cuenta antes de las transacciones registradas.
                 </p>
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -171,7 +171,7 @@ export default function Admin() {
             {/* Account Settings */}
             <div className="card" style={{ marginTop: '1rem' }}>
                 <h3>Configuración de Cuenta</h3>
-                <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
+                <p style={{ fontSize: '0.9rem', color: 'var(--md-sys-color-on-surface)', opacity: 0.7, marginBottom: '1rem' }}>
                     Cambiar contraseña de acceso.
                 </p>
                 <form onSubmit={async (e) => {
@@ -219,7 +219,7 @@ export default function Admin() {
             {/* Backups */}
             <div className="card" style={{ marginTop: '1rem' }}>
                 <h3>Backup</h3>
-                <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
+                <p style={{ fontSize: '0.9rem', color: 'var(--md-sys-color-on-surface)', opacity: 0.7, marginBottom: '1rem' }}>
                     Gestión de copias de seguridad de tus datos.
                 </p>
                 <div style={{ display: 'flex', gap: '1rem' }}>
@@ -227,7 +227,7 @@ export default function Admin() {
                         <Download size={18} /> Descargar
                     </button>
 
-                    <label className="btn" style={{ border: '1px solid #ccc', backgroundColor: '#f5f5f5' }}>
+                    <label className="btn" style={{ border: '1px solid var(--md-sys-color-outline)', backgroundColor: 'var(--md-sys-color-surface-variant)', color: 'var(--md-sys-color-on-surface-variant)' }}>
                         <Upload size={18} /> Restaurar
                         <input
                             type="file"
@@ -296,7 +296,7 @@ export default function Admin() {
                                         value={editingItem.debt || ''}
                                         onChange={e => setEditingItem({ ...editingItem, debt: parseFloat(e.target.value) || 0 })}
                                     />
-                                    <small style={{ color: '#888' }}>Si se añade gasto a esta categoría, se reducirá de esta deuda.</small>
+                                    <small style={{ color: 'var(--md-sys-color-on-surface)', opacity: 0.6 }}>Si se añade gasto a esta categoría, se reducirá de esta deuda.</small>
                                 </div>
                             )}
 
@@ -386,9 +386,10 @@ export default function Admin() {
         .btn-sm {
           padding: 0.5rem 1rem;
           font-size: 0.85rem;
-          border: 1px solid #ddd;
+          border: 1px solid var(--md-sys-color-outline);
           border-radius: 20px;
-          background: white;
+          background: var(--md-sys-color-surface);
+          color: var(--md-sys-color-on-surface);
         }
         .list-container {
           display: flex;
@@ -396,13 +397,14 @@ export default function Admin() {
           gap: 0.5rem;
         }
         .list-item {
-          background: white;
+          background: var(--md-sys-color-surface);
           padding: 0.75rem;
           border-radius: 8px;
           display: flex;
           align-items: center;
           gap: 1rem;
           box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+          color: var(--md-sys-color-on-surface);
         }
         .item-icon {
           width: 40px;
@@ -421,17 +423,20 @@ export default function Admin() {
         }
         .item-code {
           font-size: 0.75rem;
-          color: #888;
+          color: var(--md-sys-color-on-surface);
+          opacity: 0.6;
         }
         .icon-btn {
           background: none;
           border: none;
           padding: 6px;
-          color: #666;
+          color: var(--md-sys-color-on-surface);
           border-radius: 50%;
+          opacity: 0.7;
         }
         .icon-btn:hover {
-          background-color: #f0f0f0;
+          background-color: var(--md-sys-color-on-surface-variant);
+          opacity: 0.1;
         }
         .icon-btn.danger:hover {
           background-color: #ffebee;
@@ -441,21 +446,23 @@ export default function Admin() {
         .modal-overlay {
           position: fixed;
           top: 0; left: 0; right: 0; bottom: 0;
-          background: rgba(0,0,0,0.5);
+          background: rgba(0,0,0,0.6);
           display: flex;
           align-items: center;
           justify-content: center;
           z-index: 2000;
           padding: 1rem;
+          backdrop-filter: blur(2px);
         }
         .modal {
-          background: white;
+          background: var(--md-sys-color-surface);
           padding: 1.5rem;
           border-radius: 16px;
           width: 100%;
           max-width: 400px;
           max-height: 90vh;
           overflow-y: auto;
+          color: var(--md-sys-color-on-surface);
         }
         .modal h3 {
           margin-bottom: 1.5rem;
@@ -484,12 +491,13 @@ export default function Admin() {
           width: 40px;
           height: 40px;
           border-radius: 8px;
-          background: #f5f5f5;
+          background: var(--md-sys-color-surface-variant);
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
           border: 2px solid transparent;
+          color: var(--md-sys-color-on-surface-variant);
         }
         .icon-swatch.selected {
           border-color: var(--md-sys-color-primary);
@@ -504,7 +512,8 @@ export default function Admin() {
         }
         .text-btn {
           background: none;
-          color: #666;
+          color: var(--md-sys-color-on-surface);
+          opacity: 0.7;
         }
 
         /* Toggle Switch Styles */
@@ -523,7 +532,7 @@ export default function Admin() {
           position: absolute;
           cursor: pointer;
           top: 0; left: 0; right: 0; bottom: 0;
-          background-color: #ccc;
+          background-color: var(--md-sys-color-outline-variant);
           transition: .3s;
           border-radius: 24px;
         }

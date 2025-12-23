@@ -73,7 +73,7 @@ export default function PullToRefresh({ onRefresh, children }) {
                     transition: 'transform 0.2s',
                     opacity: Math.min(pullDistance / PULL_THRESHOLD, 1)
                 }}>
-                    <Loader2 className={isRefreshing ? "animate-spin" : ""} size={24} color="#666" />
+                    <Loader2 className={isRefreshing ? "animate-spin" : ""} size={24} color="var(--md-sys-color-on-surface)" />
                 </div>
             </div>
             <div>
