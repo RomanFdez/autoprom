@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../utils/api';
+import { useAuth } from './AuthContext';
 import { v4 as uuidv4 } from 'uuid';
 
 const DataContext = createContext();
@@ -43,18 +44,27 @@ export const DataProvider = ({ children }) => {
         await api.saveData(payload);
     };
 
+    const { logout } = useAuth(); // Need to ensure DataProvider is child of AuthProvider
+
     const refreshData = async () => {
         setLoading(true);
-        const data = await api.loadData();
-        if (data) {
-            setTransactions(data.transactions || []);
-            setCategories(data.categories && data.categories.length > 0 ? data.categories : INITIAL_CATEGORIES);
-            setTags(data.tags && data.tags.length > 0 ? data.tags : INITIAL_TAGS);
-            setSettings(data.settings || INITIAL_SETTINGS);
-        } else {
-            // Fallback Init
-            setCategories(INITIAL_CATEGORIES);
-            setTags(INITIAL_TAGS);
+        try {
+            const data = await api.loadData();
+            if (data) {
+                setTransactions(data.transactions || []);
+                setCategories(data.categories && data.categories.length > 0 ? data.categories : INITIAL_CATEGORIES);
+                setTags(data.tags && data.tags.length > 0 ? data.tags : INITIAL_TAGS);
+                setSettings(data.settings || INITIAL_SETTINGS);
+            } else {
+                // If data is null, it likely means fetch failed (possibly 401).
+                // In a robust app, api.loadData should throw, but here it returns null.
+                // If server restarted, session is gone, we should logout.
+                console.warn("Failed to load data, likely session expired");
+                logout();
+            }
+        } catch (e) {
+            console.error(e);
+            logout();
         }
         setLoading(false);
     };
