@@ -36,7 +36,18 @@ export default function TransactionForm({ onClose, initialData = null }) {
         // If not valid, select the first valid one.
         const currentCat = categories.find(c => c.id === categoryId);
         let isValid = false;
-        if (currentCat) {
+
+        // Exception: If we are editing and the category matches the original one, 
+        // keep it even if it's technically "hidden" in the picker, 
+        // provided the type hasn't changed from the original.
+        if (initialData && categoryId === initialData.categoryId) {
+            const initialType = initialData.amount >= 0 ? 'income' : 'expense';
+            if (type === initialType) {
+                isValid = true;
+            }
+        }
+
+        if (!isValid && currentCat) {
             if (type === 'income') {
                 isValid = currentCat.showInIncome !== false;
             } else {
@@ -49,9 +60,11 @@ export default function TransactionForm({ onClose, initialData = null }) {
                 if (type === 'income') return c.showInIncome !== false;
                 return c.showInExpense !== false;
             });
-            if (firstValid) setCategoryId(firstValid.id);
+            if (firstValid && firstValid.id !== categoryId) {
+                setCategoryId(firstValid.id);
+            }
         }
-    }, [type, categories]);
+    }, [type, categories, categoryId, initialData]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
