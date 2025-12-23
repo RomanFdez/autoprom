@@ -76,10 +76,7 @@ export default function PullToRefresh({ onRefresh, children }) {
                     <Loader2 className={isRefreshing ? "animate-spin" : ""} size={24} color="#666" />
                 </div>
             </div>
-            <div style={{
-                transform: `translateY(${0}px)`,
-                transition: 'transform 0.2s'
-            }}>
+            <div>
                 {children}
             </div>
 
