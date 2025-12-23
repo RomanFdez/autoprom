@@ -186,11 +186,11 @@ export default function TransactionForm({ onClose, initialData = null }) {
                                     <div
                                         key={cat.id}
                                         className={`category-item ${isSelected ? 'selected' : ''}`}
-                                        onClick={() => !isIncome && setCategoryId(cat.id)}
+                                        onClick={() => setCategoryId(cat.id)}
                                         style={{
                                             borderColor: isSelected ? cat.color : 'transparent',
                                             backgroundColor: isSelected ? `${cat.color}20` : '#f5f5f5',
-                                            cursor: isIncome ? 'default' : 'pointer'
+                                            cursor: 'pointer'
                                         }}
                                     >
                                         <div
