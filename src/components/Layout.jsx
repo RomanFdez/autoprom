@@ -7,9 +7,11 @@ import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { getIcon } from '../utils/icons';
 
+import PullToRefresh from './PullToRefresh';
+
 export default function Layout() {
   const { logout } = useAuth();
-  const { transactions, categories } = useData();
+  const { transactions, categories, refreshData } = useData();
   const navigate = useNavigate();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -63,7 +65,9 @@ export default function Layout() {
       </nav>
 
       <main className="content">
-        <Outlet />
+        <PullToRefresh onRefresh={refreshData}>
+          <Outlet />
+        </PullToRefresh>
       </main>
 
       {/* Search Modal */}
