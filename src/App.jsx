@@ -1,19 +1,31 @@
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
-import Transactions from './pages/Transactions';
-import Reports from './pages/Reports';
-import Admin from './pages/Admin';
-import Login from './pages/Login';
 import { DataProvider } from './context/DataContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { Loader2 } from 'lucide-react';
+
+// Lazy Load Pages for Performance Optimization
+const Transactions = lazy(() => import('./pages/Transactions'));
+const Reports = lazy(() => import('./pages/Reports'));
+const Admin = lazy(() => import('./pages/Admin'));
+const Login = lazy(() => import('./pages/Login'));
+
+const LoadingFallback = () => (
+  <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <Loader2 className="animate-spin" size={40} color="#666" />
+    <style>{`
+      .animate-spin { animation: spin 1s linear infinite; }
+      @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    `}</style>
+  </div>
+);
 
 const ProtectedRoute = () => {
   const { user, loading } = useAuth();
-
-  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>Cargando...</div>;
+  if (loading) return <LoadingFallback />;
   if (!user) return <Navigate to="/login" replace />;
 
-  // DataProvider is wrapped here to ensure it only initializes when authenticated
   return (
     <DataProvider>
       <Layout />
@@ -25,15 +37,16 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-
-          <Route path="/" element={<ProtectedRoute />}>
-            <Route index element={<Reports />} /> {/* Resumen/Informes como Home */}
-            <Route path="transactions" element={<Transactions />} />
-            <Route path="admin" element={<Admin />} />
-          </Route>
-        </Routes>
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<ProtectedRoute />}>
+              <Route index element={<Reports />} />
+              <Route path="transactions" element={<Transactions />} />
+              <Route path="admin" element={<Admin />} />
+            </Route>
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </AuthProvider>
   );

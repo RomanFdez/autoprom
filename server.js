@@ -7,6 +7,8 @@ import fs from 'fs';
 import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
 
+import compression from 'compression';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -17,6 +19,7 @@ const PORT = process.env.PORT || 3030;
 // Simple In-Memory Session Store
 const sessions = new Set();
 
+app.use(compression());
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' })); // Increased limit for potentially large data syncs
 app.use(express.static(path.join(__dirname, 'dist')));
