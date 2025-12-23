@@ -80,7 +80,7 @@ export default function Todos() {
                 .page-title {
                     margin-bottom: 20px;
                     font-size: 1.5rem;
-                    color: #333;
+                    color: var(--md-sys-color-on-background);
                 }
                 .todo-input-group {
                     display: flex;
@@ -90,17 +90,19 @@ export default function Todos() {
                 .form-input {
                     flex: 1;
                     padding: 12px;
-                    border: 1px solid #ddd;
+                    border: 1px solid var(--md-sys-color-outline);
                     border-radius: 12px;
                     font-size: 1rem;
                     outline: none;
-                    transition: border-color 0.2s;
+                    background: var(--md-sys-color-surface);
+                    color: var(--md-sys-color-on-surface);
+                    transition: border-color 0.2s, background-color 0.3s ease;
                 }
                 .form-input:focus {
-                    border-color: var(--md-sys-color-primary, #4caf50);
+                    border-color: var(--md-sys-color-primary);
                 }
                 .add-btn {
-                    background-color: var(--md-sys-color-primary, #4caf50);
+                    background-color: var(--md-sys-color-primary);
                     border: none;
                     border-radius: 12px;
                     width: 48px;
@@ -115,7 +117,7 @@ export default function Todos() {
                     opacity: 0.8;
                 }
                 .add-btn:disabled {
-                    background-color: #ccc;
+                    background-color: var(--md-sys-color-outline);
                     cursor: default;
                 }
                 .todo-list {
@@ -124,18 +126,21 @@ export default function Todos() {
                     gap: 12px;
                 }
                 .todo-item {
-                    background: white;
+                    background: var(--md-sys-color-surface);
                     padding: 16px;
                     border-radius: 16px;
                     display: flex;
                     align-items: center;
                     gap: 12px;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                    box-shadow: var(--elevation-1);
                     transition: all 0.2s;
+                    border: 1px solid transparent;
                 }
                 .todo-item.done {
-                    background: #f9f9f9;
+                    background: var(--md-sys-color-background);
                     opacity: 0.8;
+                    box-shadow: none;
+                    border: 1px dashed var(--md-sys-color-outline);
                 }
                 .todo-checkbox-area {
                     cursor: pointer;
@@ -145,18 +150,18 @@ export default function Todos() {
                 .todo-text {
                     flex: 1;
                     font-size: 1rem;
-                    color: #333;
+                    color: var(--md-sys-color-on-surface);
                     cursor: pointer;
                     word-break: break-all;
                 }
                 .todo-item.done .todo-text {
                     text-decoration: line-through;
-                    color: #999;
+                    color: var(--md-sys-color-secondary);
                 }
                 .delete-btn {
                     background: none;
                     border: none;
-                    color: #ccc;
+                    color: var(--md-sys-color-secondary);
                     cursor: pointer;
                     padding: 8px;
                     border-radius: 50%;
@@ -166,12 +171,12 @@ export default function Todos() {
                     justify-content: center;
                 }
                 .delete-btn:hover {
-                    color: #ef5350;
-                    background: #ffebee;
+                    color: var(--color-expense);
+                    background: var(--md-sys-color-background);
                 }
                 .empty-state {
                     text-align: center;
-                    color: #999;
+                    color: var(--md-sys-color-secondary);
                     margin-top: 40px;
                 }
             `}</style>

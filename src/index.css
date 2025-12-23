@@ -39,13 +39,11 @@
 :root[data-theme='dark'] {
   /* Material Design Colors - Dark */
   --md-sys-color-primary: #80cbc4;
-  /* Teal 200 */
   --md-sys-color-on-primary: #003730;
   --md-sys-color-primary-container: #004d40;
   --md-sys-color-on-primary-container: #b2dfdb;
 
   --md-sys-color-secondary: #b0bec5;
-  /* Blue Grey 200 */
   --md-sys-color-on-secondary: #000000;
 
   --md-sys-color-background: #121212;
@@ -57,9 +55,7 @@
   --md-sys-color-outline: #444444;
 
   --color-income: #ffd54f;
-  /* Amber 300 */
   --color-expense: #ef5350;
-  /* Red 400 */
 }
 
 * {
@@ -74,6 +70,7 @@ body {
   color: var(--md-sys-color-on-background);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 button {
@@ -92,17 +89,17 @@ a {
   margin: 0 auto;
   padding: 1rem;
   padding-bottom: 80px;
-  /* Space for bottom nav */
 }
 
 /* Material Components Classes */
 .card {
   background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
   border-radius: var(--radius-lg);
   padding: 1rem;
   box-shadow: var(--elevation-1);
   margin-bottom: 1rem;
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s, background-color 0.3s ease;
 }
 
 .card:hover {
@@ -138,7 +135,7 @@ a {
   height: 56px;
   border-radius: 28px;
   background-color: var(--md-sys-color-primary);
-  color: white;
+  color: var(--md-sys-color-on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -153,17 +150,20 @@ a {
 .input-label {
   display: block;
   font-size: 0.8rem;
-  color: var(--md-sys-color-secondary);
+  color: var(--md-sys-color-on-surface);
+  opacity: 0.8;
   margin-bottom: 0.25rem;
 }
 
 .form-input {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--md-sys-color-outline);
   border-radius: var(--radius-md);
   font-size: 1rem;
   background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  transition: border-color 0.2s, background-color 0.3s ease, color 0.3s ease;
 }
 
 .form-input:focus {
