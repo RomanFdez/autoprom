@@ -37,23 +37,16 @@ export default function TransactionForm({ onClose, initialData = null }) {
         }
     }, [initialData]); // Run only when initialData changes (or mount)
 
-    // 2. Type Change Effect
-    // Only run this when TYPE changes. This prevents overwriting category on mount.
-    useEffect(() => {
-        // If we just loaded (initialData exists), and the type matches initial type, 
-        // DO NOT change category. This guards against the effect running on mount.
-        if (initialData) {
-            const initialType = initialData.amount >= 0 ? 'income' : 'expense';
-            if (type === initialType && categoryId === initialData.categoryId) {
-                return;
-            }
-        }
+    // Helper to validate and switch category when Type changes manually
+    const handleTypeChange = (newType) => {
+        setType(newType);
 
+        // Logic to ensure category is valid for new type
         const currentCat = categories.find(c => c.id === categoryId);
         let isValid = false;
 
         if (currentCat) {
-            if (type === 'income') {
+            if (newType === 'income') {
                 isValid = currentCat.showInIncome !== false;
             } else {
                 isValid = currentCat.showInExpense !== false;
@@ -62,14 +55,14 @@ export default function TransactionForm({ onClose, initialData = null }) {
 
         if (!isValid) {
             const firstValid = categories.find(c => {
-                if (type === 'income') return c.showInIncome !== false;
+                if (newType === 'income') return c.showInIncome !== false;
                 return c.showInExpense !== false;
             });
-            if (firstValid && firstValid.id !== categoryId) {
+            if (firstValid) {
                 setCategoryId(firstValid.id);
             }
         }
-    }, [type]); // Dependencies: ONLY type. (categories is stable enough, or add it if lint complains, but mainly TYPE triggers the switch)
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -116,13 +109,13 @@ export default function TransactionForm({ onClose, initialData = null }) {
                     <div className="type-toggle">
                         <div
                             className={`type-option ${type === 'expense' ? 'active expense' : ''}`}
-                            onClick={() => setType('expense')}
+                            onClick={() => handleTypeChange('expense')}
                         >
                             Gasto
                         </div>
                         <div
                             className={`type-option ${type === 'income' ? 'active income' : ''}`}
-                            onClick={() => setType('income')}
+                            onClick={() => handleTypeChange('income')}
                         >
                             Ingreso
                         </div>
