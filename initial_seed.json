@@ -1,427 +1,127 @@
 {
-  "transactions": [
-    {
-      "id": "355616a4-c814-4d00-89d3-e3ebf3589535",
-      "amount": -15000,
-      "date": "2024-02-03",
-      "categoryId": "cat_3",
-      "tagIds": [],
-      "isPinned": false,
-      "description": "Reserva"
-    },
-    {
-      "id": "b90b7f15-5505-476d-afd6-756b2490b869",
-      "amount": -100.14,
-      "date": "2024-04-01",
-      "categoryId": "cat_5",
-      "tagIds": [
-        "47fe25c5-3f27-42eb-a8af-53ed57c266c8"
-      ],
-      "isPinned": false,
-      "description": "Reolink Duo 2"
-    },
-    {
-      "id": "959c6743-3193-473a-8926-3133d7d5a0f5",
-      "amount": -70,
-      "date": "2024-04-01",
-      "categoryId": "cat_5",
-      "tagIds": [
-        "47fe25c5-3f27-42eb-a8af-53ed57c266c8"
-      ],
-      "isPinned": false,
-      "description": "Reolink 833A"
-    },
-    {
-      "id": "68b1aa48-547f-4cc0-9126-483bfd706ade",
-      "amount": -80,
-      "date": "2024-04-01",
-      "categoryId": "cat_5",
-      "tagIds": [
-        "47fe25c5-3f27-42eb-a8af-53ed57c266c8"
-      ],
-      "isPinned": false,
-      "description": "Reolink 842A"
-    },
-    {
-      "id": "5cfcb964-28fb-4f86-bc6c-cf3667ad14a7",
-      "amount": -89.28,
-      "date": "2024-04-01",
-      "categoryId": "cat_6",
-      "tagIds": [
-        "47fe25c5-3f27-42eb-a8af-53ed57c266c8"
-      ],
-      "isPinned": false,
-      "description": "TP-Link Omada EAP650"
-    },
-    {
-      "id": "62ca4627-4382-43a7-83b2-8508f930a989",
-      "amount": -46.08,
-      "date": "2024-04-01",
-      "categoryId": "cat_6",
-      "tagIds": [
-        "47fe25c5-3f27-42eb-a8af-53ed57c266c8"
-      ],
-      "isPinned": false,
-      "description": "Router Omada E605"
-    },
-    {
-      "id": "05c52665-c8f8-4edf-9c0a-c37e68703df3",
-      "amount": -4840,
-      "date": "2024-09-18",
-      "categoryId": "0c5c0d84-a311-4ea4-9ab2-a6567f5ba1b8",
-      "tagIds": [
-        "6f80eaff-19f5-42cb-b191-5d36ce6c3993"
-      ],
-      "isPinned": false,
-      "description": "Arquitecto Pago 1"
-    },
-    {
-      "id": "8feefa2c-55b9-4fb8-aef9-9068f117b9e0",
-      "amount": -21430,
-      "date": "2024-11-06",
-      "categoryId": "cat_2",
-      "tagIds": [
-        "tag_1"
-      ],
-      "isPinned": false,
-      "description": "IVA Terreno"
-    },
-    {
-      "id": "a44af20e-a790-4782-9773-44d31a9a426b",
-      "amount": -102000,
-      "date": "2024-11-06",
-      "categoryId": "cat_2",
-      "tagIds": [],
-      "isPinned": false,
-      "description": "Terreno Sierra Espada"
-    },
-    {
-      "id": "5f987e7b-ec20-4d1a-be8b-8e10a7c932ec",
-      "amount": -2040,
-      "date": "2024-11-11",
-      "categoryId": "cat_2",
-      "tagIds": [
-        "tag_1"
-      ],
-      "isPinned": false,
-      "description": "Impuesto compraventa"
-    },
-    {
-      "id": "864d16c3-f847-47f6-9900-abcf603166f9",
-      "amount": -1530,
-      "date": "2024-11-11",
-      "categoryId": "cat_2",
-      "tagIds": [
-        "tag_1"
-      ],
-      "isPinned": false,
-      "description": "Impuesto segregación"
-    },
-    {
-      "id": "0b07ee01-ca21-4844-a953-0177edebe04c",
-      "amount": -1016.4,
-      "date": "2024-12-17",
-      "categoryId": "0c5c0d84-a311-4ea4-9ab2-a6567f5ba1b8",
-      "tagIds": [
-        "tag_2"
-      ],
-      "isPinned": false,
-      "description": "Estudio geotecnico"
-    },
-    {
-      "id": "1f109dc4-2fe1-4ee6-9498-9be8f8a450af",
-      "amount": -980.9,
-      "date": "2025-03-10",
-      "categoryId": "0c5c0d84-a311-4ea4-9ab2-a6567f5ba1b8",
-      "tagIds": [
-        "tag_2"
-      ],
-      "isPinned": false,
-      "description": "Registro de la propiedad Terreno"
-    },
-    {
-      "id": "920a9aba-498b-48c4-8a30-44f709833bb3",
-      "amount": -411.98,
-      "date": "2025-08-26",
-      "categoryId": "cat_5",
-      "tagIds": [
-        "47fe25c5-3f27-42eb-a8af-53ed57c266c8"
-      ],
-      "isPinned": false,
-      "description": "Alarma Ajax"
-    },
-    {
-      "id": "4d6ee6e0-4cd2-4adb-809a-263879948725",
-      "amount": -993.16,
-      "date": "2025-09-11",
-      "categoryId": "0c5c0d84-a311-4ea4-9ab2-a6567f5ba1b8",
-      "tagIds": [
-        "tag_1"
-      ],
-      "isPinned": false,
-      "description": "Licencia de obra"
-    },
-    {
-      "id": "20b209d8-b3b8-43ef-884f-8b4e085a7004",
-      "amount": -36.13,
-      "date": "2025-10-09",
-      "categoryId": "0c5c0d84-a311-4ea4-9ab2-a6567f5ba1b8",
-      "tagIds": [
-        "tag_1"
-      ],
-      "isPinned": false,
-      "description": "Tasa tira de la cuerda"
-    },
-    {
-      "id": "93aef223-411b-4aa1-96da-e9ffc64107df",
-      "amount": -2000,
-      "date": "2025-10-09",
-      "categoryId": "0c5c0d84-a311-4ea4-9ab2-a6567f5ba1b8",
-      "tagIds": [
-        "tag_1"
-      ],
-      "isPinned": false,
-      "description": "Fianza servicios urbanísticos"
-    },
-    {
-      "id": "4ba806ba-857f-4a4f-9708-cb4f50d7c96c",
-      "amount": -7746.66,
-      "date": "2025-10-09",
-      "categoryId": "0c5c0d84-a311-4ea4-9ab2-a6567f5ba1b8",
-      "tagIds": [
-        "tag_1"
-      ],
-      "isPinned": false,
-      "description": "ICIO "
-    },
-    {
-      "id": "2b45ec0e-e3d8-4e8e-8680-c72b069a7547",
-      "amount": -1589.06,
-      "date": "2025-10-09",
-      "categoryId": "0c5c0d84-a311-4ea4-9ab2-a6567f5ba1b8",
-      "tagIds": [
-        "tag_1"
-      ],
-      "isPinned": false,
-      "description": "Fianza vertido escombros"
-    },
-    {
-      "id": "6a0ab6e6-a76d-4b6f-a1a1-e85b18d14b73",
-      "amount": -635.25,
-      "date": "2025-11-13",
-      "categoryId": "0c5c0d84-a311-4ea4-9ab2-a6567f5ba1b8",
-      "tagIds": [
-        "tag_2"
-      ],
-      "isPinned": false,
-      "description": "Tasación"
-    },
-    {
-      "id": "2b1afa3f-42b2-40b2-8a02-026266404cf8",
-      "amount": -20,
-      "date": "2025-11-21",
-      "categoryId": "0c5c0d84-a311-4ea4-9ab2-a6567f5ba1b8",
-      "tagIds": [
-        "tag_2"
-      ],
-      "isPinned": false,
-      "description": "Nota Simple otras casas"
-    },
-    {
-      "id": "c1438fa4-715f-4bb8-8236-a02c53ab3f79",
-      "amount": -288.14,
-      "date": "2025-11-21",
-      "categoryId": "0c5c0d84-a311-4ea4-9ab2-a6567f5ba1b8",
-      "tagIds": [
-        "01739e13-9625-4fcf-9ab8-2f7832213637"
-      ],
-      "isPinned": false,
-      "description": "Alta agua obra"
-    },
-    {
-      "id": "ffa48c2c-3b02-4af3-a47e-cd4592940b6a",
-      "amount": 25000,
-      "date": "2024-11-22",
-      "categoryId": "2bdba34d-209a-42a7-bc7d-3d15e322b7d6",
-      "tagIds": [],
-      "isPinned": false,
-      "description": "Ahorro Álvaro "
-    },
-    {
-      "id": "62cbf6b6-5141-4b07-ac29-cdc7a1153b5e",
-      "amount": 125000,
-      "date": "2024-11-22",
-      "categoryId": "2bdba34d-209a-42a7-bc7d-3d15e322b7d6",
-      "tagIds": [],
-      "isPinned": false,
-      "description": "Ahorro Cris"
-    },
-    {
-      "id": "22f9638d-4b08-4143-a505-0fcffe9bfef4",
-      "amount": 35000,
-      "date": "2025-01-01",
-      "categoryId": "2bdba34d-209a-42a7-bc7d-3d15e322b7d6",
-      "tagIds": [],
-      "isPinned": false,
-      "description": "Ahorro Cris"
-    },
-    {
-      "id": "187d6ba4-80a5-48e0-b513-c0d688723bce",
-      "amount": 417000,
-      "date": "2025-12-01",
-      "categoryId": "2bdba34d-209a-42a7-bc7d-3d15e322b7d6",
-      "tagIds": [],
-      "isPinned": false,
-      "description": "Hipoteca"
-    },
-    {
-      "id": "8942d560-e315-4edd-950f-035cfedc31f0",
-      "amount": 31000,
-      "date": "2025-01-01",
-      "categoryId": "2bdba34d-209a-42a7-bc7d-3d15e322b7d6",
-      "tagIds": [],
-      "isPinned": false,
-      "description": "Tradereuplic comunes y alvaro"
-    },
-    {
-      "id": "66219711-b061-43ef-b261-a964ca0650bf",
-      "amount": 7000,
-      "date": "2025-01-01",
-      "categoryId": "2bdba34d-209a-42a7-bc7d-3d15e322b7d6",
-      "tagIds": [],
-      "isPinned": false,
-      "description": "Ahorro ing común "
-    },
-    {
-      "id": "7c60c2dd-4385-44b1-9751-2b4b87e9d2f3",
-      "amount": 3000,
-      "date": "2025-01-01",
-      "categoryId": "2bdba34d-209a-42a7-bc7d-3d15e322b7d6",
-      "tagIds": [],
-      "isPinned": false,
-      "description": "Ahorro Sabadell "
-    },
-    {
-      "id": "2bf76ad0-1af3-4d75-a798-0000bf831df9",
-      "amount": -300,
-      "date": "2025-02-04",
-      "categoryId": "cat_6",
-      "tagIds": [
-        "47fe25c5-3f27-42eb-a8af-53ed57c266c8"
-      ],
-      "isPinned": false,
-      "description": "Shelly"
-    }
-  ],
+  "settings": {
+    "initialBalance": 0,
+    "darkMode": false
+  },
   "categories": [
     {
-      "id": "cat_2",
-      "code": "TERR",
+      "id": "cat_terreno",
       "name": "Terreno",
-      "color": "#4caf50",
-      "icon": "landscape"
+      "color": "#795548",
+      "icon": "landscape",
+      "showInExpense": true,
+      "showInIncome": false
     },
     {
-      "id": "cat_3",
-      "code": "CONS",
+      "id": "cat_construccion",
       "name": "Construcción",
       "color": "#ff9800",
       "icon": "construction",
-      "debt": 301000
+      "showInExpense": true,
+      "showInIncome": false
     },
     {
-      "id": "cat_5",
-      "code": "SEGU",
+      "id": "cat_seguridad",
       "name": "Seguridad",
       "color": "#607d8b",
-      "icon": "security"
+      "icon": "security",
+      "showInExpense": true,
+      "showInIncome": false
     },
     {
-      "id": "cat_6",
-      "code": "TECN",
+      "id": "cat_tecnologia",
       "name": "Tecnología",
       "color": "#2196f3",
-      "icon": "devices"
+      "icon": "devices",
+      "showInExpense": true,
+      "showInIncome": false
     },
     {
-      "id": "cat_7",
-      "code": "MUEB",
+      "id": "cat_muebles",
       "name": "Muebles",
       "color": "#ff5722",
-      "icon": "chair"
+      "icon": "chair",
+      "showInExpense": true,
+      "showInIncome": false
     },
     {
-      "id": "cat_8",
-      "code": "UTIL",
-      "name": "Utensilios y herramientas",
-      "color": "#ffeb3b",
-      "icon": "handyman"
-    },
-    {
-      "id": "cat_other",
-      "code": "OTRO",
-      "name": "Otros",
-      "color": "#9e9e9e",
-      "icon": "category"
-    },
-    {
-      "name": "Proyecto y documentación",
-      "code": "PROY",
+      "id": "cat_proy_doc",
+      "name": "Proyecto y Documentación",
       "color": "#9c27b0",
       "icon": "description",
-      "id": "0c5c0d84-a311-4ea4-9ab2-a6567f5ba1b8"
+      "showInExpense": true,
+      "showInIncome": false
     },
     {
-      "name": "Ingreso",
-      "code": "INGR",
-      "color": "#8bc34a",
-      "icon": "money",
-      "id": "2bdba34d-209a-42a7-bc7d-3d15e322b7d6"
+      "id": "cat_ahorro",
+      "name": "Ahorro",
+      "color": "#4caf50",
+      "icon": "trending_up",
+      "showInExpense": false,
+      "showInIncome": true
+    },
+    {
+      "id": "cat_hipoteca",
+      "name": "Hipoteca",
+      "color": "#f44336",
+      "icon": "construction",
+      "showInExpense": false,
+      "showInIncome": true
+    },
+    {
+      "id": "cat_credito",
+      "name": "Crédito",
+      "color": "#e91e63",
+      "icon": "description",
+      "showInExpense": false,
+      "showInIncome": true
+    },
+    {
+      "id": "cat_otros",
+      "name": "Otros",
+      "color": "#9e9e9e",
+      "icon": "category",
+      "showInExpense": true,
+      "showInIncome": true
     }
   ],
   "tags": [
     {
-      "id": "tag_1",
-      "code": "IMP",
-      "name": "Impuestos",
-      "color": "#f44336"
-    },
-    {
-      "id": "tag_2",
-      "code": "DOC",
-      "name": "Documentos",
-      "color": "#3f51b5"
-    },
-    {
-      "id": "tag_3",
-      "code": "NOT",
-      "name": "Notaría",
-      "color": "#673ab7"
-    },
-    {
-      "name": "Productos y consumibles",
-      "code": "PROD",
-      "color": "#cddc39",
-      "id": "47fe25c5-3f27-42eb-a8af-53ed57c266c8"
-    },
-    {
-      "name": "Arquitecto",
-      "code": "ARQU",
-      "color": "#009688",
-      "id": "6f80eaff-19f5-42cb-b191-5d36ce6c3993"
-    },
-    {
-      "id": "tag_1",
-      "code": "IMP",
+      "id": "tag_impuestos",
       "name": "Impuestos directos",
       "color": "#f44336"
     },
     {
+      "id": "tag_documentos",
+      "name": "Documentos",
+      "color": "#3f51b5"
+    },
+    {
+      "id": "tag_notaria",
+      "name": "Notaría",
+      "color": "#673ab7"
+    },
+    {
+      "id": "tag_productos",
+      "name": "Productos y consumibles",
+      "color": "#cddc39"
+    },
+    {
+      "id": "tag_arquitecto",
+      "name": "Arquitecto",
+      "color": "#009688"
+    },
+    {
+      "id": "tag_suministros",
       "name": "Suministros",
-      "code": "SUMI",
-      "color": "#2196f3",
-      "id": "01739e13-9625-4fcf-9ab8-2f7832213637"
+      "color": "#03a9f4"
+    },
+    {
+      "id": "tag_banco",
+      "name": "Banco",
+      "color": "#ffc107"
     }
   ],
-  "settings": {}
+  "transactions": [],
+  "todos": []
 }

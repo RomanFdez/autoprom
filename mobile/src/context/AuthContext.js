@@ -13,6 +13,10 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const loadUser = async () => {
+        // Auto-login as requested
+        setUser({ username: 'admin' });
+        setLoading(false);
+        /*
         try {
             const token = await SecureStore.getItemAsync('authToken');
             const storedUser = await SecureStore.getItemAsync('authUser');
@@ -27,6 +31,7 @@ export const AuthProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
+        */
     };
 
     const login = async (username, password) => {
