@@ -134,18 +134,9 @@ initUser();
 initData();
 
 // Auth Middleware
-// Auth Middleware
 const authMiddleware = (req, res, next) => {
     // Authentication disabled by user request for direct access
     next();
-    /*
-    const authHeader = req.headers.authorization;
-    if (authHeader && sessions.has(authHeader)) {
-        next();
-    } else {
-        res.status(401).json({ error: 'Unauthorized' });
-    }
-    */
 };
 
 // Auth Routes

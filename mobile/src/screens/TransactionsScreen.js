@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Alert, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, Edit2, Copy, Trash2, Calendar, Tag } from 'lucide-react-native';
+import { Plus, Edit2, Copy, Trash2, Calendar, Tag, Search } from 'lucide-react-native';
 import { format, isToday, isYesterday, isThisWeek, isThisMonth, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useData } from '../context/DataContext';
@@ -140,14 +140,19 @@ export default function TransactionsScreen() {
         <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
             <StatusBar barStyle={theme.isDark ? 'light-content' : 'dark-content'} />
 
-            {/* Header with Search */}
-            <AppHeader title="Transacciones" onSearchPress={() => setSearchVisible(true)} />
+            {/* Header with Search removed from here to save space if needed, or just keep title */}
+            <AppHeader title="Transacciones" />
 
-            {/* Balance + Filters */}
+            {/* Compact Balance + Search + Filters */}
             <View style={{ backgroundColor: theme.colors.surface, borderBottomWidth: 1, borderBottomColor: theme.colors.border, paddingBottom: 8 }}>
                 <View style={styles.balanceHeader}>
-                    <Text style={[styles.balanceLabel, { color: theme.colors.textSecondary }]}>Saldo Total</Text>
-                    <Text style={[styles.balanceAmount, { color: getBalanceColor(totalBalance) }]}>{totalBalance.toFixed(2)} €</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <Text style={[styles.balanceLabel, { color: theme.colors.textSecondary }]}>Saldo Total:</Text>
+                        <Text style={[styles.balanceAmount, { color: getBalanceColor(totalBalance) }]}>{totalBalance.toFixed(2)} €</Text>
+                    </View>
+                    <TouchableOpacity onPress={() => setSearchVisible(true)} style={styles.searchBtn}>
+                        <Search size={24} color={theme.colors.text} />
+                    </TouchableOpacity>
                 </View>
                 <View style={styles.filtersContainer}>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.filterScroll, { flexGrow: 1, justifyContent: 'center' }]}>
@@ -177,9 +182,10 @@ export default function TransactionsScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1 },
-    balanceHeader: { alignItems: 'center', paddingVertical: 12 },
-    balanceLabel: { fontSize: 12, fontWeight: '500' },
-    balanceAmount: { fontSize: 24, fontWeight: 'bold' },
+    balanceHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12 },
+    balanceLabel: { fontSize: 14, fontWeight: '500' },
+    balanceAmount: { fontSize: 20, fontWeight: 'bold' },
+    searchBtn: { padding: 4 },
     filtersContainer: { paddingBottom: 12 },
     filterScroll: { paddingHorizontal: 16, gap: 8 },
     chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, marginRight: 8 },

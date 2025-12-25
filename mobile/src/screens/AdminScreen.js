@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Modal, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useData } from '../context/DataContext';
-import { useAuth } from '../context/AuthContext';
+
 import { useTheme } from '../context/ThemeContext';
 import { getIcon } from '../utils/icons';
 import { Plus, Trash2, Edit2, X, Save, Lock, Download, Upload, LogOut, Check, Sun, Moon, Settings } from 'lucide-react-native';
@@ -38,7 +38,7 @@ export default function AdminScreen() {
         updateSettings, importData, loading: dataLoading,
         transactions // needed for export
     } = useData();
-    const { logout } = useAuth();
+
     const { themePreference, setTheme, theme } = useTheme();
 
     // UI State
@@ -264,13 +264,7 @@ export default function AdminScreen() {
                 </View>
             </View>
 
-            <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-                <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Cuenta</Text>
-                <TouchableOpacity style={[styles.btnOutline, { borderColor: '#f44336' }]} onPress={logout}>
-                    <LogOut size={18} color="#f44336" />
-                    <Text style={[styles.btnOutlineText, { color: '#f44336' }]}>Cerrar Sesión</Text>
-                </TouchableOpacity>
-            </View>
+
         </View>
     );
 

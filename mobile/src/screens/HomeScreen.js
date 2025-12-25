@@ -160,7 +160,7 @@ export default function HomeScreen() {
 
                 {/* List fallback if no selection */}
                 {!focusedSection && (
-                    <View style={[styles.legendContainer, { backgroundColor: theme.colors.surfaceVariant }]}>
+                    <View style={[styles.legendContainer, { backgroundColor: theme.colors.surface }]}>
                         {data.map((item, index) => (
                             <TouchableOpacity key={index} style={[styles.legendItem, { borderBottomColor: theme.colors.border }]} onPress={() => handleDrilldown(item)}>
                                 <View style={styles.legendLeft}>

@@ -49,7 +49,7 @@ export const DataProvider = ({ children }) => {
         } catch (e) {
             console.error('Fetch failed', e);
             if (e.response && e.response.status === 401) {
-                logout();
+                // Auto-logout disabled for offline/direct mode
             }
         } finally {
             setLoading(false);

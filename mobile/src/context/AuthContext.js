@@ -16,22 +16,6 @@ export const AuthProvider = ({ children }) => {
         // Auto-login as requested
         setUser({ username: 'admin' });
         setLoading(false);
-        /*
-        try {
-            const token = await SecureStore.getItemAsync('authToken');
-            const storedUser = await SecureStore.getItemAsync('authUser');
-
-            if (token && storedUser) {
-                // Validate token or just assume valid for now? 
-                // Ideally hit an endpoint /me, but for now trusting storage like web app
-                setUser(JSON.parse(storedUser));
-            }
-        } catch (e) {
-            console.error('Failed to load user', e);
-        } finally {
-            setLoading(false);
-        }
-        */
     };
 
     const login = async (username, password) => {
