@@ -48,6 +48,13 @@ export const DataProvider = ({ children }) => {
             }
         } catch (e) {
             console.error('Fetch failed', e);
+            // Clear data if fetch fails to reflect invalid connection
+            setTransactions([]);
+            setCategories([]);
+            setTags([]);
+            setTodos([]);
+            setSettings(INITIAL_SETTINGS);
+
             if (e.response && e.response.status === 401) {
                 // Auto-logout disabled for offline/direct mode
             }

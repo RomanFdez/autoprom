@@ -130,6 +130,7 @@ export default function HomeScreen() {
                 <TouchableWithoutFeedback onPress={() => setFocusedSection(null)}>
                     <View style={{ alignItems: 'center', paddingVertical: 10 }}>
                         <PieChart
+                            key={`${viewType}-${data.length}`}
                             data={data}
                             donut
                             showText={false}
@@ -140,6 +141,8 @@ export default function HomeScreen() {
                             focusOnPress
                             toggleFocusOnPress
                             onPress={(item) => setFocusedSection(item)}
+                            isAnimated
+                            animationDuration={1000}
                         />
                     </View>
                 </TouchableWithoutFeedback>

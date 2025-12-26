@@ -5,10 +5,11 @@ import { useData } from '../context/DataContext';
 
 import { useTheme } from '../context/ThemeContext';
 import { getIcon } from '../utils/icons';
-import { Plus, Trash2, Edit2, X, Save, Lock, Download, Upload, LogOut, Check, Sun, Moon, Settings } from 'lucide-react-native';
+import { Plus, Trash2, Edit2, X, Save, Lock, Download, Upload, LogOut, Check, Sun, Moon, Settings, Wifi } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
+import * as SecureStore from 'expo-secure-store';
 
 // ... (Colors and Icons arrays remain same) ...
 const COLORS = [
@@ -36,8 +37,31 @@ export default function AdminScreen() {
         addCategory, updateCategory, removeCategory,
         addTag, updateTag, removeTag,
         updateSettings, importData, loading: dataLoading,
-        transactions // needed for export
+        transactions, // needed for export
+        refreshData // Added refreshData
     } = useData();
+
+    // ...
+
+    const handleSaveConnection = async () => {
+        console.log('💾 [Admin] Intentando guardar:', serverIp, serverPort);
+        try {
+            await SecureStore.setItemAsync('server_ip', serverIp);
+            await SecureStore.setItemAsync('server_port', serverPort);
+            console.log('✅ [Admin] Guardado en SecureStore completado');
+
+            // Verificación inmediata
+            const verifyIp = await SecureStore.getItemAsync('server_ip');
+            console.log('👀 [Admin] Verificación de guardado:', verifyIp);
+
+            // Force refresh data
+            await refreshData();
+            Alert.alert('Guardado', `Conexión actualizada a ${serverIp}:${serverPort} y datos recargados.`);
+        } catch (e) {
+            console.error('❌ [Admin] Error al guardar o recargar:', e);
+            Alert.alert('Error', 'Hubo un problema al guardar la configuración.');
+        }
+    };
 
     const { themePreference, setTheme, theme } = useTheme();
 
@@ -205,8 +229,81 @@ export default function AdminScreen() {
         </View>
     );
 
+    // Connection State
+    const [serverIp, setServerIp] = useState('192.168.1.221');
+    const [serverPort, setServerPort] = useState('3030');
+    const [testingConnection, setTestingConnection] = useState(false);
+
+    // Load connection settings on mount
+    React.useEffect(() => {
+        const loadConnection = async () => {
+            const ip = await SecureStore.getItemAsync('server_ip');
+            const port = await SecureStore.getItemAsync('server_port');
+            if (ip) setServerIp(ip);
+            if (port) setServerPort(port);
+        };
+        loadConnection();
+    }, []);
+
+    const handleTestConnection = async () => {
+        setTestingConnection(true);
+        try {
+            const url = `http://${serverIp}:${serverPort}/api/data`; // Test with data endpoint since we have no auth
+            const response = await fetch(url);
+            if (response.ok) {
+                Alert.alert('Éxito', 'Conexión establecida correctamente con el servidor.');
+            } else {
+                Alert.alert('Error', `Servidor respondió con estado: ${response.status}`);
+            }
+        } catch (error) {
+            Alert.alert('Error de Conexión', 'No se pudo contactar con el servidor. Verifica la IP y que el servidor esté activo.');
+        } finally {
+            setTestingConnection(false);
+        }
+    };
+
+
+
     const renderSettings = () => (
         <View style={styles.settingsContainer}>
+            <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+                <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Conexión del Servidor</Text>
+                <View style={{ gap: 10 }}>
+                    <View style={styles.row}>
+                        <TextInput
+                            style={[styles.input, { flex: 2, backgroundColor: theme.colors.surfaceVariant, color: theme.colors.text, borderColor: theme.colors.border }]}
+                            value={serverIp}
+                            onChangeText={setServerIp}
+                            placeholder="IP (ej: 192.168.1.50)"
+                            placeholderTextColor={theme.colors.textSecondary}
+                            autoCapitalize="none"
+                        />
+                        <TextInput
+                            style={[styles.input, { flex: 1, backgroundColor: theme.colors.surfaceVariant, color: theme.colors.text, borderColor: theme.colors.border }]}
+                            value={serverPort}
+                            onChangeText={setServerPort}
+                            placeholder="Puerto"
+                            keyboardType="numeric"
+                            placeholderTextColor={theme.colors.textSecondary}
+                        />
+                    </View>
+                    <View style={styles.row}>
+                        <TouchableOpacity
+                            style={[styles.btnOutline, { flex: 1, borderColor: theme.colors.text }]}
+                            onPress={handleTestConnection}
+                            disabled={testingConnection}
+                        >
+                            {testingConnection ? <ActivityIndicator size="small" color={theme.colors.text} /> : <Wifi size={18} color={theme.colors.text} />}
+                            <Text style={[styles.btnOutlineText, { color: theme.colors.text }]}>Probar</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.btnPrimary, { flex: 1 }]} onPress={handleSaveConnection}>
+                            <Save size={18} color="white" />
+                            <Text style={styles.btnText}>Guardar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+
             <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
                 <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Saldo Inicial</Text>
                 <View style={styles.row}>
