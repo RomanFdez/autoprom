@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { api } from '../utils/api';
 import { ICON_KEYS, getIcon } from '../utils/icons';
-import { Plus, X, Edit2, Trash2, Check, Save, Download, Lock, Upload } from 'lucide-react';
+import { Plus, Edit2, Trash2, Check, Save, Download, Lock, Upload, Tag, List, Settings } from 'lucide-react';
 
 const COLORS = [
     '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
@@ -15,9 +15,10 @@ export default function Admin() {
     const {
         categories, addCategory, updateCategory, removeCategory,
         tags, addTag, updateTag, removeTag,
-        settings, updateSettings
+        settings, updateSettings, transactions
     } = useData();
 
+    const [activeTab, setActiveTab] = useState('categories'); // 'categories', 'tags', 'settings'
     const [balance, setBalance] = useState(settings.initialBalance || 0);
     const [isCatModalOpen, setIsCatModalOpen] = useState(false);
     const [isTagModalOpen, setIsTagModalOpen] = useState(false);
@@ -42,7 +43,6 @@ export default function Admin() {
         document.body.removeChild(link);
     };
 
-    // ... existing modals ...
     const openCatModal = (cat = null) => {
         setEditingItem(cat ? { ...cat } : { name: '', code: '', color: COLORS[0], icon: 'category', showInExpense: true, showInIncome: true });
         setIsCatModalOpen(true);
@@ -56,10 +56,13 @@ export default function Admin() {
     const handleSaveCategory = (e) => {
         e.preventDefault();
         const code = editingItem.code || editingItem.name.substring(0, 4).toUpperCase();
-        if (editingItem.id) {
-            updateCategory({ ...editingItem, code });
+
+        const newItem = { ...editingItem, code };
+
+        if (newItem.id) {
+            updateCategory(newItem);
         } else {
-            addCategory({ ...editingItem, code });
+            addCategory(newItem);
         }
         setIsCatModalOpen(false);
         setEditingItem(null);
@@ -91,182 +94,222 @@ export default function Admin() {
 
     return (
         <div className="admin-page">
-            <h2 style={{ marginBottom: '1rem' }}>Administración</h2>
-
-            {/* Categories */}
-            <div className="section-header">
-                <h3>Categorías</h3>
-                <button className="btn btn-sm" onClick={() => openCatModal()}>
-                    <Plus size={18} /> Nueva
-                </button>
-            </div>
-            <div className="list-container">
-                {categories.map(cat => {
-                    const Icon = getIcon(cat.icon);
-                    return (
-                        <div key={cat.id} className="list-item">
-                            <div className="item-icon" style={{ backgroundColor: cat.color }}>
-                                <Icon size={20} color="white" />
-                            </div>
-                            <div className="item-details">
-                                <div className="item-name">{cat.name}</div>
-                                {cat.debt > 0 && (
-                                    <div className="item-code" style={{ color: 'var(--md-sys-color-on-surface)', opacity: 0.6, fontSize: '0.8rem' }}>
-                                        Deuda: {cat.debt.toFixed(2)}€
-                                    </div>
-                                )}
-                            </div>
-                            <div className="item-actions">
-                                <button className="icon-btn" onClick={() => openCatModal(cat)}><Edit2 size={16} /></button>
-                                <button className="icon-btn danger" onClick={() => handleDeleteCategory(cat.id)}><Trash2 size={16} /></button>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-
-            {/* Tags */}
-            <div className="section-header" style={{ marginTop: '2rem' }}>
-                <h3>Etiquetas</h3>
-                <button className="btn btn-sm" onClick={() => openTagModal()}>
-                    <Plus size={18} /> Nueva
-                </button>
-            </div>
-            <div className="list-container">
-                {tags.map(tag => (
-                    <div key={tag.id} className="list-item">
-                        <div className="item-icon" style={{ backgroundColor: tag.color, borderRadius: '4px' }}>
-                            <span style={{ color: 'white', fontWeight: 'bold', fontSize: '10px' }}>#</span>
-                        </div>
-                        <div className="item-details">
-                            <div className="item-name">{tag.name}</div>
-                        </div>
-                        <div className="item-actions">
-                            <button className="icon-btn" onClick={() => openTagModal(tag)}><Edit2 size={16} /></button>
-                            <button className="icon-btn danger" onClick={() => handleDeleteTag(tag.id)}><Trash2 size={16} /></button>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Initial Balance */}
-            <div className="card" style={{ marginTop: '2rem' }}>
-                <h3>Saldo Inicial</h3>
-                <p style={{ fontSize: '0.9rem', color: 'var(--md-sys-color-on-surface)', opacity: 0.7, marginBottom: '1rem' }}>
-                    El saldo con el que empieza la cuenta antes de las transacciones registradas.
-                </p>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                    <input
-                        type="number"
-                        className="form-input"
-                        value={balance}
-                        onChange={(e) => setBalance(e.target.value)}
-                    />
-                    <button className="btn btn-primary" onClick={handleUpdateBalance}>
-                        <Save size={18} /> Guardar
+            <div className="admin-header">
+                <h2>Administración</h2>
+                <div className="admin-tabs">
+                    <button
+                        className={`tab-btn ${activeTab === 'categories' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('categories')}
+                    >
+                        <List size={18} />
+                        <span>Categorías</span>
+                    </button>
+                    <button
+                        className={`tab-btn ${activeTab === 'tags' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('tags')}
+                    >
+                        <Tag size={18} />
+                        <span>Etiquetas</span>
+                    </button>
+                    <button
+                        className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('settings')}
+                    >
+                        <Settings size={18} />
+                        <span>Configuración</span>
                     </button>
                 </div>
             </div>
 
-            {/* Account Settings */}
-            <div className="card" style={{ marginTop: '1rem' }}>
-                <h3>Configuración de Cuenta</h3>
-                <p style={{ fontSize: '0.9rem', color: 'var(--md-sys-color-on-surface)', opacity: 0.7, marginBottom: '1rem' }}>
-                    Cambiar contraseña de acceso.
-                </p>
-                <form onSubmit={async (e) => {
-                    e.preventDefault();
-                    const newPass = e.target.newPassword.value;
-                    const confirmPass = e.target.confirmPassword.value;
+            <div className="admin-content">
+                {activeTab === 'categories' && (
+                    <>
+                        <div className="section-header">
+                            <h3>Gestión de Categorías</h3>
+                            <button className="btn btn-sm" onClick={() => openCatModal()}>
+                                <Plus size={18} /> Nueva
+                            </button>
+                        </div>
+                        <div className="list-container">
+                            {categories.map(cat => {
+                                const Icon = getIcon(cat.icon);
+                                // Calculate Remaining Debt
+                                const spent = transactions
+                                    .filter(t => t.categoryId === cat.id && t.amount < 0)
+                                    .reduce((acc, t) => acc + Math.abs(t.amount), 0);
+                                const remaining = Math.max(0, cat.debt - spent);
 
-                    if (newPass !== confirmPass) {
-                        alert('Las contraseñas no coinciden');
-                        return;
-                    }
+                                return (
+                                    <div key={cat.id} className="list-item">
+                                        <div className="item-icon" style={{ backgroundColor: cat.color }}>
+                                            <Icon size={20} color="white" />
+                                        </div>
+                                        <div className="item-details">
+                                            <div className="item-name">{cat.name}</div>
+                                            {cat.debt > 0 && (
+                                                <div className="item-code" style={{ color: 'var(--md-sys-color-on-surface)', opacity: 0.6, fontSize: '0.8rem' }}>
+                                                    Deuda: {remaining.toFixed(2)}€ / {cat.debt.toFixed(2)}€
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="item-actions">
+                                            <button className="icon-btn" onClick={() => openCatModal(cat)}><Edit2 size={16} /></button>
+                                            <button className="icon-btn danger" onClick={() => handleDeleteCategory(cat.id)}><Trash2 size={16} /></button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </>
+                )}
 
-                    if (newPass) {
-                        const success = await api.changePassword(newPass);
-                        if (success) {
-                            alert('Contraseña actualizada correctamente');
-                            e.target.reset();
-                        } else {
-                            alert('Error al actualizar la contraseña');
-                        }
-                    }
-                }} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        <input
-                            name="newPassword"
-                            type="password"
-                            className="form-input"
-                            placeholder="Nueva contraseña"
-                            required
-                        />
-                        <input
-                            name="confirmPassword"
-                            type="password"
-                            className="form-input"
-                            placeholder="Repetir contraseña"
-                            required
-                        />
-                        <button type="submit" className="btn btn-primary" style={{ whiteSpace: 'nowrap' }}>
-                            <Lock size={18} /> Actualizar
-                        </button>
-                    </div>
-                </form>
-            </div>
+                {activeTab === 'tags' && (
+                    <>
+                        <div className="section-header">
+                            <h3>Gestión de Etiquetas</h3>
+                            <button className="btn btn-sm" onClick={() => openTagModal()}>
+                                <Plus size={18} /> Nueva
+                            </button>
+                        </div>
+                        <div className="list-container">
+                            {tags.map(tag => (
+                                <div key={tag.id} className="list-item">
+                                    <div className="item-icon" style={{ backgroundColor: tag.color, borderRadius: '4px' }}>
+                                        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '10px' }}>#</span>
+                                    </div>
+                                    <div className="item-details">
+                                        <div className="item-name">{tag.name}</div>
+                                    </div>
+                                    <div className="item-actions">
+                                        <button className="icon-btn" onClick={() => openTagModal(tag)}><Edit2 size={16} /></button>
+                                        <button className="icon-btn danger" onClick={() => handleDeleteTag(tag.id)}><Trash2 size={16} /></button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
 
-            {/* Backups */}
-            <div className="card" style={{ marginTop: '1rem' }}>
-                <h3>Backup</h3>
-                <p style={{ fontSize: '0.9rem', color: 'var(--md-sys-color-on-surface)', opacity: 0.7, marginBottom: '1rem' }}>
-                    Gestión de copias de seguridad de tus datos.
-                </p>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button className="btn btn-primary" onClick={handleBackup}>
-                        <Download size={18} /> Descargar
-                    </button>
+                {activeTab === 'settings' && (
+                    <div className="settings-container">
+                        {/* Initial Balance */}
+                        <div className="card">
+                            <h3>Saldo Inicial</h3>
+                            <p className="card-desc">
+                                El saldo con el que empieza la cuenta antes de las transacciones registradas.
+                            </p>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <input
+                                    type="number"
+                                    className="form-input"
+                                    value={balance}
+                                    onChange={(e) => setBalance(e.target.value)}
+                                />
+                                <button className="btn btn-primary" onClick={handleUpdateBalance}>
+                                    <Save size={18} /> Guardar
+                                </button>
+                            </div>
+                        </div>
 
-                    <label className="btn" style={{ border: '1px solid var(--md-sys-color-outline)', backgroundColor: 'var(--md-sys-color-surface-variant)', color: 'var(--md-sys-color-on-surface-variant)' }}>
-                        <Upload size={18} /> Restaurar
-                        <input
-                            type="file"
-                            accept=".json"
-                            style={{ display: 'none' }}
-                            onChange={async (e) => {
-                                const file = e.target.files[0];
-                                if (!file) return;
+                        {/* Account Settings */}
+                        <div className="card">
+                            <h3>Contraseña</h3>
+                            <p className="card-desc">
+                                Actualizar la contraseña de acceso a la aplicación.
+                            </p>
+                            <form onSubmit={async (e) => {
+                                e.preventDefault();
+                                const newPass = e.target.newPassword.value;
+                                const confirmPass = e.target.confirmPassword.value;
 
-                                if (!confirm('¡ATENCIÓN! Esto sobrescribirá todos los datos actuales con los del archivo de respaldo. ¿Estás seguro?')) {
-                                    e.target.value = '';
+                                if (newPass !== confirmPass) {
+                                    alert('Las contraseñas no coinciden');
                                     return;
                                 }
 
-                                const reader = new FileReader();
-                                reader.onload = async (e) => {
-                                    try {
-                                        const json = JSON.parse(e.target.result);
-                                        // Basic validation
-                                        if (!json.transactions || !json.categories) {
-                                            throw new Error('Formato de archivo inválido');
-                                        }
-                                        const success = await api.saveData(json);
-                                        if (success) {
-                                            alert('Datos restaurados correctamente. La página se recargará.');
-                                            window.location.reload();
-                                        } else {
-                                            alert('Error al guardar los datos restaurados.');
-                                        }
-                                    } catch (err) {
-                                        console.error(err);
-                                        alert('Error al procesar el archivo: ' + err.message);
+                                if (newPass) {
+                                    const success = await api.changePassword(newPass);
+                                    if (success) {
+                                        alert('Contraseña actualizada correctamente');
+                                        e.target.reset();
+                                    } else {
+                                        alert('Error al actualizar la contraseña');
                                     }
-                                };
-                                reader.readAsText(file);
-                            }}
-                        />
-                    </label>
-                </div>
+                                }
+                            }} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <input
+                                        name="newPassword"
+                                        type="password"
+                                        className="form-input"
+                                        placeholder="Nueva contraseña"
+                                        required
+                                    />
+                                    <input
+                                        name="confirmPassword"
+                                        type="password"
+                                        className="form-input"
+                                        placeholder="Repetir"
+                                        required
+                                    />
+                                    <button type="submit" className="btn btn-primary">
+                                        <Lock size={18} />
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        {/* Backups */}
+                        <div className="card">
+                            <h3>Copia de Seguridad</h3>
+                            <p className="card-desc">
+                                Descarga o restaura tus datos.
+                            </p>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button className="btn btn-primary" onClick={handleBackup}>
+                                    <Download size={18} /> Descargar
+                                </button>
+
+                                <label className="btn btn-secondary">
+                                    <Upload size={18} /> Restaurar
+                                    <input
+                                        type="file"
+                                        accept=".json"
+                                        style={{ display: 'none' }}
+                                        onChange={async (e) => {
+                                            const file = e.target.files[0];
+                                            if (!file) return;
+
+                                            if (!confirm('¡ATENCIÓN! Esto sobrescribirá todos los datos actuales. ¿Seguro?')) {
+                                                e.target.value = '';
+                                                return;
+                                            }
+
+                                            const reader = new FileReader();
+                                            reader.onload = async (e) => {
+                                                try {
+                                                    const json = JSON.parse(e.target.result);
+                                                    if (!json.transactions || !json.categories) throw new Error('Formato inválido');
+                                                    const success = await api.saveData(json);
+                                                    if (success) {
+                                                        alert('Datos restaurados. Recargando...');
+                                                        window.location.reload();
+                                                    } else {
+                                                        alert('Error al guardar datos.');
+                                                    }
+                                                } catch (err) {
+                                                    console.error(err);
+                                                    alert('Error: ' + err.message);
+                                                }
+                                            };
+                                            reader.readAsText(file);
+                                        }}
+                                    />
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Modals */}
@@ -288,7 +331,7 @@ export default function Admin() {
 
                             {isCatModalOpen && (
                                 <div className="input-group">
-                                    <label className="input-label">Deuda Actual (€)</label>
+                                    <label className="input-label">Deuda Total (€)</label>
                                     <input
                                         type="number"
                                         className="form-input"
@@ -296,7 +339,7 @@ export default function Admin() {
                                         value={editingItem.debt || ''}
                                         onChange={e => setEditingItem({ ...editingItem, debt: parseFloat(e.target.value) || 0 })}
                                     />
-                                    <small style={{ color: 'var(--md-sys-color-on-surface)', opacity: 0.6 }}>Si se añade gasto a esta categoría, se reducirá de esta deuda.</small>
+                                    <small style={{ color: 'var(--md-sys-color-on-surface)', opacity: 0.6 }}>Opcional. Cantidad total a pagar.</small>
                                 </div>
                             )}
 
@@ -313,7 +356,7 @@ export default function Admin() {
                                                 />
                                                 <span className="slider"></span>
                                             </label>
-                                            <span style={{ fontSize: '0.9rem' }}>En Gastos</span>
+                                            <span style={{ fontSize: '0.9rem' }}>Gastos</span>
                                         </div>
 
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -325,7 +368,7 @@ export default function Admin() {
                                                 />
                                                 <span className="slider"></span>
                                             </label>
-                                            <span style={{ fontSize: '0.9rem' }}>En Ingresos</span>
+                                            <span style={{ fontSize: '0.9rem' }}>Ingresos</span>
                                         </div>
                                     </div>
                                 </div>
@@ -377,11 +420,59 @@ export default function Admin() {
             )}
 
             <style>{`
+        .admin-header {
+            margin-bottom: 2rem;
+        }
+        .admin-header h2 {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .admin-tabs {
+            display: flex;
+            background: var(--md-sys-color-background);
+            padding: 4px;
+            border-radius: 20px;
+            border: 1px solid var(--md-sys-color-outline);
+            gap: 4px;
+        }
+        .tab-btn {
+            flex: 1;
+            border: none;
+            background: none;
+            padding: 8px 12px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            opacity: 0.6;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        .tab-btn:hover {
+            opacity: 0.8;
+            background: rgba(0,0,0,0.05);
+        }
+        .tab-btn.active {
+            background: var(--md-sys-color-surface);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            opacity: 1;
+            color: var(--md-sys-color-primary);
+        }
+
         .section-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
           margin-bottom: 1rem;
+        }
+        .settings-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
         }
         .btn-sm {
           padding: 0.5rem 1rem;
@@ -390,6 +481,7 @@ export default function Admin() {
           border-radius: 20px;
           background: var(--md-sys-color-surface);
           color: var(--md-sys-color-on-surface);
+          cursor: pointer;
         }
         .list-container {
           display: flex;
@@ -415,12 +507,8 @@ export default function Admin() {
           justify-content: center;
           flex-shrink: 0;
         }
-        .item-details {
-          flex: 1;
-        }
-        .item-name {
-          font-weight: 500;
-        }
+        .item-details { flex: 1; }
+        .item-name { font-weight: 500; }
         .item-code {
           font-size: 0.75rem;
           color: var(--md-sys-color-on-surface);
@@ -433,16 +521,56 @@ export default function Admin() {
           color: var(--md-sys-color-on-surface);
           border-radius: 50%;
           opacity: 0.7;
+          cursor: pointer;
         }
         .icon-btn:hover {
           background-color: var(--md-sys-color-on-surface-variant);
-          opacity: 0.1;
+          opacity: 1;
         }
         .icon-btn.danger:hover {
           background-color: #ffebee;
           color: #d32f2f;
         }
         
+        .card {
+            background: var(--md-sys-color-surface);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .card h3 { margin-bottom: 0.5rem; font-size: 1.1rem; }
+        .card-desc {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-bottom: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            background: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        /* Modal Styles */
         .modal-overlay {
           position: fixed;
           top: 0; left: 0; right: 0; bottom: 0;
@@ -464,40 +592,38 @@ export default function Admin() {
           overflow-y: auto;
           color: var(--md-sys-color-on-surface);
         }
-        .modal h3 {
-          margin-bottom: 1.5rem;
+        .modal h3 { margin-bottom: 1.5rem; }
+        .input-group { margin-bottom: 1rem; }
+        .input-label { display: block; font-size: 0.85rem; margin-bottom: 4px; opacity: 0.8; }
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--md-sys-color-outline);
+            background: transparent;
+            color: inherit;
         }
+        
         .color-grid, .icon-grid {
           display: flex;
           flex-wrap: wrap;
           gap: 8px;
-          margin-top: 0.5rem;
         }
         .color-swatch {
-          width: 32px;
-          height: 32px;
+          width: 32px; height: 32px;
           border-radius: 50%;
           cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          display: flex; alignItems: center; justifyContent: center;
           border: 2px solid transparent;
         }
-        .color-swatch.selected {
-          border-color: #333;
-          transform: scale(1.1);
-        }
+        .color-swatch.selected { border-color: #333; transform: scale(1.1); }
         .icon-swatch {
-          width: 40px;
-          height: 40px;
+          width: 40px; height: 40px;
           border-radius: 8px;
           background: var(--md-sys-color-surface-variant);
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          display: flex; alignItems: center; justifyContent: center;
           cursor: pointer;
           border: 2px solid transparent;
-          color: var(--md-sys-color-on-surface-variant);
         }
         .icon-swatch.selected {
           border-color: var(--md-sys-color-primary);
@@ -505,55 +631,31 @@ export default function Admin() {
           color: var(--md-sys-color-on-primary-container);
         }
         .modal-actions {
-          display: flex;
-          justify-content: flex-end;
-          gap: 1rem;
-          margin-top: 2rem;
+          display: flex; justifyContent: flex-end; gap: 1rem; margin-top: 2rem;
         }
-        .text-btn {
-          background: none;
-          color: var(--md-sys-color-on-surface);
-          opacity: 0.7;
-        }
+        .text-btn { background: none; border:none; cursor: pointer; color: inherit; opacity: 0.7; }
 
-        /* Toggle Switch Styles */
+        /* Toggle */
         .toggle-switch {
-          position: relative;
-          display: inline-block;
-          width: 44px;
-          height: 24px;
+          position: relative; display: inline-block; width: 44px; height: 24px;
         }
-        .toggle-switch input {
-          opacity: 0;
-          width: 0;
-          height: 0;
-        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider {
-          position: absolute;
-          cursor: pointer;
+          position: absolute; cursor: pointer;
           top: 0; left: 0; right: 0; bottom: 0;
           background-color: var(--md-sys-color-outline-variant);
-          transition: .3s;
-          border-radius: 24px;
+          transition: .3s; border-radius: 24px;
         }
         .slider:before {
-          position: absolute;
-          content: "";
-          height: 18px;
-          width: 18px;
-          left: 3px;
-          bottom: 3px;
+          position: absolute; content: "";
+          height: 18px; width: 18px;
+          left: 3px; bottom: 3px;
           background-color: white;
-          transition: .3s;
-          border-radius: 50%;
+          transition: .3s; border-radius: 50%;
           box-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
-        input:checked + .slider {
-          background-color: #ff9800; /* Orange to match user request */
-        }
-        input:checked + .slider:before {
-          transform: translateX(20px);
-        }
+        input:checked + .slider { background-color: var(--md-sys-color-primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
       `}</style>
         </div>
     );

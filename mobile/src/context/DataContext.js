@@ -1,15 +1,24 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import client from '../api/client';
-import { useAuth } from './AuthContext';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
+import { db } from '../firebaseConfig';
+import {
+    collection,
+    doc,
+    setDoc,
+    deleteDoc,
+    onSnapshot,
+    updateDoc,
+    writeBatch
+} from 'firebase/firestore';
+import { useAuth } from './AuthContext';
 
 const DataContext = createContext();
 
 const INITIAL_SETTINGS = { initialBalance: 0, darkMode: false };
 
 export const DataProvider = ({ children }) => {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const [todos, setTodos] = useState([]);
     const [transactions, setTransactions] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -17,179 +26,214 @@ export const DataProvider = ({ children }) => {
     const [settings, setSettings] = useState(INITIAL_SETTINGS);
     const [loading, setLoading] = useState(true);
 
-    const syncData = async (newTransactions, newCategories, newTags, newSettings, newTodos) => {
-        const payload = {
-            transactions: newTransactions || transactions,
-            categories: newCategories || categories,
-            tags: newTags || tags,
-            settings: newSettings || settings,
-            todos: newTodos || todos
+    // Setup Real-time Listeners
+    useEffect(() => {
+        setLoading(true);
+
+        // Listen to Collections
+        const unsubTransactions = onSnapshot(collection(db, 'transactions'), (snapshot) => {
+            const data = snapshot.docs.map(doc => doc.data());
+            setTransactions(data.sort((a, b) => new Date(b.date) - new Date(a.date)));
+        });
+
+        const unsubCategories = onSnapshot(collection(db, 'categories'), (snapshot) => {
+            setCategories(snapshot.docs.map(doc => doc.data()));
+        });
+
+        const unsubTags = onSnapshot(collection(db, 'tags'), (snapshot) => {
+            setTags(snapshot.docs.map(doc => doc.data()));
+        });
+
+        const unsubTodos = onSnapshot(collection(db, 'todos'), (snapshot) => {
+            setTodos(snapshot.docs.map(doc => doc.data()));
+        });
+
+        const unsubSettings = onSnapshot(doc(db, 'settings', 'appSettings'), (docSnap) => {
+            if (docSnap.exists()) {
+                setSettings(docSnap.data());
+            } else {
+                setDoc(doc(db, 'settings', 'appSettings'), INITIAL_SETTINGS);
+                setSettings(INITIAL_SETTINGS);
+            }
+            setLoading(false);
+        });
+
+        return () => {
+            unsubTransactions();
+            unsubCategories();
+            unsubTags();
+            unsubTodos();
+            unsubSettings();
         };
+    }, []);
+
+    // --- Transactions ---
+
+    const addTransaction = async (t) => {
+        const id = t.id || uuidv4();
+        const newT = { ...t, id };
 
         try {
-            await client.post('/data', payload);
+            await setDoc(doc(db, 'transactions', id), newT);
         } catch (e) {
-            console.error('Sync failed', e);
+            console.error("Error adding transaction: ", e);
         }
     };
 
-    const refreshData = async () => {
-        setLoading(true);
+    const updateTransaction = async (t) => {
         try {
-            const res = await client.get('/data');
-            const data = res.data;
-            if (data) {
-                // Ensure dates are parsed correctly if needed, but strings work for comparison
-                setTransactions(data.transactions || []);
-                setCategories(data.categories || []);
-                setTags(data.tags || []);
-                setSettings(data.settings || INITIAL_SETTINGS);
-                setTodos(data.todos || []);
-            }
+            await setDoc(doc(db, 'transactions', t.id), t, { merge: true });
         } catch (e) {
-            console.error('Fetch failed', e);
-            // Clear data if fetch fails to reflect invalid connection
-            setTransactions([]);
-            setCategories([]);
-            setTags([]);
-            setTodos([]);
-            setSettings(INITIAL_SETTINGS);
+            console.error("Error updating transaction: ", e);
+        }
+    };
 
-            if (e.response && e.response.status === 401) {
-                // Auto-logout disabled for offline/direct mode
+    const removeTransaction = async (id) => {
+        try {
+            await deleteDoc(doc(db, 'transactions', id));
+        } catch (e) {
+            console.error("Error deleting transaction: ", e);
+        }
+    };
+
+    // --- Todos ---
+
+    const addTodo = async (todo) => {
+        const id = uuidv4();
+        const newTodo = { ...todo, id };
+        try {
+            await setDoc(doc(db, 'todos', id), newTodo);
+        } catch (e) {
+            console.error("Error adding todo: ", e);
+        }
+    };
+
+    const toggleTodo = async (id) => {
+        const todo = todos.find(t => t.id === id);
+        if (todo) {
+            try {
+                await updateDoc(doc(db, 'todos', id), { done: !todo.done });
+            } catch (e) {
+                console.error("Error toggling todo: ", e);
             }
+        }
+    };
+
+    const deleteTodo = async (id) => {
+        try {
+            await deleteDoc(doc(db, 'todos', id));
+        } catch (e) {
+            console.error("Error deleting todo: ", e);
+        }
+    };
+
+    // --- Categories ---
+
+    const addCategory = async (cat) => {
+        const id = cat.id || uuidv4();
+        const newCat = { ...cat, id };
+        try {
+            await setDoc(doc(db, 'categories', id), newCat);
+        } catch (e) {
+            console.error("Error adding category: ", e);
+        }
+    };
+
+    const updateCategory = async (cat) => {
+        try {
+            await setDoc(doc(db, 'categories', cat.id), cat, { merge: true });
+        } catch (e) {
+            console.error("Error updating category: ", e);
+        }
+    };
+
+    const removeCategory = async (id) => {
+        try {
+            await deleteDoc(doc(db, 'categories', id));
+        } catch (e) {
+            console.error("Error deleting category: ", e);
+        }
+    };
+
+    // --- Tags ---
+
+    const addTag = async (tag) => {
+        const id = tag.id || uuidv4();
+        const newTag = { ...tag, id };
+        try {
+            await setDoc(doc(db, 'tags', id), newTag);
+        } catch (e) {
+            console.error("Error adding tag: ", e);
+        }
+    };
+
+    const updateTag = async (tag) => {
+        try {
+            await setDoc(doc(db, 'tags', tag.id), tag, { merge: true });
+        } catch (e) {
+            console.error("Error updating tag: ", e);
+        }
+    };
+
+    const removeTag = async (id) => {
+        try {
+            await deleteDoc(doc(db, 'tags', id));
+        } catch (e) {
+            console.error("Error deleting tag: ", e);
+        }
+    };
+
+    // --- Settings ---
+
+    const updateSettings = async (newSet) => {
+        const finalSettings = { ...settings, ...newSet };
+        try {
+            await setDoc(doc(db, 'settings', 'appSettings'), finalSettings, { merge: true });
+        } catch (e) {
+            console.error("Error updating settings: ", e);
+        }
+    };
+
+    // --- Import / Restore ---
+
+    const importData = async (data) => {
+        setLoading(true);
+        console.log("Starting Import...");
+
+        try {
+            // Collect all operations
+            const allItems = [];
+
+            if (data.transactions) data.transactions.forEach(t => allItems.push({ col: 'transactions', id: t.id, data: t }));
+            if (data.categories) data.categories.forEach(c => allItems.push({ col: 'categories', id: c.id, data: c }));
+            if (data.tags) data.tags.forEach(t => allItems.push({ col: 'tags', id: t.id, data: t }));
+            if (data.todos) data.todos.forEach(t => allItems.push({ col: 'todos', id: t.id, data: t }));
+            if (data.settings) allItems.push({ col: 'settings', id: 'appSettings', data: data.settings });
+
+            // Chunking
+            const CHUNK_SIZE = 450;
+            for (let i = 0; i < allItems.length; i += CHUNK_SIZE) {
+                const batch = writeBatch(db);
+                const chunk = allItems.slice(i, i + CHUNK_SIZE);
+
+                chunk.forEach(item => {
+                    const ref = doc(db, item.col, item.id);
+                    batch.set(ref, item.data);
+                });
+
+                console.log(`Writing batch ${i} to ${i + chunk.length} of ${allItems.length}`);
+                await batch.commit();
+            }
+
+            console.log("Import successful");
+        } catch (e) {
+            console.error("Import failed: ", e);
         } finally {
             setLoading(false);
         }
     };
 
-    // Initial load
-    useEffect(() => {
-        if (user) {
-            refreshData();
-        }
-    }, [user]);
-
-    const addTransaction = (t) => {
-        const newT = { ...t, id: t.id || uuidv4() };
-        const newTransactions = [...transactions, newT];
-
-        // Handle Debt Logic
-        let newCategories = null;
-        if (newT.amount < 0 && newT.categoryId) {
-            const catIndex = categories.findIndex(c => c.id === newT.categoryId);
-            if (catIndex !== -1 && categories[catIndex].debt > 0) {
-                const updatedCat = { ...categories[catIndex] };
-                updatedCat.debt = Math.max(0, updatedCat.debt - Math.abs(newT.amount));
-
-                newCategories = [...categories];
-                newCategories[catIndex] = updatedCat;
-                setCategories(newCategories);
-            }
-        }
-
-        setTransactions(newTransactions);
-        syncData(newTransactions, newCategories, null, null, null);
-    };
-
-    const updateTransaction = (t) => {
-        const newTransactions = transactions.map(tr => tr.id === t.id ? t : tr);
-        setTransactions(newTransactions);
-        syncData(newTransactions, null, null, null, null);
-    };
-
-    const removeTransaction = (id) => {
-        const newTransactions = transactions.filter(t => t.id !== id);
-        setTransactions(newTransactions);
-        syncData(newTransactions, null, null, null, null);
-    };
-
-    // Category & Tag Handlers (Adding placeholders if needed by AdminScreen, or existing ones should be exposed if they exist. 
-    // Wait, AdminScreen uses addCategory etc. I need to make sure those are exposed too! 
-    // Looking at previous DataContext dump... 
-    // The previous dump ONLY showed addTransaction/update/remove. 
-    // AdminScreen supposedly uses addCategory, updateCategory, removeCategory, addTag, etc. 
-    // If they aren't here, AdminScreen will break too. 
-    // I will add them now to be safe, as the user didn't mention Admin errors yet but they likely exist or I missed them in previous context check.
-    // Actually, looking at the truncated file, I might have missed them or they were not there. 
-    // I will add basic CRUD for Categories and Tags + Todos.
-
-    // Todo Handlers
-    const addTodo = (todo) => {
-        // todo is object { text, done, createdAt }
-        const newTodo = { ...todo, id: uuidv4() };
-        const newTodos = [...(todos || []), newTodo];
-        setTodos(newTodos);
-        syncData(null, null, null, null, newTodos);
-    };
-
-    const toggleTodo = (id) => {
-        const newTodos = todos.map(t => t.id === id ? { ...t, done: !t.done } : t);
-        setTodos(newTodos);
-        syncData(null, null, null, null, newTodos);
-    };
-
-    const deleteTodo = (id) => {
-        const newTodos = todos.filter(t => t.id !== id);
-        setTodos(newTodos);
-        syncData(null, null, null, null, newTodos);
-    };
-
-    // Category handlers
-    const addCategory = (cat) => {
-        const newCat = { ...cat, id: uuidv4() };
-        const newCategories = [...categories, newCat];
-        setCategories(newCategories);
-        syncData(null, newCategories, null, null, null);
-    };
-
-    const updateCategory = (cat) => {
-        const newCategories = categories.map(c => c.id === cat.id ? cat : c);
-        setCategories(newCategories);
-        syncData(null, newCategories, null, null, null);
-    };
-
-    const removeCategory = (id) => {
-        const newCategories = categories.filter(c => c.id !== id);
-        setCategories(newCategories);
-        syncData(null, newCategories, null, null, null);
-    };
-
-    // Tag handlers
-    const addTag = (tag) => {
-        const newTag = { ...tag, id: uuidv4() };
-        const newTags = [...tags, newTag];
-        setTags(newTags);
-        syncData(null, null, newTags, null, null);
-    };
-
-    const updateTag = (tag) => {
-        const newTags = tags.map(t => t.id === tag.id ? tag : t);
-        setTags(newTags);
-        syncData(null, null, newTags, null, null);
-    };
-
-    const removeTag = (id) => {
-        const newTags = tags.filter(t => t.id !== id);
-        setTags(newTags);
-        syncData(null, null, newTags, null, null);
-    };
-
-    // Settings
-    const updateSettings = (newSet) => {
-        const finalSettings = { ...settings, ...newSet };
-        setSettings(finalSettings);
-        syncData(null, null, null, finalSettings, null);
-    };
-
-    const importData = (data) => {
-        setTransactions(data.transactions || []);
-        setCategories(data.categories || []);
-        setTags(data.tags || []);
-        setTodos(data.todos || []);
-        setSettings(data.settings || INITIAL_SETTINGS);
-        syncData(data.transactions, data.categories, data.tags, data.settings, data.todos);
-    };
+    const refreshData = async () => { };
 
     return (
         <DataContext.Provider value={{

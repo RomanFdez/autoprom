@@ -1,32 +1,23 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { api } from '../utils/api';
-import { useAuth } from './AuthContext';
 import { v4 as uuidv4 } from 'uuid';
+import { db } from '../firebaseConfig';
+import {
+    collection,
+    doc,
+    setDoc,
+    deleteDoc,
+    onSnapshot,
+    updateDoc,
+    writeBatch
+} from 'firebase/firestore';
+import { useAuth } from './AuthContext';
 
 const DataContext = createContext();
-
-const INITIAL_CATEGORIES = [
-    { id: 'cat_0', code: 'INGR', name: 'Ingresos', color: '#4caf50', icon: 'trending_up', isFixed: true },
-    { id: 'cat_1', code: 'PROJ', name: 'Proyecto y Documentación', color: '#795548', icon: 'description' },
-    { id: 'cat_2', code: 'TERR', name: 'Terreno', color: '#4caf50', icon: 'landscape' },
-    { id: 'cat_3', code: 'CONS', name: 'Construcción', color: '#ff9800', icon: 'construction' },
-    { id: 'cat_4', code: 'MUDA', name: 'Mudanza', color: '#9c27b0', icon: 'local_shipping' },
-    { id: 'cat_5', code: 'SEGU', name: 'Seguridad', color: '#607d8b', icon: 'security' },
-    { id: 'cat_6', code: 'TECN', name: 'Tecnología', color: '#2196f3', icon: 'devices' },
-    { id: 'cat_7', code: 'MUEB', name: 'Muebles', color: '#ff5722', icon: 'chair' },
-    { id: 'cat_8', code: 'UTIL', name: 'Utensilios y herramientas', color: '#ffeb3b', icon: 'handyman' },
-    { id: 'cat_other', code: 'OTRO', name: 'Otros', color: '#9e9e9e', icon: 'category' },
-];
-
-const INITIAL_TAGS = [
-    { id: 'tag_1', code: 'IMP', name: 'Impuestos', color: '#f44336' },
-    { id: 'tag_2', code: 'DOC', name: 'Documentos', color: '#3f51b5' },
-    { id: 'tag_3', code: 'NOT', name: 'Notaría', color: '#673ab7' },
-];
 
 const INITIAL_SETTINGS = { initialBalance: 0, darkMode: false };
 
 export const DataProvider = ({ children }) => {
+    // const { user } = useAuth(); // Auth disabled for now to match mobile approach
     const [transactions, setTransactions] = useState([]);
     const [categories, setCategories] = useState([]);
     const [tags, setTags] = useState([]);
@@ -43,160 +34,214 @@ export const DataProvider = ({ children }) => {
         }
     }, [settings.darkMode]);
 
-    // Helper to sync all data
-    const syncData = async (newTransactions, newCategories, newTags, newSettings, newTodos) => {
-        const payload = {
-            transactions: newTransactions || transactions,
-            categories: newCategories || categories,
-            tags: newTags || tags,
-            settings: newSettings || settings,
-            todos: newTodos || todos
-        };
-        await api.saveData(payload);
-    };
-
-    const { logout } = useAuth(); // Need to ensure DataProvider is child of AuthProvider
-
-    const refreshData = async () => {
-        setLoading(true);
-        try {
-            const data = await api.loadData();
-            if (data) {
-                setTransactions(data.transactions || []);
-                setCategories(data.categories && data.categories.length > 0 ? data.categories : INITIAL_CATEGORIES);
-                setTags(data.tags && data.tags.length > 0 ? data.tags : INITIAL_TAGS);
-                setSettings(data.settings || INITIAL_SETTINGS);
-                setTodos(data.todos || []);
-            } else {
-                // If data is null, it likely means fetch failed (possibly 401).
-                // In a robust app, api.loadData should throw, but here it returns null.
-                // If server restarted, session is gone, we should logout.
-                console.warn("Failed to load data, likely session expired");
-                logout();
-            }
-        } catch (e) {
-            console.error(e);
-            logout();
-        }
-        setLoading(false);
-    };
-
+    // Setup Real-time Listeners
     useEffect(() => {
-        refreshData();
+        setLoading(true);
+
+        const unsubTransactions = onSnapshot(collection(db, 'transactions'), (snapshot) => {
+            const data = snapshot.docs.map(doc => doc.data());
+            setTransactions(data.sort((a, b) => new Date(b.date) - new Date(a.date)));
+        });
+
+        const unsubCategories = onSnapshot(collection(db, 'categories'), (snapshot) => {
+            setCategories(snapshot.docs.map(doc => doc.data()));
+        });
+
+        const unsubTags = onSnapshot(collection(db, 'tags'), (snapshot) => {
+            setTags(snapshot.docs.map(doc => doc.data()));
+        });
+
+        const unsubTodos = onSnapshot(collection(db, 'todos'), (snapshot) => {
+            setTodos(snapshot.docs.map(doc => doc.data()));
+        });
+
+        const unsubSettings = onSnapshot(doc(db, 'settings', 'appSettings'), (docSnap) => {
+            if (docSnap.exists()) {
+                setSettings(docSnap.data());
+            } else {
+                setDoc(doc(db, 'settings', 'appSettings'), INITIAL_SETTINGS);
+                setSettings(INITIAL_SETTINGS);
+            }
+            setLoading(false);
+        });
+
+        return () => {
+            unsubTransactions();
+            unsubCategories();
+            unsubTags();
+            unsubTodos();
+            unsubSettings();
+        };
     }, []);
 
-    const addTransaction = (t) => {
-        const newT = { ...t, id: t.id || uuidv4() };
-        const newTransactions = [...transactions, newT];
+    // --- Transactions ---
 
-        // Handle Debt Reduction
-        let newCategories = null;
-        if (newT.amount < 0 && newT.categoryId) { // Expense
-            const catIndex = categories.findIndex(c => c.id === newT.categoryId);
-            if (catIndex !== -1 && categories[catIndex].debt > 0) {
-                const updatedCat = { ...categories[catIndex] };
-                // Reduce debt by the absolute amount of the expense
-                updatedCat.debt = Math.max(0, updatedCat.debt - Math.abs(newT.amount));
+    const addTransaction = async (t) => {
+        const id = t.id || uuidv4();
+        const newT = { ...t, id };
 
-                newCategories = [...categories];
-                newCategories[catIndex] = updatedCat;
-                setCategories(newCategories);
-            }
+        try {
+            await setDoc(doc(db, 'transactions', id), newT);
+        } catch (e) {
+            console.error("Error adding transaction: ", e);
         }
-
-        setTransactions(newTransactions);
-        syncData(newTransactions, newCategories, null, null, null);
     };
 
-    const updateTransaction = (t) => {
-        const newTransactions = transactions.map(tr => tr.id === t.id ? t : tr);
-        setTransactions(newTransactions);
-        syncData(newTransactions, null, null, null, null);
+    const updateTransaction = async (t) => {
+        try {
+            await setDoc(doc(db, 'transactions', t.id), t, { merge: true });
+        } catch (e) {
+            console.error("Error updating transaction: ", e);
+        }
     };
 
-    const removeTransaction = (id) => {
-        const newTransactions = transactions.filter(t => t.id !== id);
-        setTransactions(newTransactions);
-        syncData(newTransactions, null, null, null, null);
+    const removeTransaction = async (id) => {
+        try {
+            await deleteDoc(doc(db, 'transactions', id));
+        } catch (e) {
+            console.error("Error deleting transaction: ", e);
+        }
     };
 
-    const addCategory = (c) => {
-        const newC = { ...c, id: c.id || uuidv4() };
-        const newCategories = [...categories, newC];
-        setCategories(newCategories);
-        syncData(null, newCategories, null, null, null);
-    };
+    // --- Todos ---
 
-    const updateCategory = (c) => {
-        const newCategories = categories.map(cat => cat.id === c.id ? c : cat);
-        setCategories(newCategories);
-        syncData(null, newCategories, null, null, null);
-    };
-
-    const removeCategory = (id) => {
-        const newCategories = categories.filter(c => c.id !== id);
-        setCategories(newCategories);
-        syncData(null, newCategories, null, null, null);
-    };
-
-    const addTag = (t) => {
-        const newT = { ...t, id: t.id || uuidv4() };
-        const newTags = [...tags, newT];
-        setTags(newTags);
-        syncData(null, null, newTags, null, null);
-    };
-
-    const updateTag = (t) => {
-        const newTags = tags.map(tag => tag.id === t.id ? t : tag);
-        setTags(newTags);
-        syncData(null, null, newTags, null, null);
-    };
-
-    const removeTag = (id) => {
-        const newTags = tags.filter(t => t.id !== id);
-        setTags(newTags);
-        syncData(null, null, newTags, null, null);
-    };
-
-    const updateSettings = (s) => {
-        const newSettings = { ...settings, ...s };
-        setSettings(newSettings);
-        syncData(null, null, null, newSettings, null);
-    };
-
-    // Todo Logic
-    const addTodo = (text) => {
+    const addTodo = async (text) => {
         const newTodo = {
             id: uuidv4(),
             text,
             done: false,
             createdAt: new Date().toISOString()
         };
-        const newTodos = [...todos, newTodo];
-        setTodos(newTodos);
-        syncData(null, null, null, null, newTodos);
+        try {
+            await setDoc(doc(db, 'todos', newTodo.id), newTodo);
+        } catch (e) {
+            console.error("Error adding todo: ", e);
+        }
     };
 
-    const toggleTodo = (id) => {
-        const newTodos = todos.map(t => t.id === id ? { ...t, done: !t.done } : t);
-        setTodos(newTodos);
-        syncData(null, null, null, null, newTodos);
+    const toggleTodo = async (id) => {
+        const todo = todos.find(t => t.id === id);
+        if (todo) {
+            try {
+                await updateDoc(doc(db, 'todos', id), { done: !todo.done });
+            } catch (e) {
+                console.error("Error toggling todo: ", e);
+            }
+        }
     };
 
-    const deleteTodo = (id) => {
-        const newTodos = todos.filter(t => t.id !== id);
-        setTodos(newTodos);
-        syncData(null, null, null, null, newTodos);
+    const deleteTodo = async (id) => {
+        try {
+            await deleteDoc(doc(db, 'todos', id));
+        } catch (e) {
+            console.error("Error deleting todo: ", e);
+        }
     };
 
-    const importData = (data) => {
-        if (data.transactions) setTransactions(data.transactions);
-        if (data.categories) setCategories(data.categories);
-        if (data.tags) setTags(data.tags);
-        if (data.settings) setSettings(data.settings);
-        if (data.todos) setTodos(data.todos);
-        syncData(data.transactions, data.categories, data.tags, data.settings, data.todos);
+    // --- Categories ---
+
+    const addCategory = async (cat) => {
+        const id = cat.id || uuidv4();
+        const newCat = { ...cat, id };
+        try {
+            await setDoc(doc(db, 'categories', id), newCat);
+        } catch (e) {
+            console.error("Error adding category: ", e);
+        }
     };
+
+    const updateCategory = async (cat) => {
+        try {
+            await setDoc(doc(db, 'categories', cat.id), cat, { merge: true });
+        } catch (e) {
+            console.error("Error updating category: ", e);
+        }
+    };
+
+    const removeCategory = async (id) => {
+        try {
+            await deleteDoc(doc(db, 'categories', id));
+        } catch (e) {
+            console.error("Error deleting category: ", e);
+        }
+    };
+
+    // --- Tags ---
+
+    const addTag = async (tag) => {
+        const id = tag.id || uuidv4();
+        const newTag = { ...tag, id };
+        try {
+            await setDoc(doc(db, 'tags', id), newTag);
+        } catch (e) {
+            console.error("Error adding tag: ", e);
+        }
+    };
+
+    const updateTag = async (tag) => {
+        try {
+            await setDoc(doc(db, 'tags', tag.id), tag, { merge: true });
+        } catch (e) {
+            console.error("Error updating tag: ", e);
+        }
+    };
+
+    const removeTag = async (id) => {
+        try {
+            await deleteDoc(doc(db, 'tags', id));
+        } catch (e) {
+            console.error("Error deleting tag: ", e);
+        }
+    };
+
+    // --- Settings ---
+
+    const updateSettings = async (newSet) => {
+        const finalSettings = { ...settings, ...newSet };
+        try {
+            await setDoc(doc(db, 'settings', 'appSettings'), finalSettings, { merge: true });
+        } catch (e) {
+            console.error("Error updating settings: ", e);
+        }
+    };
+
+    // --- Import / Restore ---
+
+    const importData = async (data) => {
+        setLoading(true);
+        console.log("Starting Import...");
+
+        try {
+            const allItems = [];
+
+            if (data.transactions) data.transactions.forEach(t => allItems.push({ col: 'transactions', id: t.id, data: t }));
+            if (data.categories) data.categories.forEach(c => allItems.push({ col: 'categories', id: c.id, data: c }));
+            if (data.tags) data.tags.forEach(t => allItems.push({ col: 'tags', id: t.id, data: t }));
+            if (data.todos) data.todos.forEach(t => allItems.push({ col: 'todos', id: t.id, data: t }));
+            if (data.settings) allItems.push({ col: 'settings', id: 'appSettings', data: data.settings });
+
+            // Chunking
+            const CHUNK_SIZE = 450;
+            for (let i = 0; i < allItems.length; i += CHUNK_SIZE) {
+                const batch = writeBatch(db);
+                const chunk = allItems.slice(i, i + CHUNK_SIZE);
+
+                chunk.forEach(item => {
+                    const ref = doc(db, item.col, item.id);
+                    batch.set(ref, item.data);
+                });
+                await batch.commit();
+            }
+
+            console.log("Import successful");
+        } catch (e) {
+            console.error("Import failed: ", e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const refreshData = async () => { };
 
     return (
         <DataContext.Provider value={{
@@ -206,9 +251,13 @@ export const DataProvider = ({ children }) => {
             settings,
             todos,
             loading,
+            refreshData,
             addTransaction,
             updateTransaction,
             removeTransaction,
+            addTodo,
+            toggleTodo,
+            deleteTodo,
             addCategory,
             updateCategory,
             removeCategory,
@@ -216,11 +265,7 @@ export const DataProvider = ({ children }) => {
             updateTag,
             removeTag,
             updateSettings,
-            addTodo,
-            toggleTodo,
-            deleteTodo,
-            importData,
-            refreshData
+            importData
         }}>
             {children}
         </DataContext.Provider>

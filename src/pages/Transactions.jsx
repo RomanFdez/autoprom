@@ -2,38 +2,51 @@ import { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import TransactionForm from '../components/TransactionForm';
 import { getIcon } from '../utils/icons';
-import { Plus, Download, Upload, Filter, Pin, Trash2, Edit2, Copy } from 'lucide-react';
+import { Plus, Pin, Trash2, Edit2, Copy, Search, X } from 'lucide-react';
 import { format, isSameDay, isSameWeek, isSameMonth, subDays, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 const FILTERS = {
   TODAY: 'Hoy',
-  YESTERDAY: 'Ayer',
-  WEEK: 'Esta semana',
   MONTH: 'Este mes',
   ALL: 'Todo el tiempo'
 };
 
 export default function Transactions() {
-  const { transactions, categories, tags, settings, removeTransaction, addTransaction, importData } = useData();
+  const { transactions, categories, tags, settings, removeTransaction, addTransaction } = useData();
   const [filter, setFilter] = useState(FILTERS.ALL);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const filteredTransactions = useMemo(() => {
     const now = new Date();
     return transactions.filter(t => {
+      // Date Filter
       const tDate = parseISO(t.date);
+      let dateMatch = false;
       switch (filter) {
-        case FILTERS.TODAY: return isSameDay(tDate, now);
-        case FILTERS.YESTERDAY: return isSameDay(tDate, subDays(now, 1));
-        case FILTERS.WEEK: return isSameWeek(tDate, now, { weekStartsOn: 1 });
-        case FILTERS.MONTH: return isSameMonth(tDate, now);
-        case FILTERS.ALL: return true;
-        default: return true;
+        case FILTERS.TODAY: dateMatch = isSameDay(tDate, now); break;
+        case FILTERS.MONTH: dateMatch = isSameMonth(tDate, now); break;
+        case FILTERS.ALL: dateMatch = true; break;
+        default: dateMatch = true;
       }
-    }).sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort desc by date
-  }, [transactions, filter]);
+      if (!dateMatch) return false;
+
+      // Search Filter
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const cat = categories.find(c => c.id === t.categoryId);
+        return (
+          (t.description && t.description.toLowerCase().includes(q)) ||
+          (cat && cat.name.toLowerCase().includes(q)) ||
+          t.amount.toString().includes(q)
+        );
+      }
+      return true;
+    }).sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [transactions, filter, searchQuery, categories]);
 
   const pinnedTransactions = filteredTransactions.filter(t => t.isPinned);
   const unpinnedTransactions = filteredTransactions.filter(t => !t.isPinned);
@@ -49,98 +62,7 @@ export default function Transactions() {
     setIsFormOpen(true);
   };
 
-  const handleExport = () => {
-    // CSV Export
-    const headers = ['id', 'date', 'amount', 'categoryCode', 'tagCodes', 'description', 'isPinned'];
-    const rows = transactions.map(t => {
-      const cat = categories.find(c => c.id === t.categoryId);
-      const tTags = tags.filter(tag => (t.tagIds || []).includes(tag.id));
-      return [
-        t.id,
-        t.date,
-        t.amount,
-        cat ? cat.code : '',
-        tTags.map(tag => tag.code).join('|'),
-        t.description || '',
-        t.isPinned ? '1' : '0'
-      ].map(field => {
-        const str = String(field || '');
-        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-          return `"${str.replace(/"/g, '""')}"`;
-        }
-        return str;
-      }).join(',');
-    });
 
-    // Add BOM and sep=, for Excel compatibility
-    const csvContent = ['sep=,', headers.join(','), ...rows].join('\n');
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `transacciones_${format(new Date(), 'yyyyMMdd')}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleImport = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const text = event.target.result;
-        let lines = text.split('\n').map(l => l.trim()).filter(l => l);
-
-        // Skip optional 'sep=' line
-        if (lines[0] && lines[0].startsWith('sep=')) {
-          lines = lines.slice(1);
-        }
-
-        if (lines.length < 1) return;
-
-        const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
-
-        const newTransactions = lines.slice(1).map(line => {
-          // Basic split (handling quotes crudely but effective for our simple generation)
-          const values = line.split(',').map(v => v.replace(/^"|"$/g, '').replace(/""/g, '"'));
-
-          // Map back to IDs
-          const catCode = values[3];
-          const tagCodes = values[4] ? values[4].split('|') : [];
-
-          const cat = categories.find(c => c.code === catCode);
-          const tTagIds = tags.filter(tag => tagCodes.includes(tag.code)).map(t => t.id);
-
-          return {
-            id: values[0] || undefined,
-            date: values[1],
-            amount: parseFloat(values[2]),
-            categoryId: cat?.id || '',
-            tagIds: tTagIds,
-            description: values[5],
-            isPinned: values[6] === '1'
-          };
-        });
-
-        let count = 0;
-        newTransactions.forEach(t => {
-          if (t.amount && !isNaN(t.amount)) {
-            addTransaction(t);
-            count++;
-          }
-        });
-        alert(`Importación completada: ${count} transacciones.`);
-        e.target.value = '';
-      } catch (err) {
-        console.error(err);
-        alert('Error al importar. Asegúrate de que el formato es correcto.');
-      }
-    };
-    reader.readAsText(file);
-  };
 
   const handleDuplicate = (t) => {
     const { id, ...rest } = t;
@@ -206,13 +128,9 @@ export default function Transactions() {
         </div>
 
         <div className="header-actions">
-          <button className="icon-action-btn" onClick={handleExport} title="Exportar CSV">
-            <Download size={20} />
+          <button className="icon-action-btn" onClick={() => setIsSearchOpen(true)} title="Buscar">
+            <Search size={20} />
           </button>
-          <label className="icon-action-btn" title="Importar CSV">
-            <Upload size={20} />
-            <input type="file" hidden accept=".csv" onChange={handleImport} />
-          </label>
         </div>
       </div>
 
@@ -252,6 +170,43 @@ export default function Transactions() {
           onClose={() => setIsFormOpen(false)}
           initialData={editingTransaction}
         />
+      )}
+
+      {/* Search Modal */}
+      {isSearchOpen && (
+        <div className="search-overlay" onClick={() => setIsSearchOpen(false)}>
+          <div className="search-modal" onClick={e => e.stopPropagation()}>
+            <div className="search-header">
+              <Search size={20} className="search-icon" />
+              <input
+                type="text"
+                autoFocus
+                placeholder="Buscar..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
+              <button className="close-search" onClick={() => setIsSearchOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            {/* We already see filtered results in the main list, but user likely wants a focused search UI or just to type query
+                Since we updated 'filteredTransactions' to respect 'searchQuery', the main list BEHIND the modal will update.
+                However, usually search overlay shows results inside it.
+                Let's simplify: The overlay is just for typing the query. The user sees results in the main list?
+                Actually, the previous implementation showed results INSIDE the modal.
+                Let's stick to showing results INSIDE the modal for better UX if the list is long.
+                But wait, 'filteredTransactions' is already filtered by searchQuery.
+                So if we use 'filteredTransactions' here, it works.
+            */}
+            <div className="search-list">
+              {filteredTransactions.length === 0 && (
+                <div className="empty-state">No se encontraron resultados</div>
+              )}
+              {filteredTransactions.slice(0, 50).map(t => <TransactionItem key={t.id} t={t} />)}
+            </div>
+          </div>
+        </div>
       )}
 
       <style>{`
@@ -473,7 +428,55 @@ export default function Transactions() {
           opacity: 0.5;
           font-style: italic;
         }
-      `}</style>
+
+        /* Search Modal Styles */
+        .search-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            backdrop-filter: blur(2px);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 80px;
+        }
+        .search-modal {
+            background: var(--md-sys-color-surface);
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 80vh;
+        }
+        .search-header {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid var(--md-sys-color-outline);
+            gap: 8px;
+        }
+        .search-input {
+            flex: 1;
+            border: none;
+            font-size: 1rem;
+            background: transparent;
+            color: var(--md-sys-color-on-surface);
+            outline: none;
+        }
+        .close-search, .search-icon {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-secondary);
+            cursor: pointer;
+        }
+        .search-list {
+            overflow-y: auto;
+            padding: 8px;
+        `}</style>
     </div>
   );
 }

@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useData } from '../context/DataContext';
 
 import { useTheme } from '../context/ThemeContext';
 import { getIcon } from '../utils/icons';
-import { Plus, Trash2, Edit2, X, Save, Lock, Download, Upload, LogOut, Check, Sun, Moon, Settings, Wifi } from 'lucide-react-native';
+import { Plus, Trash2, Edit2, X, Save, Download, Upload, Sun, Moon, Settings } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
-import * as SecureStore from 'expo-secure-store';
 
-// ... (Colors and Icons arrays remain same) ...
 const COLORS = [
     '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
     '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50',
@@ -37,31 +35,9 @@ export default function AdminScreen() {
         addCategory, updateCategory, removeCategory,
         addTag, updateTag, removeTag,
         updateSettings, importData, loading: dataLoading,
-        transactions, // needed for export
-        refreshData // Added refreshData
+        transactions,
+        refreshData
     } = useData();
-
-    // ...
-
-    const handleSaveConnection = async () => {
-        console.log('💾 [Admin] Intentando guardar:', serverIp, serverPort);
-        try {
-            await SecureStore.setItemAsync('server_ip', serverIp);
-            await SecureStore.setItemAsync('server_port', serverPort);
-            console.log('✅ [Admin] Guardado en SecureStore completado');
-
-            // Verificación inmediata
-            const verifyIp = await SecureStore.getItemAsync('server_ip');
-            console.log('👀 [Admin] Verificación de guardado:', verifyIp);
-
-            // Force refresh data
-            await refreshData();
-            Alert.alert('Guardado', `Conexión actualizada a ${serverIp}:${serverPort} y datos recargados.`);
-        } catch (e) {
-            console.error('❌ [Admin] Error al guardar o recargar:', e);
-            Alert.alert('Error', 'Hubo un problema al guardar la configuración.');
-        }
-    };
 
     const { themePreference, setTheme, theme } = useTheme();
 
@@ -128,7 +104,6 @@ export default function AdminScreen() {
         Alert.alert('Éxito', 'Saldo inicial actualizado');
     };
 
-    // ... (Backup/Restore handlers same) ...
     const handleBackup = async () => {
         try {
             const data = {
@@ -191,10 +166,9 @@ export default function AdminScreen() {
     };
 
     const renderCategoryItem = (item) => {
-        // Calculate remaining debt
         const totalTx = transactions.filter(t => t.categoryId === item.id).reduce((acc, t) => acc + t.amount, 0);
         const initialDebt = item.debt || 0;
-        const currentDebt = initialDebt + totalTx; // Expenses are negative, so they reduce the initial positive debt
+        const currentDebt = initialDebt + totalTx;
 
         return (
             <View key={item.id} style={[styles.itemCard, { backgroundColor: theme.colors.surface }]}>
@@ -229,81 +203,8 @@ export default function AdminScreen() {
         </View>
     );
 
-    // Connection State
-    const [serverIp, setServerIp] = useState('192.168.1.221');
-    const [serverPort, setServerPort] = useState('3030');
-    const [testingConnection, setTestingConnection] = useState(false);
-
-    // Load connection settings on mount
-    React.useEffect(() => {
-        const loadConnection = async () => {
-            const ip = await SecureStore.getItemAsync('server_ip');
-            const port = await SecureStore.getItemAsync('server_port');
-            if (ip) setServerIp(ip);
-            if (port) setServerPort(port);
-        };
-        loadConnection();
-    }, []);
-
-    const handleTestConnection = async () => {
-        setTestingConnection(true);
-        try {
-            const url = `http://${serverIp}:${serverPort}/api/data`; // Test with data endpoint since we have no auth
-            const response = await fetch(url);
-            if (response.ok) {
-                Alert.alert('Éxito', 'Conexión establecida correctamente con el servidor.');
-            } else {
-                Alert.alert('Error', `Servidor respondió con estado: ${response.status}`);
-            }
-        } catch (error) {
-            Alert.alert('Error de Conexión', 'No se pudo contactar con el servidor. Verifica la IP y que el servidor esté activo.');
-        } finally {
-            setTestingConnection(false);
-        }
-    };
-
-
-
     const renderSettings = () => (
         <View style={styles.settingsContainer}>
-            <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-                <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Conexión del Servidor</Text>
-                <View style={{ gap: 10 }}>
-                    <View style={styles.row}>
-                        <TextInput
-                            style={[styles.input, { flex: 2, backgroundColor: theme.colors.surfaceVariant, color: theme.colors.text, borderColor: theme.colors.border }]}
-                            value={serverIp}
-                            onChangeText={setServerIp}
-                            placeholder="IP (ej: 192.168.1.50)"
-                            placeholderTextColor={theme.colors.textSecondary}
-                            autoCapitalize="none"
-                        />
-                        <TextInput
-                            style={[styles.input, { flex: 1, backgroundColor: theme.colors.surfaceVariant, color: theme.colors.text, borderColor: theme.colors.border }]}
-                            value={serverPort}
-                            onChangeText={setServerPort}
-                            placeholder="Puerto"
-                            keyboardType="numeric"
-                            placeholderTextColor={theme.colors.textSecondary}
-                        />
-                    </View>
-                    <View style={styles.row}>
-                        <TouchableOpacity
-                            style={[styles.btnOutline, { flex: 1, borderColor: theme.colors.text }]}
-                            onPress={handleTestConnection}
-                            disabled={testingConnection}
-                        >
-                            {testingConnection ? <ActivityIndicator size="small" color={theme.colors.text} /> : <Wifi size={18} color={theme.colors.text} />}
-                            <Text style={[styles.btnOutlineText, { color: theme.colors.text }]}>Probar</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[styles.btnPrimary, { flex: 1 }]} onPress={handleSaveConnection}>
-                            <Save size={18} color="white" />
-                            <Text style={styles.btnText}>Guardar</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </View>
-
             <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
                 <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Saldo Inicial</Text>
                 <View style={styles.row}>
@@ -360,8 +261,6 @@ export default function AdminScreen() {
                     </TouchableOpacity>
                 </View>
             </View>
-
-
         </View>
     );
 

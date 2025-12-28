@@ -152,7 +152,7 @@ export default function Reports() {
                                 {/* Center Text (Total) */}
                                 <div className="chart-center-text">
                                     <span className="total-label">{selectedCategory || 'Total'}</span>
-                                    <span className={`total-value ${type === 'expense' ? 'expense-text' : 'income-text'}`}>
+                                    <span className="total-value">
                                         {displayTotal.toFixed(0)}€
                                     </span>
                                 </div>
@@ -198,7 +198,14 @@ export default function Reports() {
                                         <Tooltip formatter={(value) => `${value.toFixed(2)} €`} />
                                     </PieChart>
                                 </ResponsiveContainer>
+                                <div className="chart-center-text">
+                                    <span className="total-label">Total</span>
+                                    <span className="total-value">
+                                        {totalAmount.toFixed(0)}€
+                                    </span>
+                                </div>
                             </div>
+
 
                             {/* Tag List */}
                             <div className="list-group">
@@ -222,40 +229,42 @@ export default function Reports() {
             </div>
 
             {/* Drilldown Modal */}
-            {drilldown && (
-                <div className="modal-overlay" onClick={() => setDrilldown(null)}>
-                    <div className="modal drilldown-modal" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h3>{drilldown.name}</h3>
-                            <button className="close-btn" onClick={() => setDrilldown(null)}><X size={24} /></button>
-                        </div>
-                        <div className="drilldown-list">
-                            {drilldownTransactions.length === 0 ? (
-                                <p className="empty-msg">No hay transacciones</p>
-                            ) : (
-                                drilldownTransactions.map(t => {
-                                    const cat = categories.find(c => c.id === t.categoryId) || { name: 'Sin categoría', color: '#999', icon: 'category' };
-                                    const Icon = getIcon(cat.icon);
-                                    return (
-                                        <div key={t.id} className="drilldown-item">
-                                            <div className="d-icon" style={{ backgroundColor: cat.color }}>
-                                                <Icon size={16} color="white" />
+            {
+                drilldown && (
+                    <div className="modal-overlay" onClick={() => setDrilldown(null)}>
+                        <div className="modal drilldown-modal" onClick={e => e.stopPropagation()}>
+                            <div className="modal-header">
+                                <h3>{drilldown.name}</h3>
+                                <button className="close-btn" onClick={() => setDrilldown(null)}><X size={24} /></button>
+                            </div>
+                            <div className="drilldown-list">
+                                {drilldownTransactions.length === 0 ? (
+                                    <p className="empty-msg">No hay transacciones</p>
+                                ) : (
+                                    drilldownTransactions.map(t => {
+                                        const cat = categories.find(c => c.id === t.categoryId) || { name: 'Sin categoría', color: '#999', icon: 'category' };
+                                        const Icon = getIcon(cat.icon);
+                                        return (
+                                            <div key={t.id} className="drilldown-item">
+                                                <div className="d-icon" style={{ backgroundColor: cat.color }}>
+                                                    <Icon size={16} color="white" />
+                                                </div>
+                                                <div className="d-info">
+                                                    <div className="d-desc">{t.description || cat.name}</div>
+                                                    <div className="d-date">{format(parseISO(t.date), 'dd MMM yyyy', { locale: es })}</div>
+                                                </div>
+                                                <div className="d-amount">
+                                                    {t.amount.toFixed(2)} €
+                                                </div>
                                             </div>
-                                            <div className="d-info">
-                                                <div className="d-desc">{t.description || cat.name}</div>
-                                                <div className="d-date">{format(parseISO(t.date), 'dd MMM yyyy', { locale: es })}</div>
-                                            </div>
-                                            <div className="d-amount">
-                                                {t.amount.toFixed(2)} €
-                                            </div>
-                                        </div>
-                                    );
-                                })
-                            )}
+                                        );
+                                    })
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             <style>{`
         .toggle-container {
@@ -283,8 +292,8 @@ export default function Reports() {
           opacity: 1;
           color: var(--md-sys-color-on-surface);
         }
-        .toggle-btn.active.expense { color: var(--color-expense); }
-        .toggle-btn.active.income { color: var(--color-income); }
+        .toggle-btn.active.expense { color: #f44336; }
+        .toggle-btn.active.income { color: #4caf50; }
 
         .chart-wrapper {
           position: relative;
@@ -311,8 +320,7 @@ export default function Reports() {
           font-weight: bold;
           color: var(--md-sys-color-on-surface);
         }
-        .expense-text { color: var(--color-expense); }
-        .income-text { color: var(--color-income); }
+
 
         .list-group {
           background: var(--md-sys-color-surface);
@@ -446,6 +454,6 @@ export default function Reports() {
             font-style: italic;
         }
       `}</style>
-        </div>
+        </div >
     );
 }
