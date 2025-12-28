@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
 import { ICON_KEYS, getIcon } from '../utils/icons';
-import { Plus, Edit2, Trash2, Check, Save, Download, Lock, Upload, Tag, List, Settings } from 'lucide-react';
+import { Plus, Edit2, Trash2, Check, Save, Download, Lock, Upload, Tag, List, Settings, LogOut } from 'lucide-react';
 
 const COLORS = [
     '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
@@ -15,8 +16,9 @@ export default function Admin() {
     const {
         categories, addCategory, updateCategory, removeCategory,
         tags, addTag, updateTag, removeTag,
-        settings, updateSettings, transactions
+        settings, updateSettings, transactions, importData
     } = useData();
+    const { logout } = useAuth();
 
     const [activeTab, setActiveTab] = useState('categories'); // 'categories', 'tags', 'settings'
     const [balance, setBalance] = useState(settings.initialBalance || 0);
@@ -29,9 +31,13 @@ export default function Admin() {
         alert('Saldo inicial actualizado');
     };
 
-    const handleBackup = async () => {
-        const data = await api.loadData();
-        if (!data) return alert('Error al cargar datos');
+    const handleBackup = () => {
+        const data = {
+            transactions,
+            categories,
+            tags,
+            settings
+        };
         const json = JSON.stringify(data, null, 2);
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -290,13 +296,9 @@ export default function Admin() {
                                                 try {
                                                     const json = JSON.parse(e.target.result);
                                                     if (!json.transactions || !json.categories) throw new Error('Formato inválido');
-                                                    const success = await api.saveData(json);
-                                                    if (success) {
-                                                        alert('Datos restaurados. Recargando...');
-                                                        window.location.reload();
-                                                    } else {
-                                                        alert('Error al guardar datos.');
-                                                    }
+
+                                                    await importData(json);
+                                                    alert('Datos restaurados correctamente.');
                                                 } catch (err) {
                                                     console.error(err);
                                                     alert('Error: ' + err.message);
@@ -307,6 +309,14 @@ export default function Admin() {
                                     />
                                 </label>
                             </div>
+                        </div>
+
+                        {/* Session */}
+                        <div className="card">
+                            <h3>Sesión</h3>
+                            <button className="btn" onClick={logout} style={{ width: '100%', justifyContent: 'center', color: '#d32f2f', border: '1px solid #ffcdd2', background: '#ffebee', padding: '12px', borderRadius: '8px', cursor: 'pointer', display: 'flex', gap: '8px', alignItems: 'center', fontWeight: '500' }}>
+                                <LogOut size={18} /> Cerrar Sesión
+                            </button>
                         </div>
                     </div>
                 )}

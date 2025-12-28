@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { View, ActivityIndicator } from 'react-native';
 
 import MainNavigator from './MainNavigator';
+import LoginScreen from '../screens/LoginScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,7 +23,11 @@ export default function AppNavigator() {
     return (
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="Main" component={MainNavigator} />
+                {user ? (
+                    <Stack.Screen name="Main" component={MainNavigator} />
+                ) : (
+                    <Stack.Screen name="Login" component={LoginScreen} />
+                )}
             </Stack.Navigator>
         </NavigationContainer>
     );

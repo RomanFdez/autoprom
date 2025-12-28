@@ -94,7 +94,7 @@ export default function Transactions() {
                 const tag = tags.find(tag => tag.id === tid);
                 if (!tag) return null;
                 return (
-                  <span key={tag.id} className="mini-tag" style={{ border: `1px solid ${tag.color}`, color: tag.color }}>
+                  <span key={tag.id} className="mini-tag" style={{ border: `1px solid ${tag.color}`, color: tag.color, backgroundColor: 'transparent', fontWeight: 500 }}>
                     {tag.name}
                   </span>
                 );

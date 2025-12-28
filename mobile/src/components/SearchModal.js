@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, FlatList, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search, X, Calendar, Tag } from 'lucide-react-native';
 import { useData } from '../context/DataContext';
 import { useTheme } from '../context/ThemeContext';

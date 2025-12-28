@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
 
 import { useTheme } from '../context/ThemeContext';
 import { getIcon } from '../utils/icons';
-import { Plus, Trash2, Edit2, X, Save, Download, Upload, Sun, Moon, Settings } from 'lucide-react-native';
+import { Plus, Trash2, Edit2, X, Save, Download, Upload, Sun, Moon, Settings, LogOut } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
@@ -40,6 +41,7 @@ export default function AdminScreen() {
     } = useData();
 
     const { themePreference, setTheme, theme } = useTheme();
+    const { logout } = useAuth();
 
     // UI State
     const [activeTab, setActiveTab] = useState('categories'); // 'categories' | 'tags' | 'settings' | 'backup'
@@ -260,6 +262,14 @@ export default function AdminScreen() {
                         <Text style={[styles.themeText, themePreference === 'system' && styles.themeTextActive]}>Sistema</Text>
                     </TouchableOpacity>
                 </View>
+            </View>
+
+            <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+                <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Sesión</Text>
+                <TouchableOpacity style={[styles.btnOutline, { borderColor: '#ffcdd2', backgroundColor: '#ffebee' }]} onPress={() => Alert.alert('Cerrar Sesión', '¿Seguro?', [{ text: 'Cancelar' }, { text: 'Salir', style: 'destructive', onPress: logout }])}>
+                    <LogOut size={18} color="#d32f2f" />
+                    <Text style={[styles.btnOutlineText, { color: '#d32f2f' }]}>Cerrar Sesión</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );

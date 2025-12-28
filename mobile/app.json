@@ -3,6 +3,7 @@
     "name": "AutoPromo SE30",
     "slug": "autopromo-se30",
     "version": "1.0.0",
+    "scheme": "autoprom",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

@@ -96,8 +96,8 @@ export default function TransactionsScreen() {
                     {itemTags.length > 0 && (
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
                             {itemTags.map((t) => (
-                                <View key={t.id} style={{ backgroundColor: t.color, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, alignSelf: 'flex-start' }}>
-                                    <Text style={{ color: 'white', fontSize: 10, fontWeight: '700' }}>{t.name}</Text>
+                                <View key={t.id} style={{ backgroundColor: 'transparent', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, alignSelf: 'flex-start', borderWidth: 1, borderColor: t.color }}>
+                                    <Text style={{ color: t.color, fontSize: 10, fontWeight: '700' }}>{t.name}</Text>
                                 </View>
                             ))}
                         </View>

@@ -1,52 +1,59 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import * as SecureStore from 'expo-secure-store';
-import client from '../api/client';
+import { useState, useEffect, createContext, useContext } from 'react';
+import { onAuthStateChanged, signOut, signInWithEmailAndPassword, getAuth, initializeAuth, getReactNativePersistence, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+import { app } from '../firebaseConfig';
 
 const AuthContext = createContext();
+
+// Initialize Auth with persistence
+let auth;
+try {
+    auth = initializeAuth(app, {
+        persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+    });
+} catch (e) {
+    auth = getAuth(app); // Fallback if already initialized
+}
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        loadUser();
+        const unsubscribe = onAuthStateChanged(auth, (u) => {
+            setUser(u);
+            setLoading(false);
+        });
+        return () => unsubscribe();
     }, []);
 
-    const loadUser = async () => {
-        // Auto-login as requested
-        setUser({ username: 'admin' });
-        setLoading(false);
+    const login = async (email, password) => {
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            return true;
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
     };
 
-    const login = async (username, password) => {
+    const loginWithGoogleCredential = async (idToken) => {
         try {
-            const response = await client.post('/login', { username, password });
-            if (response.data && response.data.token) {
-                const { token, user } = response.data;
-                await SecureStore.setItemAsync('authToken', token);
-                await SecureStore.setItemAsync('authUser', JSON.stringify(user));
-                setUser(user);
-                return true;
-            }
+            const credential = GoogleAuthProvider.credential(idToken);
+            await signInWithCredential(auth, credential);
+            return true;
         } catch (e) {
-            console.error('Login failed', e);
+            console.error(e);
+            return false;
         }
-        return false;
     };
 
     const logout = async () => {
-        try {
-            await client.post('/logout'); // Try to notify server
-        } catch (e) {
-            // Ignore error on logout
-        }
-        await SecureStore.deleteItemAsync('authToken');
-        await SecureStore.deleteItemAsync('authUser');
-        setUser(null);
+        await signOut(auth);
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, loginWithGoogleCredential, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );
