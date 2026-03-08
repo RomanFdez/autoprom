@@ -11,6 +11,7 @@ const Reports = lazy(() => import('./pages/Reports'));
 const Admin = lazy(() => import('./pages/Admin'));
 const Login = lazy(() => import('./pages/Login'));
 const Todos = lazy(() => import('./pages/Todos'));
+const Statistics = lazy(() => import('./pages/Statistics'));
 
 const LoadingFallback = () => (
   <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -43,6 +44,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<ProtectedRoute />}>
               <Route index element={<Reports />} />
+              <Route path="statistics" element={<Statistics />} />
               <Route path="transactions" element={<Transactions />} />
               <Route path="todos" element={<Todos />} />
               <Route path="admin" element={<Admin />} />

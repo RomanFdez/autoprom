@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutList, PieChart, Settings, ListTodo, Moon, Sun } from 'lucide-react';
+import { LayoutList, PieChart, Settings, ListTodo, Moon, Sun, BarChart2 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -25,6 +25,10 @@ export default function Layout() {
           <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <PieChart size={18} />
             <span>Inicio</span>
+          </NavLink>
+          <NavLink to="/statistics" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <BarChart2 size={18} />
+            <span>Estadísticas</span>
           </NavLink>
           <NavLink to="/transactions" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <LayoutList size={18} />

@@ -1,8 +1,9 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, List, Settings, CheckSquare } from 'lucide-react-native';
+import { Home, List, Settings, CheckSquare, BarChart2 } from 'lucide-react-native';
 
 import HomeScreen from '../screens/HomeScreen';
+import StatisticsScreen from '../screens/StatisticsScreen';
 import TransactionsScreen from '../screens/TransactionsScreen';
 import AdminScreen from '../screens/AdminScreen';
 import TodosScreen from '../screens/TodosScreen';
@@ -34,6 +35,14 @@ export default function MainNavigator() {
                 options={{
                     tabBarIcon: ({ color }) => <Home color={color} size={24} />,
                     tabBarLabel: 'Inicio'
+                }}
+            />
+            <Tab.Screen
+                name="Statistics"
+                component={StatisticsScreen}
+                options={{
+                    tabBarIcon: ({ color }) => <BarChart2 color={color} size={24} />,
+                    tabBarLabel: 'Estadísticas'
                 }}
             />
             <Tab.Screen
