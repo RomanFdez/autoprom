@@ -1,12 +1,12 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, List, Settings, CheckSquare, BarChart2 } from 'lucide-react-native';
+import { Home, List, Settings, TrendingUp, BarChart2 } from 'lucide-react-native';
 
 import HomeScreen from '../screens/HomeScreen';
 import StatisticsScreen from '../screens/StatisticsScreen';
 import TransactionsScreen from '../screens/TransactionsScreen';
 import AdminScreen from '../screens/AdminScreen';
-import TodosScreen from '../screens/TodosScreen';
+import AvanceScreen from '../screens/AvanceScreen';
 
 import { useTheme } from '../context/ThemeContext';
 
@@ -54,11 +54,11 @@ export default function MainNavigator() {
                 }}
             />
             <Tab.Screen
-                name="Todos"
-                component={TodosScreen}
+                name="Avance"
+                component={AvanceScreen}
                 options={{
-                    tabBarIcon: ({ color }) => <CheckSquare color={color} size={24} />,
-                    tabBarLabel: 'Tareas'
+                    tabBarIcon: ({ color }) => <TrendingUp color={color} size={24} />,
+                    tabBarLabel: 'Avance'
                 }}
             />
             <Tab.Screen

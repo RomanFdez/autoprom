@@ -10,7 +10,7 @@ const Transactions = lazy(() => import('./pages/Transactions'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Admin = lazy(() => import('./pages/Admin'));
 const Login = lazy(() => import('./pages/Login'));
-const Todos = lazy(() => import('./pages/Todos'));
+const Avance = lazy(() => import('./pages/Avance'));
 const Statistics = lazy(() => import('./pages/Statistics'));
 
 const LoadingFallback = () => (
@@ -46,7 +46,7 @@ function App() {
               <Route index element={<Reports />} />
               <Route path="statistics" element={<Statistics />} />
               <Route path="transactions" element={<Transactions />} />
-              <Route path="todos" element={<Todos />} />
+              <Route path="avance" element={<Avance />} />
               <Route path="admin" element={<Admin />} />
             </Route>
           </Routes>

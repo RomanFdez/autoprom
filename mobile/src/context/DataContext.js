@@ -19,7 +19,7 @@ const INITIAL_SETTINGS = { initialBalance: 0, darkMode: false };
 
 export const DataProvider = ({ children }) => {
     const { user } = useAuth();
-    const [todos, setTodos] = useState([]);
+    const [certificaciones, setCertificaciones] = useState([]);
     const [transactions, setTransactions] = useState([]);
     const [categories, setCategories] = useState([]);
     const [tags, setTags] = useState([]);
@@ -44,8 +44,8 @@ export const DataProvider = ({ children }) => {
             setTags(snapshot.docs.map(doc => doc.data()));
         });
 
-        const unsubTodos = onSnapshot(collection(db, 'todos'), (snapshot) => {
-            setTodos(snapshot.docs.map(doc => doc.data()));
+        const unsubCertificaciones = onSnapshot(collection(db, 'certificaciones'), (snapshot) => {
+            setCertificaciones(snapshot.docs.map(doc => doc.data()));
         });
 
         const unsubSettings = onSnapshot(doc(db, 'settings', 'appSettings'), (docSnap) => {
@@ -62,7 +62,7 @@ export const DataProvider = ({ children }) => {
             unsubTransactions();
             unsubCategories();
             unsubTags();
-            unsubTodos();
+            unsubCertificaciones();
             unsubSettings();
         };
     }, []);
@@ -96,34 +96,31 @@ export const DataProvider = ({ children }) => {
         }
     };
 
-    // --- Todos ---
+    // --- Certificaciones (Avance) ---
 
-    const addTodo = async (todo) => {
+    const addCertificacion = async (cert) => {
         const id = uuidv4();
-        const newTodo = { ...todo, id };
+        const newCert = { ...cert, id };
         try {
-            await setDoc(doc(db, 'todos', id), newTodo);
+            await setDoc(doc(db, 'certificaciones', id), newCert);
         } catch (e) {
-            console.error("Error adding todo: ", e);
+            console.error("Error adding certificacion: ", e);
         }
     };
 
-    const toggleTodo = async (id) => {
-        const todo = todos.find(t => t.id === id);
-        if (todo) {
-            try {
-                await updateDoc(doc(db, 'todos', id), { done: !todo.done });
-            } catch (e) {
-                console.error("Error toggling todo: ", e);
-            }
+    const updateCertificacion = async (cert) => {
+        try {
+            await setDoc(doc(db, 'certificaciones', cert.id), cert, { merge: true });
+        } catch (e) {
+            console.error("Error updating certificacion: ", e);
         }
     };
 
-    const deleteTodo = async (id) => {
+    const deleteCertificacion = async (id) => {
         try {
-            await deleteDoc(doc(db, 'todos', id));
+            await deleteDoc(doc(db, 'certificaciones', id));
         } catch (e) {
-            console.error("Error deleting todo: ", e);
+            console.error("Error deleting certificacion: ", e);
         }
     };
 
@@ -207,7 +204,7 @@ export const DataProvider = ({ children }) => {
             if (data.transactions) data.transactions.forEach(t => allItems.push({ col: 'transactions', id: t.id, data: t }));
             if (data.categories) data.categories.forEach(c => allItems.push({ col: 'categories', id: c.id, data: c }));
             if (data.tags) data.tags.forEach(t => allItems.push({ col: 'tags', id: t.id, data: t }));
-            if (data.todos) data.todos.forEach(t => allItems.push({ col: 'todos', id: t.id, data: t }));
+            if (data.certificaciones) data.certificaciones.forEach(c => allItems.push({ col: 'certificaciones', id: c.id, data: c }));
             if (data.settings) allItems.push({ col: 'settings', id: 'appSettings', data: data.settings });
 
             // Chunking
@@ -241,15 +238,15 @@ export const DataProvider = ({ children }) => {
             categories,
             tags,
             settings,
-            todos,
+            certificaciones,
             loading,
             refreshData,
             addTransaction,
             updateTransaction,
             removeTransaction,
-            addTodo,
-            toggleTodo,
-            deleteTodo,
+            addCertificacion,
+            updateCertificacion,
+            deleteCertificacion,
             addCategory,
             updateCategory,
             removeCategory,
