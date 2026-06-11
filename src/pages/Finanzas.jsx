@@ -107,26 +107,36 @@ function MensualView({ data, month, year, setMonth }) {
         </select>
       </div>
 
+      <div className="fin-table-wrap">
       <table className="fin-table">
+        <colgroup>
+          <col style={{ width: '8%' }} />
+          <col style={{ width: '19%' }} />
+          <col style={{ width: '15%' }} />
+          <col style={{ width: '27%' }} />
+          <col style={{ width: '12%' }} />
+          <col style={{ width: '13%' }} />
+          <col style={{ width: '6%' }} />
+        </colgroup>
         <thead>
-          <tr><th>Fecha</th><th>Categoría</th><th>Subcat.</th><th>Concepto</th><th>Cuenta</th><th className="num">Importe</th><th></th></tr>
+          <tr><th>Fec.</th><th>Cat.</th><th>Subcat.</th><th>Concepto</th><th>Cuenta</th><th className="num">Importe</th><th></th></tr>
         </thead>
         <tbody>
           {monthRows.map(t => {
             const { bg, fg } = catColor(t.categoria);
             return (
               <tr key={t.id}>
-                <td>{t.fecha.slice(8, 10)}/{t.fecha.slice(5, 7)}</td>
+                <td className="nowrap">{t.fecha.slice(8, 10)}/{t.fecha.slice(5, 7)}</td>
                 <td><span className="fin-badge" style={{ background: bg, color: fg }}
                   onClick={() => recategorize(t)} title="Cambiar categoría">{t.categoria}</span></td>
-                <td>{t.subcategoria || ''}</td>
-                <td>{t.concepto}</td>
-                <td>{t.cuenta}</td>
-                <td className="num" style={{ color: t.importe >= 0 ? BRAND.incomeText : BRAND.expenseText }}>
-                  {t.importe.toFixed(2)} €</td>
+                <td className="ell" title={t.subcategoria || ''}>{t.subcategoria || ''}</td>
+                <td className="ell" title={t.concepto}>{t.concepto}</td>
+                <td className="ell" title={t.cuenta}>{t.cuenta}</td>
+                <td className="num nowrap" style={{ color: t.importe >= 0 ? BRAND.incomeText : BRAND.expenseText }}>
+                  {t.importe.toFixed(2)}</td>
                 <td className="actions">
-                  <button onClick={() => { setEditing(t); setIsFormOpen(true); }}><Edit2 size={15} /></button>
-                  <button onClick={() => { if (confirm('¿Eliminar apunte?')) removeFin(t.id); }}><Trash2 size={15} /></button>
+                  <button onClick={() => { setEditing(t); setIsFormOpen(true); }}><Edit2 size={13} /></button>
+                  <button onClick={() => { if (confirm('¿Eliminar apunte?')) removeFin(t.id); }}><Trash2 size={13} /></button>
                 </td>
               </tr>
             );
@@ -134,6 +144,7 @@ function MensualView({ data, month, year, setMonth }) {
           {monthRows.length === 0 && <tr><td colSpan="7" className="empty">Sin apuntes</td></tr>}
         </tbody>
       </table>
+      </div>
 
       <button className="fin-fab" onClick={() => { setEditing(null); setIsFormOpen(true); }}><Plus size={24} /></button>
       {isFormOpen && <FinTransactionForm onClose={() => setIsFormOpen(false)} initialData={editing} />}
@@ -151,15 +162,20 @@ function MensualView({ data, month, year, setMonth }) {
         .fin-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
         .fin-filters input, .fin-filters select { border: 1px solid #D2D2D7; border-radius: 8px;
           padding: 7px 10px; background: #FAFAFA; font-size: 0.85rem; }
-        .fin-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px;
-          overflow: hidden; font-size: 0.82rem; }
+        .fin-table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .fin-table { width: 100%; table-layout: fixed; border-collapse: collapse; background: #fff;
+          border-radius: 12px; overflow: hidden; font-size: 0.66rem; }
         .fin-table th { text-align: left; background: #FAFAFA; color: #6E6E73; text-transform: uppercase;
-          font-size: 0.68rem; padding: 8px 10px; border-bottom: 1px solid #E5E5EA; }
-        .fin-table td { padding: 7px 10px; border-bottom: 1px solid #F0F0F0; }
+          font-size: 0.55rem; padding: 4px 4px; border-bottom: 1px solid #E5E5EA; }
+        .fin-table td { padding: 3px 4px; border-bottom: 1px solid #F0F0F0; vertical-align: top; }
         .fin-table .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
-        .fin-badge { padding: 2px 8px; border-radius: 20px; font-size: 0.72rem; cursor: pointer; }
-        .fin-table .actions { white-space: nowrap; }
-        .fin-table .actions button { border: none; background: none; cursor: pointer; color: #6E6E73; padding: 2px; }
+        .fin-table .nowrap { white-space: nowrap; }
+        .fin-table .ell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .fin-badge { display: inline-block; max-width: 100%; padding: 1px 5px; border-radius: 20px;
+          font-size: 0.6rem; line-height: 1.3; cursor: pointer; overflow: hidden; text-overflow: ellipsis;
+          white-space: nowrap; vertical-align: middle; }
+        .fin-table .actions { white-space: nowrap; text-align: right; }
+        .fin-table .actions button { border: none; background: none; cursor: pointer; color: #6E6E73; padding: 1px; }
         .fin-table .empty { text-align: center; color: #AEAEB2; font-style: italic; padding: 20px; }
         .fin-fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 28px;
           background: ${BRAND.blue}; color: #fff; border: none; display: flex; align-items: center;
