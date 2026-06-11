@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import { DataProvider } from './context/DataContext';
+import { FinanzasProvider } from './context/FinanzasContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
@@ -12,6 +13,7 @@ const Admin = lazy(() => import('./pages/Admin'));
 const Login = lazy(() => import('./pages/Login'));
 const Avance = lazy(() => import('./pages/Avance'));
 const Statistics = lazy(() => import('./pages/Statistics'));
+const Finanzas = lazy(() => import('./pages/Finanzas'));
 
 const LoadingFallback = () => (
   <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -47,6 +49,7 @@ function App() {
               <Route path="statistics" element={<Statistics />} />
               <Route path="transactions" element={<Transactions />} />
               <Route path="avance" element={<Avance />} />
+              <Route path="finanzas" element={<FinanzasProvider><Finanzas /></FinanzasProvider>} />
               <Route path="admin" element={<Admin />} />
             </Route>
           </Routes>
