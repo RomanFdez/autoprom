@@ -168,7 +168,9 @@ Por cada app:
   - `addFin(t)` → `setDoc(doc(db,'finTransactions', uuid))`
   - `updateFin(t)` → `setDoc(..., t.id, t, {merge:true})`
   - `removeFin(id)` → `deleteDoc`
-  - `bulkImportFin(array)` → `writeBatch` en chunks de 450, doc id = id original.
+  - `bulkImportFin(array)` → upsert (NO wipe) con `writeBatch` en chunks de 450;
+    doc id = id original (migración) o hash determinista de
+    `fecha|importe|concepto|cuenta` (cargas mensuales). Ver "Ingesta de datos".
 - **`finanzasSummary.js`** — lógica pura descrita arriba (con tests).
 - **`finanzas/constants.js`** — constantes y colores.
 
@@ -202,13 +204,49 @@ Por cada app:
 - **Drill-down:** clic en una categoría incluida en `cats_with_subcats` despliega
   filas por subcategoría (vía `getBreakdown`). Triángulo sólo si tiene subcats.
 
-## Migración de datos (import desde UI)
+## Ingesta de datos (import desde UI) — único punto de entrada
 
-- Botón **"Importar JSON"** en la sección Finanzas.
-- Lee el array `finanzas_export.json` (`{id, fecha, categoria, subcategoria,
-  concepto, importe, tipo, cuenta}`).
-- Mapea cada objeto a doc de `finTransactions` con **doc id = String(id original)**.
-- Escribe con `writeBatch` en chunks de 450 (idempotente: reimportar sobreescribe).
+El botón **"Importar JSON"** de la sección Finanzas es el **único mecanismo de
+ingesta** y se usa para dos casos: (a) la migración inicial de los 547 apuntes, y
+(b) las cargas mensuales de extractos bancarios (ver "Flujo mensual"). En ambos
+casos la entrada es un array JSON con la misma forma de documento de
+`finTransactions`.
+
+Comportamiento de `bulkImportFin(array)`:
+- **Upsert, NO wipe.** A diferencia del `importData` de empresa (que borra todo
+  antes de insertar), este import **no borra** lo existente: hace `setDoc` por doc
+  id, fusionando. Así una carga mensual añade apuntes sin perder los previos.
+- Escribe con `writeBatch` en chunks de 450.
+- **Doc id determinista para deduplicar:**
+  - Migración inicial: doc id = `String(id original)` (el entero del export).
+  - Cargas mensuales (sin id original): doc id = hash determinista de
+    `fecha|importe|concepto|cuenta`. Reimportar el mismo movimiento sobreescribe el
+    mismo doc en vez de duplicarlo.
+- Cada item debe traer `{fecha, categoria, subcategoria, concepto, importe, tipo,
+  cuenta}` ya clasificado y con el signo correcto.
+
+## Notas de negocio
+
+- "Ingreso Deuda" (41.700 € en enero) es la disposición de un préstamo; su
+  contrapartida es un traspaso de salida de −41.700 € en "Casa SE" el mismo día.
+  Ambos están en los datos: no se filtran ni excluyen.
+
+### Flujo mensual (clasificación vía Claude, NO funcionalidad in-app)
+
+La importación de extractos bancarios **se hace deliberadamente fuera de la app**,
+a través de Claude, porque entender y clasificar los movimientos requiere IA. **No
+habrá parser de bancos dentro de la app.** El flujo es:
+
+1. El usuario exporta los movimientos de cada banco (ING .xls, IberiaCard .xlsx,
+   Sabadell .xls, Cajamar .xls) y se los pasa a Claude.
+2. Claude los interpreta, asigna `categoria`/`subcategoria`, normaliza el signo
+   (**IberiaCard exporta importes en positivo** → invertir a gasto salvo
+   devoluciones) y fija `tipo`/`cuenta`, produciendo un array JSON.
+3. El usuario carga ese JSON con el botón **"Importar JSON"** de la app. El doc id
+   determinista evita duplicar movimientos ya cargados.
+
+Por tanto el botón de import (con upsert + dedup) es el punto de entrada
+**permanente**, no sólo de la migración inicial.
 
 ## Notas de negocio
 
@@ -222,9 +260,11 @@ Por cada app:
   esta iteración**; sólo se migra el JSON exportado. Se documenta como nota para una
   fase posterior.)
 
-## Fuera de alcance (esta iteración)
+## Fuera de alcance
 
-- Importación directa de extractos bancarios (.xls/.xlsx) y deduplicación automática.
+- **Parser/clasificador de extractos bancarios in-app** — es intencional: la
+  clasificación la hace Claude fuera de la app y el resultado entra por el botón
+  "Importar JSON" (ver "Flujo mensual"). No es una fase posterior, es la arquitectura.
 - Catálogos editables desde la UI.
 - Cualquier cambio a `server.js`/Prisma (legacy, no usado).
 
