@@ -45,7 +45,7 @@ export default function Layout() {
                 <div className="nav-dropdown-backdrop" onClick={() => setPseOpen(false)} />
                 <div className="nav-dropdown">
                   <NavLink to="/" end className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setPseOpen(false)}>
-                    <PieChart size={16} /><span>Inicio</span>
+                    <PieChart size={16} /><span>Resumen</span>
                   </NavLink>
                   <NavLink to="/statistics" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setPseOpen(false)}>
                     <BarChart2 size={16} /><span>Estadísticas</span>

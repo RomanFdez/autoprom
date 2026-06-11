@@ -111,12 +111,12 @@ function MensualView({ data, month, year, setMonth }) {
       <table className="fin-table">
         <colgroup>
           <col style={{ width: '8%' }} />
-          <col style={{ width: '19%' }} />
-          <col style={{ width: '15%' }} />
-          <col style={{ width: '27%' }} />
+          <col style={{ width: '18%' }} />
+          <col style={{ width: '14%' }} />
+          <col style={{ width: '23%' }} />
           <col style={{ width: '12%' }} />
-          <col style={{ width: '13%' }} />
-          <col style={{ width: '6%' }} />
+          <col style={{ width: '15%' }} />
+          <col style={{ width: '10%' }} />
         </colgroup>
         <thead>
           <tr><th>Fec.</th><th>Cat.</th><th>Subcat.</th><th>Concepto</th><th>Cuenta</th><th className="num">Importe</th><th></th></tr>
@@ -174,8 +174,10 @@ function MensualView({ data, month, year, setMonth }) {
         .fin-badge { display: inline-block; max-width: 100%; padding: 1px 5px; border-radius: 20px;
           font-size: 0.6rem; line-height: 1.3; cursor: pointer; overflow: hidden; text-overflow: ellipsis;
           white-space: nowrap; vertical-align: middle; }
-        .fin-table .actions { white-space: nowrap; text-align: right; }
-        .fin-table .actions button { border: none; background: none; cursor: pointer; color: #6E6E73; padding: 1px; }
+        .fin-table .actions { white-space: nowrap; }
+        .fin-table td.actions { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .fin-table .actions button { border: none; background: none; cursor: pointer; color: #6E6E73; padding: 0; }
+        .fin-table .actions button:last-child { color: #C0392B; }
         .fin-table .empty { text-align: center; color: #AEAEB2; font-style: italic; padding: 20px; }
         .fin-fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 28px;
           background: ${BRAND.blue}; color: #fff; border: none; display: flex; align-items: center;
