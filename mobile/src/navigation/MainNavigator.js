@@ -10,6 +10,7 @@ import AvanceScreen from '../screens/AvanceScreen';
 import FinanzasScreen from '../screens/FinanzasScreen';
 
 import { useTheme } from '../context/ThemeContext';
+import { FinanzasProvider } from '../context/FinanzasContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -17,6 +18,7 @@ export default function MainNavigator() {
     const { theme } = useTheme();
 
     return (
+        <FinanzasProvider>
         <Tab.Navigator
             screenOptions={{
                 headerShown: false,
@@ -79,5 +81,6 @@ export default function MainNavigator() {
                 }}
             />
         </Tab.Navigator>
+        </FinanzasProvider>
     );
 }

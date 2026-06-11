@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, X, Trash2 } from 'lucide-react-native';
+import { Plus, X } from 'lucide-react-native';
 import { useFinanzas } from '../context/FinanzasContext';
 import {
   CATEGORIES, SUBCATEGORIES, CUENTAS, MONTHS, CATEGORY_WITH_SUBCATS, catColor, BRAND,
