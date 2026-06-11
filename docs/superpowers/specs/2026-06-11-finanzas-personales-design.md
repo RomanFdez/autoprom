@@ -45,16 +45,20 @@ app real), con la lógica de resumen/previsión portada a **JavaScript en client
 1. **Backend de datos:** Firestore (colecciones propias), descartado Express+Prisma.
 2. **Catálogos** (categorías, subcategorías, cuentas): **fijos en código** como en
    `main.py` (no editables desde UI).
-3. **Migración:** **importar desde la UI** (botón que sube el JSON a Firestore;
-   patrón existente `importData` con `writeBatch`). Re-ejecutable.
+3. **Ingesta de datos:** la hace **Claude escribiendo directamente en Firestore**
+   con un script Node, usando la **credencial del owner que ya tiene el CLI de
+   Firebase** (`a.roman.fernandez@gmail.com`, owner de `autoprom-84fe0`) — la misma
+   cuenta con la que se gestiona autoprom. **No hay botón de import en la app.** Vale
+   tanto para la migración inicial como para las cargas mensuales.
 4. **Alcance:** **web (`src/`) + móvil (`mobile/`)**.
 5. **Navegación:** un único item de menú **"Finanzas"** con dos sub-vistas internas
    (**Mensual** / **Anual**), en vez de dos items separados.
 6. **Aislamiento de código:** **`FinanzasContext` separado** del `DataContext` de
    empresa, en ambas apps.
-7. **doc id = id entero original** (como string) para que reimportar el JSON
-   sobreescriba en vez de duplicar (import idempotente). Apuntes nuevos creados en
-   la app usan `uuid`.
+7. **doc id determinista** para que recargar sobreescriba en vez de duplicar:
+   id entero original (como string) en la migración; hash de
+   `fecha|importe|concepto|cuenta` en las cargas mensuales. Apuntes nuevos creados a
+   mano en la app usan `uuid`.
 8. **Lógica de previsión** (`finanzasSummary.js`) desarrollada con **TDD**; el resto
    de la UI portada del `index.html` de referencia.
 
@@ -168,9 +172,9 @@ Por cada app:
   - `addFin(t)` → `setDoc(doc(db,'finTransactions', uuid))`
   - `updateFin(t)` → `setDoc(..., t.id, t, {merge:true})`
   - `removeFin(id)` → `deleteDoc`
-  - `bulkImportFin(array)` → upsert (NO wipe) con `writeBatch` en chunks de 450;
-    doc id = id original (migración) o hash determinista de
-    `fecha|importe|concepto|cuenta` (cargas mensuales). Ver "Ingesta de datos".
+
+  La carga masiva NO vive en la app: la hace Claude vía script externo (ver
+  "Ingesta de datos"). El contexto solo expone el CRUD para la edición manual.
 - **`finanzasSummary.js`** — lógica pura descrita arriba (con tests).
 - **`finanzas/constants.js`** — constantes y colores.
 
@@ -204,25 +208,33 @@ Por cada app:
 - **Drill-down:** clic en una categoría incluida en `cats_with_subcats` despliega
   filas por subcategoría (vía `getBreakdown`). Triángulo sólo si tiene subcats.
 
-## Ingesta de datos (import desde UI) — único punto de entrada
+## Ingesta de datos (script externo ejecutado por Claude)
 
-El botón **"Importar JSON"** de la sección Finanzas es el **único mecanismo de
-ingesta** y se usa para dos casos: (a) la migración inicial de los 547 apuntes, y
-(b) las cargas mensuales de extractos bancarios (ver "Flujo mensual"). En ambos
-casos la entrada es un array JSON con la misma forma de documento de
-`finTransactions`.
+**No hay funcionalidad de import en la app.** Toda la carga masiva la hace Claude
+escribiendo directamente en Firestore con un script Node, para dos casos: (a) la
+migración inicial de los 547 apuntes, y (b) las cargas mensuales de extractos
+bancarios ya clasificados (ver "Flujo mensual").
 
-Comportamiento de `bulkImportFin(array)`:
-- **Upsert, NO wipe.** A diferencia del `importData` de empresa (que borra todo
-  antes de insertar), este import **no borra** lo existente: hace `setDoc` por doc
-  id, fusionando. Así una carga mensual añade apuntes sin perder los previos.
-- Escribe con `writeBatch` en chunks de 450.
+Mecanismo de conexión (validado):
+- Se reutiliza la credencial del **owner ya logado en el CLI de Firebase**
+  (`~/.config/configstore/firebase-tools.json`, `a.roman.fernandez@gmail.com`).
+- El script intercambia el `refresh_token` por un `access_token` en
+  `oauth2.googleapis.com/token` (client_id/secret públicos del CLI de Firebase) y
+  escribe vía la **API REST de Firestore**
+  (`firestore.googleapis.com/v1/projects/autoprom-84fe0/databases/(default)/documents`),
+  usando `:commit` para escrituras por lotes.
+- No requiere service account ni nuevas credenciales del usuario. Probado con
+  write+delete (HTTP 200) sobre el proyecto.
+
+Comportamiento del script:
+- **Upsert, NO wipe.** Escribe doc a doc por id; no borra lo existente. Una carga
+  mensual añade apuntes sin perder los previos.
 - **Doc id determinista para deduplicar:**
   - Migración inicial: doc id = `String(id original)` (el entero del export).
   - Cargas mensuales (sin id original): doc id = hash determinista de
-    `fecha|importe|concepto|cuenta`. Reimportar el mismo movimiento sobreescribe el
+    `fecha|importe|concepto|cuenta`. Recargar el mismo movimiento sobreescribe el
     mismo doc en vez de duplicarlo.
-- Cada item debe traer `{fecha, categoria, subcategoria, concepto, importe, tipo,
+- Cada item lleva `{fecha, categoria, subcategoria, concepto, importe, tipo,
   cuenta}` ya clasificado y con el signo correcto.
 
 ## Notas de negocio
@@ -242,11 +254,12 @@ habrá parser de bancos dentro de la app.** El flujo es:
 2. Claude los interpreta, asigna `categoria`/`subcategoria`, normaliza el signo
    (**IberiaCard exporta importes en positivo** → invertir a gasto salvo
    devoluciones) y fija `tipo`/`cuenta`, produciendo un array JSON.
-3. El usuario carga ese JSON con el botón **"Importar JSON"** de la app. El doc id
-   determinista evita duplicar movimientos ya cargados.
+3. Claude escribe esos apuntes directamente en Firestore con el script de ingesta
+   (upsert + dedup por doc id determinista, que evita duplicar movimientos ya
+   cargados). El usuario no hace nada en la app salvo verlos.
 
-Por tanto el botón de import (con upsert + dedup) es el punto de entrada
-**permanente**, no sólo de la migración inicial.
+Por tanto el script de ingesta ejecutado por Claude es el punto de entrada
+**permanente**, no sólo de la migración inicial. La app nunca importa datos.
 
 ## Notas de negocio
 
@@ -262,9 +275,10 @@ Por tanto el botón de import (con upsert + dedup) es el punto de entrada
 
 ## Fuera de alcance
 
-- **Parser/clasificador de extractos bancarios in-app** — es intencional: la
-  clasificación la hace Claude fuera de la app y el resultado entra por el botón
-  "Importar JSON" (ver "Flujo mensual"). No es una fase posterior, es la arquitectura.
+- **Cualquier import de datos in-app** (ni parser de bancos ni botón de JSON) — es
+  intencional: la clasificación y la carga las hace Claude fuera de la app,
+  escribiendo directo en Firestore (ver "Ingesta de datos" y "Flujo mensual"). No es
+  una fase posterior, es la arquitectura.
 - Catálogos editables desde la UI.
 - Cualquier cambio a `server.js`/Prisma (legacy, no usado).
 
