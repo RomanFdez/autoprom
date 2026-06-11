@@ -27,6 +27,10 @@ export default function Layout() {
         <div className="nav-left"></div>
 
         <div className="nav-center">
+          <NavLink to="/finanzas" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <Wallet size={18} />
+            <span>Finanzas</span>
+          </NavLink>
           <div className="nav-group">
             <button
               type="button"
@@ -59,10 +63,6 @@ export default function Layout() {
               </>
             )}
           </div>
-          <NavLink to="/finanzas" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-            <Wallet size={18} />
-            <span>Finanzas</span>
-          </NavLink>
         </div>
 
         <div className="nav-right">

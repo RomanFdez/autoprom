@@ -7,7 +7,7 @@ import { getSummary, getBreakdown } from '../finanzas/summary';
 
 export default function Finanzas() {
   const { finTransactions } = useFinanzas();
-  const [tab, setTab] = useState('mensual'); // 'mensual' | 'anual'
+  const [tab, setTab] = useState('anual'); // 'mensual' | 'anual' — por defecto Anual (resumen)
   const now = new Date();
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear] = useState(now.getFullYear());
