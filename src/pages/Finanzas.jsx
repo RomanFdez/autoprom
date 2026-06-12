@@ -230,14 +230,20 @@ function AnualView({ data, year }) {
         .fin-anual-wrap { overflow-x: auto; }
         .fin-anual { border-collapse: collapse; font-size: 0.75rem; background: #fff; min-width: 900px; }
         .fin-anual th { background: #FAFAFA; color: #6E6E73; text-transform: uppercase; font-size: 0.62rem;
-          padding: 7px 8px; border-bottom: 1px solid #E5E5EA; position: sticky; top: 0; }
+          padding: 7px 8px; border-bottom: 1px solid #E5E5EA; position: sticky; top: 0; z-index: 2; }
         .fin-anual td { padding: 6px 8px; border-bottom: 1px solid #F0F0F0; white-space: nowrap; }
         .fin-anual .num { text-align: right; font-variant-numeric: tabular-nums; }
+        /* Primera columna (categoría) fija al hacer scroll horizontal */
+        .fin-anual th:first-child, .fin-anual td:first-child {
+          position: sticky; left: 0; border-right: 1px solid #E5E5EA; }
+        .fin-anual td:first-child { background: #fff; z-index: 1; }
+        .fin-anual th:first-child { z-index: 3; }
         .fin-anual .fin-total td { font-weight: 700; background: #FAFAFA; border-top: 2px solid #E5E5EA; }
+        .fin-anual .fin-total td:first-child { background: #FAFAFA; }
         .fin-anual .fin-badge { padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
         .fin-anual .caret { cursor: pointer; user-select: none; margin-right: 4px; color: #6E6E73; }
         .fin-anual .sub td { color: #6E6E73; background: #FCFCFD; }
-        .fin-anual .sub td:first-child { padding-left: 24px; font-style: italic; }
+        .fin-anual .sub td:first-child { padding-left: 24px; font-style: italic; background: #FCFCFD; }
       `}</style>
     </div>
   );
