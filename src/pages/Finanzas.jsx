@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { useFinanzas } from '../context/FinanzasContext';
 import FinTransactionForm from '../components/FinTransactionForm';
-import { CATEGORIES, CUENTAS, MONTHS, catColor, BRAND } from '../finanzas/constants';
+import { CATEGORIES, CUENTAS, MONTHS, CATEGORY_WITH_SUBCATS, catColor, BRAND } from '../finanzas/constants';
 import { getSummary, getBreakdown } from '../finanzas/summary';
 
 export default function Finanzas() {
@@ -67,9 +67,13 @@ function MensualView({ data, month, year, setMonth }) {
     return { ingresos, gastos, balance: ingresos + gastos };
   }, [monthRows]);
 
-  const recategorize = (t) => {
-    const next = prompt(`Nueva categoría para "${t.concepto}":\n${CATEGORIES.join(', ')}`, t.categoria);
-    if (next && CATEGORIES.includes(next)) updateFin({ ...t, categoria: next });
+  const [recatId, setRecatId] = useState(null);
+
+  const recategorize = (t, next) => {
+    if (next && CATEGORIES.includes(next) && next !== t.categoria) {
+      updateFin({ ...t, categoria: next, subcategoria: next === CATEGORY_WITH_SUBCATS ? (t.subcategoria || null) : null });
+    }
+    setRecatId(null);
   };
 
   return (
@@ -128,8 +132,18 @@ function MensualView({ data, month, year, setMonth }) {
             return (
               <tr key={t.id}>
                 <td className="nowrap">{t.fecha.slice(8, 10)}/{t.fecha.slice(5, 7)}</td>
-                <td><span className="fin-badge" style={{ background: bg, color: fg }}
-                  onClick={() => recategorize(t)} title="Cambiar categoría">{t.categoria}</span></td>
+                <td>
+                  {recatId === t.id ? (
+                    <select className="fin-recat" autoFocus defaultValue={t.categoria}
+                      onChange={e => recategorize(t, e.target.value)}
+                      onBlur={() => setRecatId(null)}>
+                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  ) : (
+                    <span className="fin-badge" style={{ background: bg, color: fg }}
+                      onClick={() => setRecatId(t.id)} title="Cambiar categoría">{t.categoria}</span>
+                  )}
+                </td>
                 <td className="ell" title={t.subcategoria || ''}>{t.subcategoria || ''}</td>
                 <td className="ell" title={t.concepto}>{t.concepto}</td>
                 <td className="ell" title={t.cuenta}>{t.cuenta}</td>
@@ -175,6 +189,8 @@ function MensualView({ data, month, year, setMonth }) {
         .fin-badge { display: inline-block; max-width: 100%; padding: 1px 5px; border-radius: 20px;
           font-size: 0.6rem; line-height: 1.3; cursor: pointer; overflow: hidden; text-overflow: ellipsis;
           white-space: nowrap; vertical-align: middle; }
+        .fin-recat { width: 100%; font-size: 0.62rem; padding: 2px 3px; border: 1px solid #0055B3;
+          border-radius: 6px; background: #fff; color: #1D1D1F; }
         .fin-table td.actions { white-space: nowrap; text-align: right; }
         .fin-table .actions button { border: none; background: none; cursor: pointer; color: #6E6E73;
           padding: 0 1px; vertical-align: middle; }
