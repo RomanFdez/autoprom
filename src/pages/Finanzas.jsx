@@ -151,7 +151,7 @@ function MensualView({ data, month, year, setMonth }) {
                   {t.importe.toFixed(2)}</td>
                 <td className="actions">
                   <button onClick={() => { setEditing(t); setIsFormOpen(true); }}><Edit2 size={13} /></button>
-                  <button onClick={() => { if (confirm('¿Eliminar apunte?')) removeFin(t.id); }}><Trash2 size={13} /></button>
+                  <button onClick={() => { if (confirm(`¿Eliminar el apunte "${t.concepto || t.categoria}"?`)) removeFin(t.id); }}><Trash2 size={13} /></button>
                 </td>
               </tr>
             );

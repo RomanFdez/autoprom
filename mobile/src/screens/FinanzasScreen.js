@@ -80,7 +80,7 @@ function Mensual({ data, month, year, setMonth }) {
           return (
             <TouchableOpacity key={t.id} style={styles.row}
               onPress={() => { setEditing(t); setFormOpen(true); }}
-              onLongPress={() => Alert.alert('Eliminar', '¿Eliminar apunte?', [
+              onLongPress={() => Alert.alert('Eliminar', `¿Eliminar el apunte "${t.concepto || t.categoria}"?`, [
                 { text: 'Cancelar', style: 'cancel' },
                 { text: 'Eliminar', style: 'destructive', onPress: () => removeFin(t.id) },
               ])}>
