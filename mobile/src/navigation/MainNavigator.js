@@ -1,14 +1,16 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, List, Settings, TrendingUp, BarChart2 } from 'lucide-react-native';
+import { Home, List, Settings, TrendingUp, BarChart2, Wallet } from 'lucide-react-native';
 
 import HomeScreen from '../screens/HomeScreen';
 import StatisticsScreen from '../screens/StatisticsScreen';
 import TransactionsScreen from '../screens/TransactionsScreen';
 import AdminScreen from '../screens/AdminScreen';
 import AvanceScreen from '../screens/AvanceScreen';
+import FinanzasScreen from '../screens/FinanzasScreen';
 
 import { useTheme } from '../context/ThemeContext';
+import { FinanzasProvider } from '../context/FinanzasContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -16,6 +18,7 @@ export default function MainNavigator() {
     const { theme } = useTheme();
 
     return (
+        <FinanzasProvider>
         <Tab.Navigator
             screenOptions={{
                 headerShown: false,
@@ -62,6 +65,14 @@ export default function MainNavigator() {
                 }}
             />
             <Tab.Screen
+                name="Finanzas"
+                component={FinanzasScreen}
+                options={{
+                    tabBarIcon: ({ color }) => <Wallet color={color} size={24} />,
+                    tabBarLabel: 'Finanzas'
+                }}
+            />
+            <Tab.Screen
                 name="Admin"
                 component={AdminScreen}
                 options={{
@@ -70,5 +81,6 @@ export default function MainNavigator() {
                 }}
             />
         </Tab.Navigator>
+        </FinanzasProvider>
     );
 }
