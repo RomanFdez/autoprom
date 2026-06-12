@@ -9,7 +9,8 @@ export default function Finanzas() {
   const { finTransactions } = useFinanzas();
   const [tab, setTab] = useState('anual'); // 'mensual' | 'anual' — por defecto Anual (resumen)
   const now = new Date();
-  const [month, setMonth] = useState(now.getMonth() + 1);
+  // Mes activo por defecto = el anterior al actual (Ene → Dic).
+  const [month, setMonth] = useState(now.getMonth() === 0 ? 12 : now.getMonth());
   const [year, setYear] = useState(now.getFullYear());
 
   return (

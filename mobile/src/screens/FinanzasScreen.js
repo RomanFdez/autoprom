@@ -14,7 +14,8 @@ export default function FinanzasScreen() {
   const { finTransactions } = useFinanzas();
   const [tab, setTab] = useState('anual');
   const now = new Date();
-  const [month, setMonth] = useState(now.getMonth() + 1);
+  // Mes activo por defecto = el anterior al actual (Ene → Dic).
+  const [month, setMonth] = useState(now.getMonth() === 0 ? 12 : now.getMonth());
   const [year] = useState(now.getFullYear());
 
   return (
