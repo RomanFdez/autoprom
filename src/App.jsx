@@ -47,7 +47,8 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<ProtectedRoute />}>
-              <Route index element={<Reports />} />
+              <Route index element={<Navigate to="/finanzas" replace />} />
+              <Route path="reports" element={<Reports />} />
               <Route path="statistics" element={<Statistics />} />
               <Route path="transactions" element={<Transactions />} />
               <Route path="avance" element={<Avance />} />
