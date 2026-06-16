@@ -20,6 +20,37 @@ export default function Seguros() {
 
       <style>{`
         .seg-page { padding-bottom: 100px; color: #1D1D1F; }
+
+        /* ---- Dark mode ---- */
+        :root[data-theme='dark'] .seg-page { color: var(--md-sys-color-on-surface); }
+        :root[data-theme='dark'] .seg-h4 { color: #b0bec5; }
+        :root[data-theme='dark'] .seg-tipo-row { background: var(--md-sys-color-surface); border-color: #333; }
+        :root[data-theme='dark'] .seg-tipo-count,
+        :root[data-theme='dark'] .seg-tipo-cost { color: var(--md-sys-color-on-surface); }
+        :root[data-theme='dark'] .seg-check { color: #b0bec5; }
+        :root[data-theme='dark'] .seg-filters select { background: var(--md-sys-color-surface);
+          color: var(--md-sys-color-on-surface); border-color: var(--md-sys-color-outline); }
+        :root[data-theme='dark'] .seg-table { background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
+        :root[data-theme='dark'] .seg-table th { background: #2a2a2a; color: #b0bec5; border-bottom-color: var(--md-sys-color-outline); }
+        :root[data-theme='dark'] .seg-table td { border-bottom-color: #333; }
+        :root[data-theme='dark'] .seg-table .actions button { color: #b0bec5; }
+        :root[data-theme='dark'] .seg-table .actions button:last-child { color: #ef5350; }
+        :root[data-theme='dark'] .seg-tel { color: #5b9bff; }
+        :root[data-theme='dark'] .seg-table .empty { color: #888; }
+        :root[data-theme='dark'] .seg-modal { background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
+        :root[data-theme='dark'] .seg-modal-header { border-bottom-color: var(--md-sys-color-outline); }
+        :root[data-theme='dark'] .seg-form label { color: #b0bec5; }
+        :root[data-theme='dark'] .seg-form input,
+        :root[data-theme='dark'] .seg-form select,
+        :root[data-theme='dark'] .seg-form textarea { background: var(--md-sys-color-surface);
+          color: var(--md-sys-color-on-surface); border-color: var(--md-sys-color-outline); }
+        :root[data-theme='dark'] .segd-modal { background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
+        :root[data-theme='dark'] .segd-header { border-bottom-color: var(--md-sys-color-outline); }
+        :root[data-theme='dark'] .segd-header h3 { color: var(--md-sys-color-on-surface); }
+        :root[data-theme='dark'] .segd-label { color: #b0bec5; }
+        :root[data-theme='dark'] .segd-value,
+        :root[data-theme='dark'] .segd-cob { color: var(--md-sys-color-on-surface); }
+        :root[data-theme='dark'] .segd-row { border-bottom-color: #333; }
       `}</style>
     </div>
   );

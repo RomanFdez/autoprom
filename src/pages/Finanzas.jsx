@@ -39,6 +39,40 @@ export default function Finanzas() {
         .fin-year { margin-left: auto; font-size: 0.85rem; color: #6E6E73; }
         .fin-year select { border: 1px solid #D2D2D7; border-radius: 6px; padding: 4px 8px;
           background: #FAFAFA; margin-left: 4px; }
+        .fin-table td.amt.pos { color: #166534; }
+        .fin-table td.amt.neg { color: #991B1B; }
+
+        /* ---- Dark mode ---- */
+        :root[data-theme='dark'] .fin-page { color: var(--md-sys-color-on-surface); }
+        :root[data-theme='dark'] .fin-year select,
+        :root[data-theme='dark'] .fin-filters input,
+        :root[data-theme='dark'] .fin-filters select,
+        :root[data-theme='dark'] .fin-recat { background: var(--md-sys-color-surface);
+          color: var(--md-sys-color-on-surface); border-color: var(--md-sys-color-outline); }
+        :root[data-theme='dark'] .fin-pill { color: #b0bec5; }
+        :root[data-theme='dark'] .fin-table,
+        :root[data-theme='dark'] .fin-anual { background: var(--md-sys-color-surface);
+          color: var(--md-sys-color-on-surface); }
+        :root[data-theme='dark'] .fin-table th,
+        :root[data-theme='dark'] .fin-anual th { background: #2a2a2a; color: #b0bec5;
+          border-bottom-color: var(--md-sys-color-outline); }
+        :root[data-theme='dark'] .fin-table td,
+        :root[data-theme='dark'] .fin-anual td { border-bottom-color: #333; }
+        :root[data-theme='dark'] .fin-anual td:first-child { background: var(--md-sys-color-surface);
+          border-right-color: var(--md-sys-color-outline); }
+        :root[data-theme='dark'] .fin-anual .fin-total td,
+        :root[data-theme='dark'] .fin-anual .fin-total td:first-child { background: #2a2a2a; }
+        :root[data-theme='dark'] .fin-anual .sub td,
+        :root[data-theme='dark'] .fin-anual .sub td:first-child { background: #262626; color: #b0bec5; }
+        :root[data-theme='dark'] .fin-table td.amt.pos { color: #4ade80; }
+        :root[data-theme='dark'] .fin-table td.amt.neg { color: #f87171; }
+        :root[data-theme='dark'] .fin-table .empty { color: #888; }
+        :root[data-theme='dark'] .fin-modal { background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
+        :root[data-theme='dark'] .fin-modal-header { border-bottom-color: var(--md-sys-color-outline); }
+        :root[data-theme='dark'] .fin-form label { color: #b0bec5; }
+        :root[data-theme='dark'] .fin-form input,
+        :root[data-theme='dark'] .fin-form select { background: var(--md-sys-color-surface);
+          color: var(--md-sys-color-on-surface); border-color: var(--md-sys-color-outline); }
       `}</style>
     </div>
   );
@@ -147,7 +181,7 @@ function MensualView({ data, month, year, setMonth }) {
                 <td className="ell" title={t.subcategoria || ''}>{t.subcategoria || ''}</td>
                 <td className="ell" title={t.concepto}>{t.concepto}</td>
                 <td className="ell" title={t.cuenta}>{t.cuenta}</td>
-                <td className="num nowrap" style={{ color: t.importe >= 0 ? BRAND.incomeText : BRAND.expenseText }}>
+                <td className={`num nowrap amt ${t.importe >= 0 ? 'pos' : 'neg'}`}>
                   {t.importe.toFixed(2)}</td>
                 <td className="actions">
                   <button onClick={() => { setEditing(t); setIsFormOpen(true); }}><Edit2 size={13} /></button>
