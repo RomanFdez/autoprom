@@ -3,14 +3,16 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Alert, Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, X, Edit2, Trash2, Phone } from 'lucide-react-native';
+import { Plus, X, Edit2, Trash2, Phone, Eye } from 'lucide-react-native';
 import { useSeguros } from '../context/SegurosContext';
 import {
-  TIPOS, PERIODICIDADES, ESTADOS, tipoColor, tipoLabel, BRAND,
+  TIPOS, PERIODICIDADES, ESTADOS, tipoColor, tipoLabel, periodicidadLabel, BRAND,
 } from '../seguros/constants';
 import { importeMensual, getEstadisticas } from '../seguros/calc';
 
 const fmtEur = (v) => `${(Number(v) || 0).toFixed(2)} €`;
+// "YYYY-MM-DD" -> "DD/MM/YYYY" (o "—" si vacío).
+const fmtFecha = (iso) => (iso ? iso.split('-').reverse().join('/') : '—');
 
 export default function SegurosScreen() {
   const { seguros } = useSeguros();
@@ -53,7 +55,7 @@ function Resumen({ data }) {
               <View style={[styles.badge, { backgroundColor: c.bg }]}>
                 <Text style={{ color: c.fg, fontSize: 11 }}>{tipoLabel(r.tipo)}</Text>
               </View>
-              <Text style={styles.statCount}>{r.count}</Text>
+              <View style={{ flex: 1 }} />
               <Text style={styles.statCost}>{fmtEur(r.costeMensual)}/mes</Text>
             </View>
           );
@@ -97,6 +99,7 @@ function Listado({ data }) {
   const { addSeguro, updateSeguro, removeSeguro } = useSeguros();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [detail, setDetail] = useState(null);
   const [fTipo, setFTipo] = useState('');
   const [soloActivos, setSoloActivos] = useState(true);
 
@@ -153,7 +156,6 @@ function Listado({ data }) {
                   </View>
                   <Text style={styles.compania}>{s.compania || '—'}</Text>
                 </View>
-                {!!s.asegurado && <Text style={styles.metaText}>{s.asegurado}</Text>}
                 {!!s.telefono && (
                   <TouchableOpacity style={styles.telBtn} onPress={() => Linking.openURL('tel:' + s.telefono)}>
                     <Phone size={12} color={BRAND.blue} />
@@ -163,7 +165,11 @@ function Listado({ data }) {
               </View>
               <View style={styles.rowRight}>
                 <Text style={styles.mensual}>{(Number(s.importeMensual) || 0).toFixed(2)} €/mes</Text>
+                <Text style={styles.renov}>Renov. {fmtFecha(s.fechaVencimiento)}</Text>
                 <View style={styles.actions}>
+                  <TouchableOpacity onPress={() => setDetail(s)} style={styles.actionBtn}>
+                    <Eye size={16} color="#6E6E73" />
+                  </TouchableOpacity>
                   <TouchableOpacity onPress={() => { setEditing(s); setFormOpen(true); }} style={styles.actionBtn}>
                     <Edit2 size={16} color="#6E6E73" />
                   </TouchableOpacity>
@@ -185,7 +191,50 @@ function Listado({ data }) {
 
       <SeguroForm visible={formOpen} onClose={() => setFormOpen(false)} initialData={editing}
         addSeguro={addSeguro} updateSeguro={updateSeguro} />
+      <SeguroDetalle seguro={detail} onClose={() => setDetail(null)} />
     </View>
+  );
+}
+
+// Modal de solo lectura con todos los datos del seguro.
+function SeguroDetalle({ seguro: s, onClose }) {
+  if (!s) return null;
+  const c = tipoColor(s.tipo);
+  const estadoLabel = s.estado === 'cancelada' ? 'Cancelada' : 'Activa';
+  const Row = ({ label, value }) => (
+    <View style={styles.dRow}>
+      <Text style={styles.dLabel}>{label}</Text>
+      <Text style={styles.dValue}>{value || '—'}</Text>
+    </View>
+  );
+  return (
+    <Modal visible={!!s} animationType="slide" transparent onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modal}>
+          <View style={styles.modalHeader}>
+            <View style={[styles.badge, { backgroundColor: c.bg }]}>
+              <Text style={{ color: c.fg, fontSize: 11 }}>{tipoLabel(s.tipo)}</Text>
+            </View>
+            <Text style={[styles.modalTitle, { flex: 1, marginLeft: 8 }]} numberOfLines={1}>{s.compania || '—'}</Text>
+            <TouchableOpacity onPress={onClose}><X size={22} color="#6E6E73" /></TouchableOpacity>
+          </View>
+          <ScrollView>
+            <Row label="Nº de póliza" value={s.numeroPoliza} />
+            <Row label="Tomador" value={s.tomador} />
+            <Row label="Asegurado" value={s.asegurado} />
+            <Row label="Teléfono" value={s.telefono} />
+            <Row label="Importe" value={`${(Number(s.importe) || 0).toFixed(2)} € · ${periodicidadLabel(s.periodicidad)}`} />
+            <Row label="Importe mensual" value={`${(Number(s.importeMensual) || 0).toFixed(2)} €`} />
+            <Row label="Fecha de efecto" value={fmtFecha(s.fechaEfecto)} />
+            <Row label="Fecha de renovación" value={fmtFecha(s.fechaVencimiento)} />
+            <Row label="Estado" value={estadoLabel} />
+            <Text style={[styles.dLabel, { marginTop: 10 }]}>Coberturas</Text>
+            <Text style={styles.dCob}>{s.coberturas || '—'}</Text>
+            <View style={{ height: 20 }} />
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -354,6 +403,11 @@ const styles = StyleSheet.create({
   telText: { color: BRAND.blue, fontSize: 13 },
   rowRight: { alignItems: 'flex-end', justifyContent: 'space-between' },
   mensual: { fontWeight: '700', color: '#1D1D1F', fontSize: 13 },
+  renov: { color: '#6E6E73', fontSize: 11, marginTop: 2 },
+  dRow: { flexDirection: 'row', gap: 12, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#F4F4F6' },
+  dLabel: { color: '#6E6E73', fontSize: 12, width: 120 },
+  dValue: { color: '#1D1D1F', fontSize: 13, flex: 1 },
+  dCob: { color: '#1D1D1F', fontSize: 13, lineHeight: 19, marginTop: 4 },
   actions: { flexDirection: 'row', gap: 12, marginTop: 8 },
   actionBtn: { padding: 2 },
   empty: { textAlign: 'center', color: '#AEAEB2', fontStyle: 'italic', marginTop: 30 },

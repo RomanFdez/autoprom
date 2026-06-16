@@ -1,6 +1,7 @@
 // src/pages/Seguros.jsx
 import { useState, useMemo } from 'react';
-import { Plus, Edit2, Trash2, Phone } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Plus, Edit2, Trash2, Phone, Eye, X } from 'lucide-react';
 import { useSeguros } from '../context/SegurosContext';
 import SeguroForm from '../components/SeguroForm';
 import {
@@ -10,23 +11,15 @@ import { getEstadisticas } from '../seguros/calc';
 
 export default function Seguros() {
   const { seguros } = useSeguros();
-  const [tab, setTab] = useState('resumen'); // 'resumen' (por defecto) | 'listado'
+  const [searchParams] = useSearchParams();
+  const tab = searchParams.get('v') === 'listado' ? 'listado' : 'resumen'; // por defecto Resumen
 
   return (
     <div className="seg-page">
-      <div className="seg-tabs">
-        <button className={tab === 'resumen' ? 'active' : ''} onClick={() => setTab('resumen')}>Resumen</button>
-        <button className={tab === 'listado' ? 'active' : ''} onClick={() => setTab('listado')}>Listado</button>
-      </div>
-
       {tab === 'resumen' ? <ResumenView data={seguros} /> : <ListadoView data={seguros} />}
 
       <style>{`
         .seg-page { padding-bottom: 100px; color: #1D1D1F; }
-        .seg-tabs { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; }
-        .seg-tabs > button { border: none; background: #EBEBED; color: #6E6E73; padding: 7px 16px;
-          border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
-        .seg-tabs > button.active { background: ${BRAND.blue}; color: #fff; }
       `}</style>
     </div>
   );
@@ -60,8 +53,7 @@ function ResumenView({ data }) {
           return (
             <div key={r.tipo} className="seg-tipo-row">
               <span className="seg-badge" style={{ background: bg, color: fg }}>{tipoLabel(r.tipo)}</span>
-              <span className="seg-tipo-count">{r.count}</span>
-              <span className="seg-tipo-cost">{fmtEur(r.costeMensual)}/mes</span>
+              <span className="seg-tipo-cost" style={{ marginLeft: 'auto' }}>{fmtEur(r.costeMensual)}/mes</span>
             </div>
           );
         })}
@@ -108,9 +100,13 @@ function tipoColorStyle(tipo) {
   return { background: bg, color: fg };
 }
 
+// "YYYY-MM-DD" -> "DD/MM/YYYY" (o "—" si vacío).
+const fmtFecha = (iso) => (iso ? iso.split('-').reverse().join('/') : '—');
+
 function ListadoView({ data }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [detail, setDetail] = useState(null);
   const [fTipo, setFTipo] = useState('');
   const [soloActivos, setSoloActivos] = useState(true);
   const { removeSeguro } = useSeguros();
@@ -136,15 +132,15 @@ function ListadoView({ data }) {
       <div className="seg-table-wrap">
       <table className="seg-table">
         <colgroup>
-          <col style={{ width: '14%' }} />
+          <col style={{ width: '13%' }} />
+          <col style={{ width: '21%' }} />
+          <col style={{ width: '17%' }} />
+          <col style={{ width: '13%' }} />
+          <col style={{ width: '16%' }} />
           <col style={{ width: '20%' }} />
-          <col style={{ width: '22%' }} />
-          <col style={{ width: '16%' }} />
-          <col style={{ width: '16%' }} />
-          <col style={{ width: '12%' }} />
         </colgroup>
         <thead>
-          <tr><th>Tipo</th><th>Compañía</th><th>Asegurado</th><th>Teléfono</th><th className="num">€/mes</th><th></th></tr>
+          <tr><th>Tipo</th><th>Compañía</th><th>Teléfono</th><th className="num">€/mes</th><th>Renovación</th><th></th></tr>
         </thead>
         <tbody>
           {rows.map(s => {
@@ -156,14 +152,15 @@ function ListadoView({ data }) {
                   <span className="seg-badge" style={{ background: bg, color: fg }}>{tipoLabel(s.tipo)}</span>
                 </td>
                 <td className="ell" title={`${s.compania} · ${s.numeroPoliza}`}>{s.compania}</td>
-                <td className="ell" title={s.asegurado}>{s.asegurado}</td>
                 <td className="ell" title={s.telefono}>
                   {s.telefono ? <a href={`tel:${s.telefono}`} className="seg-tel"><Phone size={11} /> {s.telefono}</a> : ''}
                 </td>
                 <td className="num nowrap">{(Number(s.importeMensual) || 0).toFixed(2)}</td>
+                <td className="nowrap">{fmtFecha(s.fechaVencimiento)}</td>
                 <td className="actions">
-                  <button onClick={() => { setEditing(s); setIsFormOpen(true); }}><Edit2 size={13} /></button>
-                  <button onClick={() => {
+                  <button title="Ver detalles" onClick={() => setDetail(s)}><Eye size={13} /></button>
+                  <button title="Editar" onClick={() => { setEditing(s); setIsFormOpen(true); }}><Edit2 size={13} /></button>
+                  <button title="Eliminar" onClick={() => {
                     if (confirm(`¿Eliminar el seguro de ${tipoLabel(s.tipo)} de ${s.compania || '—'} (póliza ${s.numeroPoliza || '—'})?`)) removeSeguro(s.id);
                   }}><Trash2 size={13} /></button>
                 </td>
@@ -177,6 +174,7 @@ function ListadoView({ data }) {
 
       <button className="seg-fab" onClick={() => { setEditing(null); setIsFormOpen(true); }}><Plus size={24} /></button>
       {isFormOpen && <SeguroForm onClose={() => setIsFormOpen(false)} initialData={editing} />}
+      {detail && <SeguroDetalle seguro={detail} onClose={() => setDetail(null)} />}
 
       <style>{`
         .seg-filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
@@ -204,6 +202,60 @@ function ListadoView({ data }) {
           background: ${BRAND.blue}; color: #fff; border: none; display: flex; align-items: center;
           justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; }
       `}</style>
+    </div>
+  );
+}
+
+// Modal de solo lectura con todos los datos del seguro.
+function SeguroDetalle({ seguro: s, onClose }) {
+  const { bg, fg } = tipoColor(s.tipo);
+  const estadoLabel = s.estado === 'cancelada' ? 'Cancelada' : 'Activa';
+  const row = (label, value) => (
+    <div className="segd-row">
+      <span className="segd-label">{label}</span>
+      <span className="segd-value">{value || '—'}</span>
+    </div>
+  );
+  return (
+    <div className="segd-overlay" onClick={onClose}>
+      <div className="segd-modal" onClick={e => e.stopPropagation()}>
+        <div className="segd-header">
+          <span className="seg-badge" style={{ background: bg, color: fg }}>{tipoLabel(s.tipo)}</span>
+          <h3>{s.compania || '—'}</h3>
+          <button type="button" onClick={onClose}><X size={20} /></button>
+        </div>
+        <div className="segd-body">
+          {row('Nº de póliza', s.numeroPoliza)}
+          {row('Tomador', s.tomador)}
+          {row('Asegurado', s.asegurado)}
+          {row('Teléfono', s.telefono ? <a href={`tel:${s.telefono}`} className="seg-tel">{s.telefono}</a> : '')}
+          {row('Importe', `${(Number(s.importe) || 0).toFixed(2)} € · ${periodicidadLabel(s.periodicidad)}`)}
+          {row('Importe mensual', `${(Number(s.importeMensual) || 0).toFixed(2)} €`)}
+          {row('Fecha de efecto', fmtFecha(s.fechaEfecto))}
+          {row('Fecha de renovación', fmtFecha(s.fechaVencimiento))}
+          {row('Estado', estadoLabel)}
+          <div className="segd-row segd-col">
+            <span className="segd-label">Coberturas</span>
+            <p className="segd-cob">{s.coberturas || '—'}</p>
+          </div>
+        </div>
+        <style>{`
+          .segd-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000;
+            display: flex; justify-content: center; align-items: flex-start; padding-top: 60px; overflow-y: auto; }
+          .segd-modal { background: #fff; color: #1D1D1F; width: 90%; max-width: 460px;
+            border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); overflow: hidden; margin-bottom: 40px; }
+          .segd-header { display: flex; align-items: center; gap: 10px;
+            padding: 14px 18px; border-bottom: 1px solid #E5E5EA; }
+          .segd-header h3 { margin: 0; font-size: 1.05rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+          .segd-header button { border: none; background: none; cursor: pointer; color: #6E6E73; }
+          .segd-body { padding: 8px 18px 18px; }
+          .segd-row { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid #F4F4F6; font-size: 0.9rem; }
+          .segd-label { color: #6E6E73; min-width: 120px; font-size: 0.8rem; }
+          .segd-value { color: #1D1D1F; flex: 1; word-break: break-word; }
+          .segd-col { flex-direction: column; gap: 4px; }
+          .segd-cob { margin: 0; white-space: pre-wrap; font-size: 0.85rem; color: #1D1D1F; line-height: 1.4; }
+        `}</style>
+      </div>
     </div>
   );
 }

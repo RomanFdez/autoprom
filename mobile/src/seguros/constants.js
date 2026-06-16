@@ -11,6 +11,7 @@ export const TIPOS = [
   { value: 'coche', label: 'Coche' },
   { value: 'construccion', label: 'Construcción' },
   { value: 'hogar', label: 'Hogar' },
+  { value: 'responsabilidad_civil', label: 'Responsabilidad Civil' },
   { value: 'otro', label: 'Otro' },
 ];
 
@@ -35,6 +36,7 @@ const TIPO_COLORS = {
   coche: '#FFEDD5:#9A3412',
   construccion: '#FEF9C3:#854D0E',
   hogar: '#D1FAE5:#065F46',
+  responsabilidad_civil: '#E0E7FF:#3730A3',
   otro: '#F3F4F6:#374151',
 };
 const TIPO_COLOR_FALLBACK = '#F3F4F6:#374151';
