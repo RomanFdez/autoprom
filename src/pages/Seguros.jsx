@@ -1,7 +1,7 @@
 // src/pages/Seguros.jsx
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Phone, Eye, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Phone, Eye, X, Car, Home, HeartPulse, HeartHandshake, HardHat, Scale, Shield } from 'lucide-react';
 import { useSeguros } from '../context/SegurosContext';
 import SeguroForm from '../components/SeguroForm';
 import {
@@ -27,16 +27,6 @@ export default function Seguros() {
         :root[data-theme='dark'] .seg-tipo-row { background: var(--md-sys-color-surface); border-color: #333; }
         :root[data-theme='dark'] .seg-tipo-count,
         :root[data-theme='dark'] .seg-tipo-cost { color: var(--md-sys-color-on-surface); }
-        :root[data-theme='dark'] .seg-check { color: #b0bec5; }
-        :root[data-theme='dark'] .seg-filters select { background: var(--md-sys-color-surface);
-          color: var(--md-sys-color-on-surface); border-color: var(--md-sys-color-outline); }
-        :root[data-theme='dark'] .seg-table { background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
-        :root[data-theme='dark'] .seg-table th { background: #2a2a2a; color: #b0bec5; border-bottom-color: var(--md-sys-color-outline); }
-        :root[data-theme='dark'] .seg-table td { border-bottom-color: #333; }
-        :root[data-theme='dark'] .seg-table .actions button { color: #b0bec5; }
-        :root[data-theme='dark'] .seg-table .actions button:last-child { color: #ef5350; }
-        :root[data-theme='dark'] .seg-tel { color: #5b9bff; }
-        :root[data-theme='dark'] .seg-table .empty { color: #888; }
         :root[data-theme='dark'] .seg-modal { background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
         :root[data-theme='dark'] .seg-modal-header { border-bottom-color: var(--md-sys-color-outline); }
         :root[data-theme='dark'] .seg-form label { color: #b0bec5; }
@@ -134,6 +124,17 @@ function tipoColorStyle(tipo) {
 // "YYYY-MM-DD" -> "DD/MM/YYYY" (o "—" si vacío).
 const fmtFecha = (iso) => (iso ? iso.split('-').reverse().join('/') : '—');
 
+// Icono distintivo por tipo de seguro.
+const TIPO_ICONS = {
+  salud: HeartPulse,
+  vida: HeartHandshake,
+  coche: Car,
+  construccion: HardHat,
+  hogar: Home,
+  responsabilidad_civil: Scale,
+  otro: Shield,
+};
+
 function ListadoView({ data }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -149,58 +150,58 @@ function ListadoView({ data }) {
 
   return (
     <div>
-      <div className="seg-filters">
-        <select value={fTipo} onChange={e => setFTipo(e.target.value)}>
-          <option value="">Todos los tipos</option>
-          {TIPOS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-        </select>
-        <label className="seg-check">
+      <div className="segl-filters">
+        <div className="segl-chips">
+          <button className={`segl-chip ${fTipo === '' ? 'active' : ''}`} onClick={() => setFTipo('')}>Todos</button>
+          {TIPOS.map(t => (
+            <button key={t.value} className={`segl-chip ${fTipo === t.value ? 'active' : ''}`}
+              onClick={() => setFTipo(t.value)}>{t.label}</button>
+          ))}
+        </div>
+        <label className="segl-check">
           <input type="checkbox" checked={soloActivos} onChange={e => setSoloActivos(e.target.checked)} />
           Solo activos
         </label>
       </div>
 
-      <div className="seg-table-wrap">
-      <table className="seg-table">
-        <colgroup>
-          <col style={{ width: '13%' }} />
-          <col style={{ width: '21%' }} />
-          <col style={{ width: '17%' }} />
-          <col style={{ width: '13%' }} />
-          <col style={{ width: '16%' }} />
-          <col style={{ width: '20%' }} />
-        </colgroup>
-        <thead>
-          <tr><th>Tipo</th><th>Compañía</th><th>Teléfono</th><th className="num">€/mes</th><th>Renovación</th><th></th></tr>
-        </thead>
-        <tbody>
-          {rows.map(s => {
-            const { bg, fg } = tipoColor(s.tipo);
-            const cancelada = s.estado === 'cancelada';
-            return (
-              <tr key={s.id} className={cancelada ? 'cancelada' : ''}>
-                <td>
-                  <span className="seg-badge" style={{ background: bg, color: fg }}>{tipoLabel(s.tipo)}</span>
-                </td>
-                <td className="ell" title={`${s.compania} · ${s.numeroPoliza}`}>{s.compania}</td>
-                <td className="ell" title={s.telefono}>
-                  {s.telefono ? <a href={`tel:${s.telefono}`} className="seg-tel"><Phone size={11} /> {s.telefono}</a> : ''}
-                </td>
-                <td className="num nowrap">{(Number(s.importeMensual) || 0).toFixed(2)}</td>
-                <td className="nowrap">{fmtFecha(s.fechaVencimiento)}</td>
-                <td className="actions">
-                  <button title="Ver detalles" onClick={() => setDetail(s)}><Eye size={13} /></button>
-                  <button title="Editar" onClick={() => { setEditing(s); setIsFormOpen(true); }}><Edit2 size={13} /></button>
-                  <button title="Eliminar" onClick={() => {
-                    if (confirm(`¿Eliminar el seguro de ${tipoLabel(s.tipo)} de ${s.compania || '—'} (póliza ${s.numeroPoliza || '—'})?`)) removeSeguro(s.id);
-                  }}><Trash2 size={13} /></button>
-                </td>
-              </tr>
-            );
-          })}
-          {rows.length === 0 && <tr><td colSpan="6" className="empty">Sin seguros</td></tr>}
-        </tbody>
-      </table>
+      <div className="segl-list">
+        {rows.map(s => {
+          const { fg } = tipoColor(s.tipo);
+          const Icon = TIPO_ICONS[s.tipo] || Shield;
+          const cancelada = s.estado === 'cancelada';
+          return (
+            <div key={s.id} className={`segl-item ${cancelada ? 'cancelada' : ''}`}>
+              <div className="segl-icon" style={{ backgroundColor: fg }}>
+                <Icon size={20} color="#fff" />
+              </div>
+              <div className="segl-details">
+                <div className="segl-row1">
+                  <span className="segl-title" style={{ color: fg }}>{tipoLabel(s.tipo)}</span>
+                  <span className="segl-amount">{(Number(s.importeMensual) || 0).toFixed(2)} €/mes</span>
+                </div>
+                <div className="segl-row2">
+                  <span className="segl-comp">{s.compania || '—'}</span>
+                  <span className="segl-sep">•</span>
+                  <span>Renov. {fmtFecha(s.fechaVencimiento)}</span>
+                </div>
+                <div className="segl-row3">
+                  {!!s.asegurado && <span className="segl-aseg">{s.asegurado}</span>}
+                  {!!s.telefono && (
+                    <a href={`tel:${s.telefono}`} className="segl-tel"><Phone size={12} /> {s.telefono}</a>
+                  )}
+                </div>
+              </div>
+              <div className="segl-actions">
+                <button title="Ver detalles" onClick={() => setDetail(s)}><Eye size={16} /></button>
+                <button title="Editar" onClick={() => { setEditing(s); setIsFormOpen(true); }}><Edit2 size={16} /></button>
+                <button title="Eliminar" className="danger" onClick={() => {
+                  if (confirm(`¿Eliminar el seguro de ${tipoLabel(s.tipo)} de ${s.compania || '—'} (póliza ${s.numeroPoliza || '—'})?`)) removeSeguro(s.id);
+                }}><Trash2 size={16} /></button>
+              </div>
+            </div>
+          );
+        })}
+        {rows.length === 0 && <div className="segl-empty">Sin seguros</div>}
       </div>
 
       <button className="seg-fab" onClick={() => { setEditing(null); setIsFormOpen(true); }}><Plus size={24} /></button>
@@ -208,27 +209,41 @@ function ListadoView({ data }) {
       {detail && <SeguroDetalle seguro={detail} onClose={() => setDetail(null)} />}
 
       <style>{`
-        .seg-filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
-        .seg-filters select { border: 1px solid #D2D2D7; border-radius: 8px; padding: 7px 10px;
-          background: #FAFAFA; font-size: 0.85rem; }
-        .seg-check { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #6E6E73; }
-        .seg-table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .seg-table { width: 100%; table-layout: fixed; border-collapse: collapse; background: #fff;
-          border-radius: 12px; overflow: hidden; font-size: 0.66rem; }
-        .seg-table th { text-align: left; background: #FAFAFA; color: #6E6E73; text-transform: uppercase;
-          font-size: 0.55rem; padding: 4px 4px; border-bottom: 1px solid #E5E5EA; }
-        .seg-table td { padding: 4px 4px; border-bottom: 1px solid #F0F0F0; vertical-align: middle; }
-        .seg-table .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
-        .seg-table .nowrap { white-space: nowrap; }
-        .seg-table .ell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .seg-table tr.cancelada td { opacity: 0.5; }
-        .seg-badge { display: inline-block; max-width: 100%; padding: 1px 6px; border-radius: 20px;
-          font-size: 0.6rem; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .seg-tel { color: #0055B3; text-decoration: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 2px; }
-        .seg-table td.actions { white-space: nowrap; text-align: right; }
-        .seg-table .actions button { border: none; background: none; cursor: pointer; color: #6E6E73; padding: 0 1px; vertical-align: middle; }
-        .seg-table .actions button:last-child { color: #C0392B; }
-        .seg-table .empty { text-align: center; color: #AEAEB2; font-style: italic; padding: 20px; }
+        .segl-filters { display: flex; flex-direction: column; gap: 10px; padding: 4px 0 14px; }
+        .segl-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .segl-chip { white-space: nowrap; padding: 6px 12px; border-radius: 20px;
+          border: 1px solid var(--md-sys-color-outline); background: var(--md-sys-color-surface);
+          font-size: 0.8rem; color: var(--md-sys-color-on-surface); opacity: 0.7; cursor: pointer; }
+        .segl-chip.active { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);
+          border-color: var(--md-sys-color-primary); opacity: 1; }
+        .segl-check { display: flex; align-items: center; gap: 6px; font-size: 0.85rem;
+          color: var(--md-sys-color-on-surface); opacity: 0.8; align-self: flex-start; }
+        .segl-list { display: flex; flex-direction: column; }
+        .segl-item { background: var(--md-sys-color-surface); padding: 12px; border-radius: 12px;
+          margin-bottom: 8px; display: flex; gap: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .segl-item.cancelada { opacity: 0.55; }
+        .segl-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center;
+          justify-content: center; flex-shrink: 0; }
+        .segl-details { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 0; }
+        .segl-row1 { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .segl-title { font-weight: 600; font-size: 0.95rem; color: var(--md-sys-color-on-surface);
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .segl-amount { font-weight: 700; font-size: 1rem; color: var(--md-sys-color-on-surface); white-space: nowrap; }
+        .segl-row2 { display: flex; align-items: center; gap: 8px; font-size: 0.8rem;
+          color: var(--md-sys-color-on-surface); opacity: 0.7; }
+        .segl-tipo { font-weight: 600; }
+        .segl-sep { color: var(--md-sys-color-outline); }
+        .segl-row3 { display: flex; align-items: center; gap: 10px; font-size: 0.8rem;
+          color: var(--md-sys-color-on-surface); opacity: 0.7; flex-wrap: wrap; }
+        .segl-aseg { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
+        .segl-tel { color: var(--md-sys-color-primary); text-decoration: none; display: inline-flex;
+          align-items: center; gap: 3px; white-space: nowrap; }
+        .segl-empty { text-align: center; padding: 2rem; color: var(--md-sys-color-on-surface);
+          opacity: 0.5; font-style: italic; }
+        .segl-actions { display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+        .segl-actions button { border: none; background: none; padding: 4px; cursor: pointer;
+          color: var(--md-sys-color-on-surface); opacity: 0.6; }
+        .segl-actions button.danger { color: #ef5350; }
         .seg-fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 28px;
           background: ${BRAND.blue}; color: #fff; border: none; display: flex; align-items: center;
           justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; }
@@ -239,7 +254,8 @@ function ListadoView({ data }) {
 
 // Modal de solo lectura con todos los datos del seguro.
 function SeguroDetalle({ seguro: s, onClose }) {
-  const { bg, fg } = tipoColor(s.tipo);
+  const { fg } = tipoColor(s.tipo);
+  const Icon = TIPO_ICONS[s.tipo] || Shield;
   const estadoLabel = s.estado === 'cancelada' ? 'Cancelada' : 'Activa';
   const row = (label, value) => (
     <div className="segd-row">
@@ -251,7 +267,8 @@ function SeguroDetalle({ seguro: s, onClose }) {
     <div className="segd-overlay" onClick={onClose}>
       <div className="segd-modal" onClick={e => e.stopPropagation()}>
         <div className="segd-header">
-          <span className="seg-badge" style={{ background: bg, color: fg }}>{tipoLabel(s.tipo)}</span>
+          <Icon size={18} color={fg} />
+          <span className="segd-tipo" style={{ color: fg }}>{tipoLabel(s.tipo)}</span>
           <h3>{s.compania || '—'}</h3>
           <button type="button" onClick={onClose}><X size={20} /></button>
         </div>
@@ -277,7 +294,9 @@ function SeguroDetalle({ seguro: s, onClose }) {
             border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); overflow: hidden; margin-bottom: 40px; }
           .segd-header { display: flex; align-items: center; gap: 10px;
             padding: 14px 18px; border-bottom: 1px solid #E5E5EA; }
-          .segd-header h3 { margin: 0; font-size: 1.05rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+          .segd-tipo { font-weight: 700; font-size: 0.95rem; }
+          .segd-header h3 { margin: 0; font-size: 0.95rem; font-weight: 500; opacity: 0.75; flex: 1; text-align: right;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
           .segd-header button { border: none; background: none; cursor: pointer; color: #6E6E73; }
           .segd-body { padding: 8px 18px 18px; }
           .segd-row { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid #F4F4F6; font-size: 0.9rem; }
