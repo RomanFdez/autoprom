@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutList, PieChart, Settings, TrendingUp, Moon, Sun, BarChart2, Wallet, Home, ChevronDown } from 'lucide-react';
+import { LayoutList, PieChart, Settings, TrendingUp, Moon, Sun, BarChart2, Wallet, Home, ChevronDown, ShieldCheck } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -12,10 +12,14 @@ export default function Layout() {
   const { transactions, categories, refreshData, settings, updateSettings } = useData();
   const navigate = useNavigate();
   const location = useLocation();
-  const [pseOpen, setPseOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState(null);
+  const toggleMenu = (name) => setOpenMenu(o => (o === name ? null : name));
 
-  const PSE_ROUTES = ['/', '/statistics', '/transactions', '/avance', '/admin'];
+  const PSE_ROUTES = ['/reports', '/statistics', '/transactions', '/avance', '/admin'];
   const pseActive = PSE_ROUTES.includes(location.pathname);
+  const finActive = location.pathname === '/finanzas';
+  const segActive = location.pathname === '/seguros';
+  const view = new URLSearchParams(location.search).get('v');
 
   const toggleTheme = () => {
     updateSettings({ darkMode: !settings.darkMode });
@@ -27,36 +31,74 @@ export default function Layout() {
         <div className="nav-left"></div>
 
         <div className="nav-center">
-          <NavLink to="/finanzas" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-            <Wallet size={18} />
-            <span>Finanzas</span>
-          </NavLink>
+          <div className="nav-group">
+            <button type="button" className={`nav-link nav-group-btn ${finActive ? 'active' : ''}`}
+              onClick={() => toggleMenu('fin')}>
+              <Wallet size={18} />
+              <span>Finanzas <ChevronDown size={11} style={{ verticalAlign: 'middle' }} /></span>
+            </button>
+            {openMenu === 'fin' && (
+              <>
+                <div className="nav-dropdown-backdrop" onClick={() => setOpenMenu(null)} />
+                <div className="nav-dropdown">
+                  <NavLink to="/finanzas?v=anual" className={() => `dd-link ${finActive && view !== 'mensual' ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
+                    <BarChart2 size={16} /><span>Anual</span>
+                  </NavLink>
+                  <NavLink to="/finanzas?v=mensual" className={() => `dd-link ${finActive && view === 'mensual' ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
+                    <LayoutList size={16} /><span>Mensual</span>
+                  </NavLink>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="nav-group">
+            <button type="button" className={`nav-link nav-group-btn ${segActive ? 'active' : ''}`}
+              onClick={() => toggleMenu('seg')}>
+              <ShieldCheck size={18} />
+              <span>Seguros <ChevronDown size={11} style={{ verticalAlign: 'middle' }} /></span>
+            </button>
+            {openMenu === 'seg' && (
+              <>
+                <div className="nav-dropdown-backdrop" onClick={() => setOpenMenu(null)} />
+                <div className="nav-dropdown">
+                  <NavLink to="/seguros?v=resumen" className={() => `dd-link ${segActive && view !== 'listado' ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
+                    <PieChart size={16} /><span>Resumen</span>
+                  </NavLink>
+                  <NavLink to="/seguros?v=listado" className={() => `dd-link ${segActive && view === 'listado' ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
+                    <LayoutList size={16} /><span>Listado</span>
+                  </NavLink>
+                </div>
+              </>
+            )}
+          </div>
+
           <div className="nav-group">
             <button
               type="button"
               className={`nav-link nav-group-btn ${pseActive ? 'active' : ''}`}
-              onClick={() => setPseOpen(o => !o)}
+              onClick={() => toggleMenu('pse')}
             >
               <Home size={18} />
               <span>P.S.Espada <ChevronDown size={11} style={{ verticalAlign: 'middle' }} /></span>
             </button>
-            {pseOpen && (
+            {openMenu === 'pse' && (
               <>
-                <div className="nav-dropdown-backdrop" onClick={() => setPseOpen(false)} />
+                <div className="nav-dropdown-backdrop" onClick={() => setOpenMenu(null)} />
                 <div className="nav-dropdown">
-                  <NavLink to="/" end className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setPseOpen(false)}>
+                  <NavLink to="/reports" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
                     <PieChart size={16} /><span>Resumen</span>
                   </NavLink>
-                  <NavLink to="/statistics" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setPseOpen(false)}>
+                  <NavLink to="/statistics" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
                     <BarChart2 size={16} /><span>Estadísticas</span>
                   </NavLink>
-                  <NavLink to="/transactions" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setPseOpen(false)}>
+                  <NavLink to="/transactions" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
                     <LayoutList size={16} /><span>Movimientos</span>
                   </NavLink>
-                  <NavLink to="/avance" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setPseOpen(false)}>
+                  <NavLink to="/avance" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
                     <TrendingUp size={16} /><span>Avance</span>
                   </NavLink>
-                  <NavLink to="/admin" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setPseOpen(false)}>
+                  <NavLink to="/admin" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
                     <Settings size={16} /><span>Admin P.SE</span>
                   </NavLink>
                 </div>

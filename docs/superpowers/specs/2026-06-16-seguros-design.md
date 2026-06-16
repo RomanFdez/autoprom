@@ -82,8 +82,8 @@ Nuevos ficheros, siguiendo el patrón de Finanzas:
   `summary.test.js`).
 - `src/components/SeguroForm.jsx` — formulario alta/edición (modal), con el
   importe mensual mostrado en vivo y de solo lectura.
-- `src/pages/Seguros.jsx` — página con dos sub-pestañas: **Listado** y
-  **Estadísticas**.
+- `src/pages/Seguros.jsx` — página con dos sub-pestañas: **Resumen**
+  (estadísticas, pestaña por defecto) y **Listado**, en ese orden.
 
 Cambios en ficheros existentes:
 
@@ -105,7 +105,20 @@ Cambios en ficheros existentes:
 
 ## Pantallas
 
+El orden de las sub-pestañas es **Resumen** (por defecto) y luego **Listado**.
+
+### Resumen (estadísticas)
+
+(Ver sección de estadísticas más abajo — es la pestaña por defecto al entrar.)
+
 ### Listado
+
+El estilo visual del listado debe ser **coherente con el listado de apuntes de
+Finanzas** (`MensualView` en `src/pages/Finanzas.jsx`): misma estética de tabla
+compacta con badges de color para el tipo, cabecera en mayúsculas, filas con
+acciones de editar/borrar y FAB azul, reutilizando las mismas variables de marca
+(`BRAND`) y convenciones de estilo.
+
 
 - Lista de seguros (tarjetas o tabla compacta) mostrando: tipo (badge con
   color), compañía, asegurado, nº de póliza, importe + periodicidad, importe
@@ -117,7 +130,7 @@ Cambios en ficheros existentes:
   Sanitas (póliza 12345)?"`), al estilo de Finanzas.
 - Un seguro `cancelada` se muestra atenuado / archivado y no cuenta en stats.
 
-### Estadísticas
+### Resumen — detalle de estadísticas
 
 Calculado solo sobre seguros **activos**:
 

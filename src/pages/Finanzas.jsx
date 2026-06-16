@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { useFinanzas } from '../context/FinanzasContext';
 import FinTransactionForm from '../components/FinTransactionForm';
@@ -7,7 +8,8 @@ import { getSummary, getBreakdown } from '../finanzas/summary';
 
 export default function Finanzas() {
   const { finTransactions } = useFinanzas();
-  const [tab, setTab] = useState('anual'); // 'mensual' | 'anual' — por defecto Anual (resumen)
+  const [searchParams] = useSearchParams();
+  const tab = searchParams.get('v') === 'mensual' ? 'mensual' : 'anual'; // por defecto Anual
   const now = new Date();
   // Mes activo por defecto = el anterior al actual (Ene → Dic).
   const [month, setMonth] = useState(now.getMonth() === 0 ? 12 : now.getMonth());
@@ -16,8 +18,6 @@ export default function Finanzas() {
   return (
     <div className="fin-page">
       <div className="fin-tabs">
-        <button className={tab === 'mensual' ? 'active' : ''} onClick={() => setTab('mensual')}>Mensual</button>
-        <button className={tab === 'anual' ? 'active' : ''} onClick={() => setTab('anual')}>Anual</button>
         <div className="fin-year">
           <label>Año </label>
           <select value={year} onChange={e => setYear(parseInt(e.target.value, 10))}>
