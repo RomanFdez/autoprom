@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Alert, Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus, X, Edit2, Trash2, Phone, Eye } from 'lucide-react-native';
+import { Plus, X, Edit2, Trash2, Phone, Eye, Car, Home, HeartPulse, HeartHandshake, HardHat, Scale, Shield } from 'lucide-react-native';
 import { useSeguros } from '../context/SegurosContext';
 import {
   TIPOS, PERIODICIDADES, ESTADOS, tipoColor, tipoLabel, periodicidadLabel, BRAND,
@@ -13,6 +13,17 @@ import { importeMensual, getEstadisticas } from '../seguros/calc';
 const fmtEur = (v) => `${(Number(v) || 0).toFixed(2)} €`;
 // "YYYY-MM-DD" -> "DD/MM/YYYY" (o "—" si vacío).
 const fmtFecha = (iso) => (iso ? iso.split('-').reverse().join('/') : '—');
+
+// Icono distintivo por tipo de seguro.
+const TIPO_ICONS = {
+  salud: HeartPulse,
+  vida: HeartHandshake,
+  coche: Car,
+  construccion: HardHat,
+  hogar: Home,
+  responsabilidad_civil: Scale,
+  otro: Shield,
+};
 
 export default function SegurosScreen() {
   const { seguros } = useSeguros();
@@ -146,37 +157,41 @@ function Listado({ data }) {
       <ScrollView style={{ flex: 1 }}>
         {rows.map(s => {
           const c = tipoColor(s.tipo);
+          const Icon = TIPO_ICONS[s.tipo] || Shield;
           const cancelada = s.estado === 'cancelada';
           return (
             <View key={s.id} style={[styles.row, cancelada && styles.rowCancelada]}>
-              <View style={{ flex: 1 }}>
-                <View style={styles.rowMeta}>
-                  <View style={[styles.badge, { backgroundColor: c.bg }]}>
-                    <Text style={{ color: c.fg, fontSize: 11 }}>{tipoLabel(s.tipo)}</Text>
-                  </View>
-                  <Text style={styles.compania}>{s.compania || '—'}</Text>
+              <View style={[styles.rowIcon, { backgroundColor: c.fg }]}>
+                <Icon size={20} color="#fff" />
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <View style={styles.rowLine1}>
+                  <Text style={[styles.rowTipo, { color: c.fg }]} numberOfLines={1}>{tipoLabel(s.tipo)}</Text>
+                  <Text style={styles.mensual}>{(Number(s.importeMensual) || 0).toFixed(2)} €/mes</Text>
                 </View>
-                {!!s.telefono && (
-                  <TouchableOpacity style={styles.telBtn} onPress={() => Linking.openURL('tel:' + s.telefono)}>
-                    <Phone size={12} color={BRAND.blue} />
-                    <Text style={styles.telText}>{s.telefono}</Text>
-                  </TouchableOpacity>
+                <Text style={styles.rowSub} numberOfLines={1}>{(s.compania || '—')} · Renov. {fmtFecha(s.fechaVencimiento)}</Text>
+                {(!!s.asegurado || !!s.telefono) && (
+                  <View style={styles.rowLine3}>
+                    {!!s.asegurado && <Text style={styles.rowAseg} numberOfLines={1}>{s.asegurado}</Text>}
+                    {!!s.telefono && (
+                      <TouchableOpacity style={styles.telBtn} onPress={() => Linking.openURL('tel:' + s.telefono)}>
+                        <Phone size={12} color={BRAND.blue} />
+                        <Text style={styles.telText}>{s.telefono}</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 )}
               </View>
-              <View style={styles.rowRight}>
-                <Text style={styles.mensual}>{(Number(s.importeMensual) || 0).toFixed(2)} €/mes</Text>
-                <Text style={styles.renov}>Renov. {fmtFecha(s.fechaVencimiento)}</Text>
-                <View style={styles.actions}>
-                  <TouchableOpacity onPress={() => setDetail(s)} style={styles.actionBtn}>
-                    <Eye size={16} color="#6E6E73" />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => { setEditing(s); setFormOpen(true); }} style={styles.actionBtn}>
-                    <Edit2 size={16} color="#6E6E73" />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => confirmDelete(s)} style={styles.actionBtn}>
-                    <Trash2 size={16} color="#C0392B" />
-                  </TouchableOpacity>
-                </View>
+              <View style={styles.actions}>
+                <TouchableOpacity onPress={() => setDetail(s)} style={styles.actionBtn}>
+                  <Eye size={16} color="#6E6E73" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => { setEditing(s); setFormOpen(true); }} style={styles.actionBtn}>
+                  <Edit2 size={16} color="#6E6E73" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => confirmDelete(s)} style={styles.actionBtn}>
+                  <Trash2 size={16} color="#C0392B" />
+                </TouchableOpacity>
               </View>
             </View>
           );
@@ -200,6 +215,7 @@ function Listado({ data }) {
 function SeguroDetalle({ seguro: s, onClose }) {
   if (!s) return null;
   const c = tipoColor(s.tipo);
+  const Icon = TIPO_ICONS[s.tipo] || Shield;
   const estadoLabel = s.estado === 'cancelada' ? 'Cancelada' : 'Activa';
   const Row = ({ label, value }) => (
     <View style={styles.dRow}>
@@ -212,10 +228,9 @@ function SeguroDetalle({ seguro: s, onClose }) {
       <View style={styles.modalOverlay}>
         <View style={styles.modal}>
           <View style={styles.modalHeader}>
-            <View style={[styles.badge, { backgroundColor: c.bg }]}>
-              <Text style={{ color: c.fg, fontSize: 11 }}>{tipoLabel(s.tipo)}</Text>
-            </View>
-            <Text style={[styles.modalTitle, { flex: 1, marginLeft: 8 }]} numberOfLines={1}>{s.compania || '—'}</Text>
+            <Icon size={18} color={c.fg} />
+            <Text style={{ color: c.fg, fontWeight: '700', fontSize: 15, marginLeft: 6 }}>{tipoLabel(s.tipo)}</Text>
+            <Text style={[styles.modalTitle, { flex: 1, textAlign: 'right', fontWeight: '500', marginLeft: 8 }]} numberOfLines={1}>{s.compania || '—'}</Text>
             <TouchableOpacity onPress={onClose}><X size={22} color="#6E6E73" /></TouchableOpacity>
           </View>
           <ScrollView>
@@ -392,23 +407,24 @@ const styles = StyleSheet.create({
   checkboxOn: { backgroundColor: BRAND.blue, borderColor: BRAND.blue },
   checkmark: { color: '#fff', fontSize: 13, fontWeight: '700' },
   toggleLabel: { color: '#6E6E73', fontSize: 13 },
-  row: { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: '#fff', marginHorizontal: 12,
-    marginBottom: 8, padding: 12, borderRadius: 12 },
+  row: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', marginHorizontal: 12,
+    marginBottom: 8, padding: 12, borderRadius: 12, gap: 12 },
   rowCancelada: { opacity: 0.5 },
-  rowMeta: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  rowIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  rowLine1: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  rowTipo: { fontSize: 15, fontWeight: '700', flex: 1, marginRight: 8 },
+  rowSub: { color: '#6E6E73', fontSize: 12, marginTop: 2 },
+  rowLine3: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 3, flexWrap: 'wrap' },
+  rowAseg: { color: '#6E6E73', fontSize: 12, flexShrink: 1 },
   badge: { paddingVertical: 2, paddingHorizontal: 8, borderRadius: 12 },
-  compania: { fontSize: 15, fontWeight: '600', color: '#1D1D1F' },
-  metaText: { color: '#6E6E73', fontSize: 12, marginTop: 4 },
-  telBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+  telBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   telText: { color: BRAND.blue, fontSize: 13 },
-  rowRight: { alignItems: 'flex-end', justifyContent: 'space-between' },
   mensual: { fontWeight: '700', color: '#1D1D1F', fontSize: 13 },
-  renov: { color: '#6E6E73', fontSize: 11, marginTop: 2 },
   dRow: { flexDirection: 'row', gap: 12, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#F4F4F6' },
   dLabel: { color: '#6E6E73', fontSize: 12, width: 120 },
   dValue: { color: '#1D1D1F', fontSize: 13, flex: 1 },
   dCob: { color: '#1D1D1F', fontSize: 13, lineHeight: 19, marginTop: 4 },
-  actions: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  actions: { flexDirection: 'column', gap: 8, marginLeft: 4, justifyContent: 'center' },
   actionBtn: { padding: 2 },
   empty: { textAlign: 'center', color: '#AEAEB2', fontStyle: 'italic', marginTop: 30 },
   fab: { position: 'absolute', bottom: 24, right: 20, width: 56, height: 56, borderRadius: 28,
