@@ -1,41 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { getIcon } from '../utils/icons';
 import { X, Check, Calendar, Pin } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function TransactionForm({ onClose, initialData = null }) {
-    const { categories, tags, addTransaction, updateTransaction, transactions } = useData();
+    const { categories, tags, addTransaction, updateTransaction } = useData();
 
-    const [type, setType] = useState('expense'); // 'expense' or 'income'
-    const [amount, setAmount] = useState('');
-    const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-    const [categoryId, setCategoryId] = useState('');
-    const [selectedTagIds, setSelectedTagIds] = useState([]);
-    const [isPinned, setIsPinned] = useState(false);
-    const [description, setDescription] = useState(''); // Optional, not explicitly requested but useful.
-
-    // 1. Initialization Effect
-    useEffect(() => {
-        if (initialData) {
-            const initialType = initialData.amount >= 0 ? 'income' : 'expense';
-            setType(initialType);
-            setAmount(Math.abs(initialData.amount).toString());
-            setDate(initialData.date);
-            setCategoryId(initialData.categoryId);
-            setSelectedTagIds(initialData.tagIds || []);
-            setIsPinned(initialData.isPinned || false);
-            setDescription(initialData.description || '');
-        } else {
-            // Default on new transaction
-            if (categories.length > 0) {
-                // Pick first valid expense category by default
-                const firstExp = categories.find(c => c.showInExpense !== false);
-                if (firstExp) setCategoryId(firstExp.id);
-                else setCategoryId(categories[0].id);
-            }
-        }
-    }, [initialData]); // Run only when initialData changes (or mount)
+    // El formulario se monta condicionalmente en cada apertura, así que basta
+    // con inicializar el estado desde initialData (sin efecto de sincronización).
+    const [type, setType] = useState(
+        initialData ? (initialData.amount >= 0 ? 'income' : 'expense') : 'expense'
+    );
+    const [amount, setAmount] = useState(initialData ? Math.abs(initialData.amount).toString() : '');
+    const [date, setDate] = useState(initialData ? initialData.date : format(new Date(), 'yyyy-MM-dd'));
+    const [categoryId, setCategoryId] = useState(() => {
+        if (initialData) return initialData.categoryId;
+        // Por defecto en alta nueva: primera categoría válida de gasto.
+        const firstExp = categories.find(c => c.showInExpense !== false);
+        return firstExp?.id ?? categories[0]?.id ?? '';
+    });
+    const [selectedTagIds, setSelectedTagIds] = useState(initialData?.tagIds || []);
+    const [isPinned, setIsPinned] = useState(initialData?.isPinned || false);
+    const [description, setDescription] = useState(initialData?.description || '');
 
     // Helper to validate and switch category when Type changes manually
     const handleTypeChange = (newType) => {

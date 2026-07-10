@@ -1,16 +1,12 @@
 import { useState } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { LayoutList, PieChart, Settings, TrendingUp, Moon, Sun, BarChart2, Wallet, Home, ChevronDown, ShieldCheck } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { getIcon } from '../utils/icons';
 
 import PullToRefresh from './PullToRefresh';
 
 export default function Layout() {
-  const { transactions, categories, refreshData, settings, updateSettings } = useData();
-  const navigate = useNavigate();
+  const { refreshData, settings, updateSettings } = useData();
   const location = useLocation();
   const [openMenu, setOpenMenu] = useState(null);
   const toggleMenu = (name) => setOpenMenu(o => (o === name ? null : name));

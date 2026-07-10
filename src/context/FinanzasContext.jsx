@@ -11,7 +11,7 @@ export const FinanzasProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
+    // loading arranca en true; el primer snapshot lo apaga.
     const unsub = onSnapshot(collection(db, COLLECTION), (snap) => {
       const data = snap.docs.map(d => d.data());
       data.sort((a, b) => (a.fecha < b.fecha ? 1 : a.fecha > b.fecha ? -1 : 0));

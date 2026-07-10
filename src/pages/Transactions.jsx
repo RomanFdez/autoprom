@@ -3,7 +3,7 @@ import { useData } from '../context/DataContext';
 import TransactionForm from '../components/TransactionForm';
 import { getIcon } from '../utils/icons';
 import { Plus, Pin, Trash2, Edit2, Copy, Search, X } from 'lucide-react';
-import { format, isSameDay, isSameWeek, isSameMonth, subDays, parseISO } from 'date-fns';
+import { format, isSameDay, isSameMonth, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 const FILTERS = {

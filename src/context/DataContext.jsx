@@ -7,10 +7,8 @@ import {
     setDoc,
     deleteDoc,
     onSnapshot,
-    updateDoc,
     writeBatch
 } from 'firebase/firestore';
-import { useAuth } from './AuthContext';
 
 const DataContext = createContext();
 

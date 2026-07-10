@@ -9,7 +9,7 @@ import { X } from 'lucide-react';
 export default function Reports() {
     const { transactions, categories, tags } = useData();
     const [type, setType] = useState('expense'); // 'income' or 'expense'
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedCategory] = useState(null);
     const [drilldown, setDrilldown] = useState(null); // { type: 'category' | 'tag', id: string, name: string }
 
     const filteredTransactions = useMemo(() => {
@@ -71,12 +71,6 @@ export default function Reports() {
 
         return data;
     }, [filteredTransactions, tags]);
-
-    // Chart interaction
-    const onPieClick = (data, chartType) => {
-        if (!data) return;
-        setDrilldown({ type: chartType, id: data.id, name: data.name });
-    };
 
     // Total Display Logic
     const displayTotal = useMemo(() => {

@@ -1,9 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../utils/api';
 import { ICON_KEYS, getIcon } from '../utils/icons';
-import { Plus, Edit2, Trash2, Check, Save, Download, Lock, Upload, Tag, List, Settings, LogOut } from 'lucide-react';
+import { Plus, Edit2, Trash2, Check, Save, Download, Upload, Tag, List, Settings, LogOut } from 'lucide-react';
 
 const COLORS = [
     '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
@@ -215,54 +214,6 @@ export default function Admin() {
                                     <Save size={18} /> Guardar
                                 </button>
                             </div>
-                        </div>
-
-                        {/* Account Settings */}
-                        <div className="card">
-                            <h3>Contraseña</h3>
-                            <p className="card-desc">
-                                Actualizar la contraseña de acceso a la aplicación.
-                            </p>
-                            <form onSubmit={async (e) => {
-                                e.preventDefault();
-                                const newPass = e.target.newPassword.value;
-                                const confirmPass = e.target.confirmPassword.value;
-
-                                if (newPass !== confirmPass) {
-                                    alert('Las contraseñas no coinciden');
-                                    return;
-                                }
-
-                                if (newPass) {
-                                    const success = await api.changePassword(newPass);
-                                    if (success) {
-                                        alert('Contraseña actualizada correctamente');
-                                        e.target.reset();
-                                    } else {
-                                        alert('Error al actualizar la contraseña');
-                                    }
-                                }
-                            }} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <input
-                                        name="newPassword"
-                                        type="password"
-                                        className="form-input"
-                                        placeholder="Nueva contraseña"
-                                        required
-                                    />
-                                    <input
-                                        name="confirmPassword"
-                                        type="password"
-                                        className="form-input"
-                                        placeholder="Repetir"
-                                        required
-                                    />
-                                    <button type="submit" className="btn btn-primary">
-                                        <Lock size={18} />
-                                    </button>
-                                </div>
-                            </form>
                         </div>
 
                         {/* Backups */}

@@ -1,6 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
 const fs = require('fs');
-const path = require('path');
 
 const prisma = new PrismaClient();
 const BACKUP_PATH = '/Users/alvaroroman/Downloads/backup_2025-12-23.json';

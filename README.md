@@ -1,51 +1,45 @@
 # Proyecto Sierra de la Espada 30
 
-Gestiona tus gastos e ingresos de forma sencilla.
+Gestión de finanzas familiares: gastos e ingresos, resumen anual por categorías,
+seguros y avance de obra.
 
-## Características
-- Registro de transacciones con importe, fecha, categoría, etiquetas, y descripción.
-- Filtros por día, semana, mes, o todo.
-- Gráficos y reportes con "drilldown" (click para ver detalles).
-- Exportación e importación CSV compatible con Excel.
-- Presupuesto inicial configurable.
-- Persistencia de datos en servidor (Docker ready).
+## Stack actual
 
-## Requisitos
-- Node.js 18+
-- Docker & Docker Compose (Opcional, recomendado para producción)
+- **Frontend web**: React + Vite (`src/`). Desplegado en **Firebase Hosting**.
+- **Datos**: **Firestore** (tiempo real, con `onSnapshot`).
+- **Autenticación**: **Firebase Auth** (Google y email/contraseña).
+- **App móvil**: Expo / React Native (`mobile/`), contra el mismo Firebase.
+- **CI/CD**: GitHub Actions (`.github/workflows/deploy.yml`) — tests, build y
+  deploy a Firebase Hosting en cada push a `main`.
 
-## Instalación y Desarrollo Local
-1. Instalar dependencias:
-   ```bash
-   npm install
-   ```
+## Desarrollo local
 
-2. Iniciar servidor backend (para persistencia):
-   ```bash
-   node server.js
-   ```
+```bash
+npm install
+npm run dev        # frontend en http://localhost:5173
+npm test           # tests (vitest)
+npm run lint       # eslint
+```
 
-3. Iniciar frontend (en otra terminal):
-   ```bash
-   npm run dev
-   ```
-   Accede a http://localhost:5173 (El frontend se conectará al backend en el puerto 3030).
+No hace falta backend propio: la app habla directamente con Firebase.
 
-## Despliegue con Docker
-Para desplegar la aplicación con persistencia de datos:
+## Estructura del proyecto
 
-1. Construir y levantar el contenedor:
-   ```bash
-   docker-compose up --build -d
-   ```
+- `src/` — Código fuente React (páginas, contextos, lógica de finanzas y seguros).
+- `src/finanzas/` — Lógica pura de finanzas (resumen anual, constantes) con tests.
+- `src/seguros/` — Lógica pura de seguros con tests.
+- `mobile/` — App móvil Expo/React Native.
+- `scripts/finanzas/` — Carga mensual de apuntes clasificados a Firestore
+  (`loadMonthly.mjs`). Los JSON de datos bancarios están gitignorados.
+- `scripts/seguros/`, `scripts/restore*.js` — Utilidades de migración/restore.
 
-2. Acceder a la aplicación:
-   http://localhost:3030
+## Legacy (no usado)
 
-Los datos se guardarán en la carpeta `./data` del host.
+Estos ficheros pertenecen al despliegue antiguo (Express + Prisma + Docker en
+Debian), anterior a la migración a Firebase. **No se usan** y se conservan solo
+como referencia histórica:
 
-## Estructura del Proyecto
-- `src/` - Código fuente React.
-- `server.js` - Servidor Express para servir la app y API de datos.
-- `data/` - Carpeta donde se guarda `db.json` (persistencia).
-- `docker-compose.yml` - Configuración para despliegue.
+- `server.js` — Antiguo servidor Express con API de datos.
+- `prisma/`, `prisma.config.ts` — Antiguo ORM/BD.
+- `Dockerfile`, `docker-compose.yml`, `DEPLOY_DEBIAN.md` — Antiguo despliegue.
+- `initial_seed.json`, `data/` — Datos del sistema antiguo.
