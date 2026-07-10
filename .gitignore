@@ -28,3 +28,9 @@ data/db.json
 *.db
 .env
 /src/generated/prisma
+
+# Firebase (caché local de deploys)
+.firebase/
+
+# Datos bancarios personales (cargas mensuales clasificadas)
+scripts/finanzas/*.json

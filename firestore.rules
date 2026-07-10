@@ -1,0 +1,20 @@
+rules_version = '2';
+
+// Acceso restringido a las cuentas de la familia (allowlist por email).
+// El email no exige email_verified porque el login por contraseña de la app
+// móvil puede no tenerlo verificado; el email ya está reclamado por la cuenta
+// de Google, así que nadie puede registrar un duplicado.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAllowed() {
+      return request.auth != null
+        && request.auth.token.email in [
+          'a.roman.fernandez@gmail.com'
+        ];
+    }
+
+    match /{document=**} {
+      allow read, write: if isAllowed();
+    }
+  }
+}
