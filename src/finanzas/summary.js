@@ -96,18 +96,20 @@ export function getSummary(transactions, year, today = new Date()) {
 }
 
 export function getBreakdown(transactions, year, categoria, today = new Date()) {
-  const rowsForYear = transactions.filter(
-    t => t.fecha.slice(0, 4) === String(year) && t.categoria === categoria
-  );
+  const yearRows = transactions.filter(t => t.fecha.slice(0, 4) === String(year));
+  const rowsForYear = yearRows.filter(t => t.categoria === categoria);
+
+  // Meses cargados = meses con movimientos de CUALQUIER categoría, igual que en
+  // getSummary. Así la media de las subcategorías divide por los mismos meses
+  // que la fila de la categoría y el drill-down cuadra con el resumen.
+  const monthsSeen = new Set(yearRows.map(r => monthOf(r.fecha)));
 
   const pivot = {};
-  const monthsSeen = new Set();
   for (const r of rowsForYear) {
     const m = monthOf(r.fecha);
     const sub = r.subcategoria || '(sin subcategoría)';
     pivot[sub] = pivot[sub] || {};
     pivot[sub][m] = (pivot[sub][m] || 0) + r.importe;
-    monthsSeen.add(m);
   }
 
   const curMonth = currentMonth(year, today);

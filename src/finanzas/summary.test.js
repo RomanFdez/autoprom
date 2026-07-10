@@ -88,4 +88,17 @@ describe('getBreakdown', () => {
     expect(amazon.meses['1']).toBe(-30);
     expect(sinSub.total_actual).toBe(-5);
   });
+
+  it('la media divide por los meses cargados del año, no solo los de la categoría', () => {
+    const withOtherCat = [
+      ...data,
+      tx('2026-03-10', 'Nomina', 2000), // marzo cargado, sin gasto en Compras varias
+    ];
+    const { rows, actual_months } = getBreakdown(withOtherCat, 2026, 'Compras varias', TODAY2);
+    expect(actual_months).toEqual([1, 2, 3]); // meses del año, no de la categoría
+    const amazon = rows.find(r => r.subcategoria === 'Amazon');
+    // -50 en 3 meses cargados → media -16.67, y marzo cuenta como 0.
+    expect(amazon.meses['3']).toBe(0);
+    expect(amazon.media_mensual).toBe(-16.67);
+  });
 });
