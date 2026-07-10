@@ -1,0 +1,167 @@
+import { useState, useMemo } from 'react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { useFinanzas } from '../context/FinanzasContext';
+import FinTransactionForm from '../components/FinTransactionForm';
+import { CATEGORIES, CUENTAS, MONTHS, CATEGORY_WITH_SUBCATS, catColor, BRAND } from './constants';
+
+export default function MensualView({ data, month, year, setMonth }) {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [qConcepto, setQConcepto] = useState('');
+  const [fCuenta, setFCuenta] = useState('');
+  const [fCategoria, setFCategoria] = useState('');
+  const { removeFin, updateFin } = useFinanzas();
+
+  const monthRows = useMemo(() => {
+    const mm = String(month).padStart(2, '0');
+    return data
+      .filter(t => t.fecha.slice(0, 4) === String(year) && t.fecha.slice(5, 7) === mm)
+      .filter(t => !qConcepto || (t.concepto || '').toLowerCase().includes(qConcepto.toLowerCase()))
+      .filter(t => !fCuenta || t.cuenta === fCuenta)
+      .filter(t => !fCategoria || t.categoria === fCategoria);
+  }, [data, month, year, qConcepto, fCuenta, fCategoria]);
+
+  const totals = useMemo(() => {
+    let ingresos = 0, gastos = 0;
+    for (const t of monthRows) { if (t.importe >= 0) ingresos += t.importe; else gastos += t.importe; }
+    return { ingresos, gastos, balance: ingresos + gastos };
+  }, [monthRows]);
+
+  const [recatId, setRecatId] = useState(null);
+
+  const recategorize = (t, next) => {
+    if (next && CATEGORIES.includes(next) && next !== t.categoria) {
+      updateFin({ ...t, categoria: next, subcategoria: next === CATEGORY_WITH_SUBCATS ? (t.subcategoria || null) : null });
+    }
+    setRecatId(null);
+  };
+
+  return (
+    <div>
+      <div className="fin-monthbar">
+        {MONTHS.map((m, i) => (
+          <button key={m} className={`fin-pill ${month === i + 1 ? 'active' : ''}`}
+            onClick={() => setMonth(i + 1)}>{m.slice(0, 3)}</button>
+        ))}
+      </div>
+
+      <div className="fin-cards">
+        <div className="fin-card" style={{ background: BRAND.incomeBg, borderColor: BRAND.incomeBorder }}>
+          <span style={{ color: BRAND.incomeText }}>Ingresos</span>
+          <strong style={{ color: BRAND.incomeText }}>{totals.ingresos.toFixed(2)} €</strong>
+        </div>
+        <div className="fin-card" style={{ background: BRAND.expenseBg, borderColor: BRAND.expenseBorder }}>
+          <span style={{ color: BRAND.expenseText }}>Gastos</span>
+          <strong style={{ color: BRAND.expenseText }}>{totals.gastos.toFixed(2)} €</strong>
+        </div>
+        <div className="fin-card" style={{ background: BRAND.balanceBg, borderColor: BRAND.balanceBorder }}>
+          <span style={{ color: BRAND.balanceText }}>Balance</span>
+          <strong style={{ color: BRAND.balanceText }}>{totals.balance.toFixed(2)} €</strong>
+        </div>
+      </div>
+
+      <div className="fin-filters">
+        <input placeholder="Buscar concepto…" value={qConcepto} onChange={e => setQConcepto(e.target.value)} />
+        <select value={fCuenta} onChange={e => setFCuenta(e.target.value)}>
+          <option value="">Todas las cuentas</option>
+          {CUENTAS.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <select value={fCategoria} onChange={e => setFCategoria(e.target.value)}>
+          <option value="">Todas las categorías</option>
+          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+      </div>
+
+      <div className="fin-table-wrap">
+      <table className="fin-table">
+        <colgroup>
+          <col style={{ width: '8%' }} />
+          <col style={{ width: '18%' }} />
+          <col style={{ width: '14%' }} />
+          <col style={{ width: '21%' }} />
+          <col style={{ width: '12%' }} />
+          <col style={{ width: '15%' }} />
+          <col style={{ width: '12%' }} />
+        </colgroup>
+        <thead>
+          <tr><th>Fec.</th><th>Cat.</th><th>Subcat.</th><th>Concepto</th><th>Cuenta</th><th className="num">Importe</th><th></th></tr>
+        </thead>
+        <tbody>
+          {monthRows.map(t => {
+            const { bg, fg } = catColor(t.categoria);
+            return (
+              <tr key={t.id}>
+                <td className="nowrap">{t.fecha.slice(8, 10)}/{t.fecha.slice(5, 7)}</td>
+                <td>
+                  {recatId === t.id ? (
+                    <select className="fin-recat" autoFocus defaultValue={t.categoria}
+                      onChange={e => recategorize(t, e.target.value)}
+                      onBlur={() => setRecatId(null)}>
+                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  ) : (
+                    <span className="fin-badge" style={{ background: bg, color: fg }}
+                      onClick={() => setRecatId(t.id)} title="Cambiar categoría">{t.categoria}</span>
+                  )}
+                </td>
+                <td className="ell" title={t.subcategoria || ''}>{t.subcategoria || ''}</td>
+                <td className="ell" title={t.concepto}>{t.concepto}</td>
+                <td className="ell" title={t.cuenta}>{t.cuenta}</td>
+                <td className={`num nowrap amt ${t.importe >= 0 ? 'pos' : 'neg'}`}>
+                  {t.importe.toFixed(2)}</td>
+                <td className="actions">
+                  <button onClick={() => { setEditing(t); setIsFormOpen(true); }}><Edit2 size={13} /></button>
+                  <button onClick={() => { if (confirm(`¿Eliminar el apunte "${t.concepto || t.categoria}"?`)) removeFin(t.id); }}><Trash2 size={13} /></button>
+                </td>
+              </tr>
+            );
+          })}
+          {monthRows.length === 0 && <tr><td colSpan="7" className="empty">Sin apuntes</td></tr>}
+        </tbody>
+      </table>
+      </div>
+
+      <button className="fin-fab" onClick={() => { setEditing(null); setIsFormOpen(true); }}><Plus size={24} /></button>
+      {isFormOpen && <FinTransactionForm onClose={() => setIsFormOpen(false)} initialData={editing} />}
+
+      <style>{`
+        .fin-monthbar { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+        .fin-pill { border: none; background: transparent; color: var(--fin-ink-2); padding: 4px 10px;
+          border-radius: 16px; font-size: 0.8rem; cursor: pointer; }
+        .fin-pill.active { background: ${BRAND.blue}; color: #fff; }
+        .fin-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+        .fin-card { border: 1px solid; border-radius: 14px; padding: 12px 14px; display: flex;
+          flex-direction: column; gap: 4px; }
+        .fin-card span { font-size: 0.72rem; text-transform: uppercase; letter-spacing: .04em; }
+        .fin-card strong { font-size: 1.15rem; }
+        .fin-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .fin-filters input, .fin-filters select { border: 1px solid var(--fin-border-input); border-radius: 8px;
+          padding: 7px 10px; background: var(--fin-surface-alt); color: var(--fin-ink); font-size: 0.85rem; }
+        .fin-table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .fin-table { width: 100%; table-layout: fixed; border-collapse: collapse; background: var(--fin-surface);
+          border-radius: 12px; overflow: hidden; font-size: 0.66rem; }
+        .fin-table th { text-align: left; background: var(--fin-surface-alt); color: var(--fin-ink-2); text-transform: uppercase;
+          font-size: 0.55rem; padding: 4px 4px; border-bottom: 1px solid var(--fin-border); }
+        .fin-table td { padding: 3px 4px; border-bottom: 1px solid var(--fin-border-soft); vertical-align: top; }
+        .fin-table td.amt.pos { color: var(--fin-pos); }
+        .fin-table td.amt.neg { color: var(--fin-neg); }
+        .fin-table .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+        .fin-table .nowrap { white-space: nowrap; }
+        .fin-table .ell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .fin-badge { display: inline-block; max-width: 100%; padding: 1px 5px; border-radius: 20px;
+          font-size: 0.6rem; line-height: 1.3; cursor: pointer; overflow: hidden; text-overflow: ellipsis;
+          white-space: nowrap; vertical-align: middle; }
+        .fin-recat { width: 100%; font-size: 0.62rem; padding: 2px 3px; border: 1px solid #0055B3;
+          border-radius: 6px; background: var(--fin-surface); color: var(--fin-ink); }
+        .fin-table td.actions { white-space: nowrap; text-align: right; }
+        .fin-table .actions button { border: none; background: none; cursor: pointer; color: #6E6E73;
+          padding: 0 1px; vertical-align: middle; }
+        .fin-table .actions button:last-child { color: #C0392B; }
+        .fin-table .empty { text-align: center; color: var(--fin-ink-2); font-style: italic; padding: 20px; }
+        .fin-fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 28px;
+          background: ${BRAND.blue}; color: #fff; border: none; display: flex; align-items: center;
+          justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; }
+      `}</style>
+    </div>
+  );
+}
