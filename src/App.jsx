@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 // Lazy Load Pages for Performance Optimization
+const Home = lazy(() => import('./pages/Home'));
 const Transactions = lazy(() => import('./pages/Transactions'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Admin = lazy(() => import('./pages/Admin'));
@@ -47,7 +48,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<ProtectedRoute />}>
-              <Route index element={<Navigate to="/finanzas" replace />} />
+              <Route index element={<Home />} />
               <Route path="reports" element={<Reports />} />
               <Route path="statistics" element={<Statistics />} />
               <Route path="transactions" element={<Transactions />} />
