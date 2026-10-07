@@ -2,11 +2,11 @@ import React, { useState, useMemo, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Alert,
 } from 'react-native';
-import { Plus, X, Edit2, Trash2, Search, ChevronLeft, BatteryFull } from 'lucide-react-native';
+import { Plus, X, Edit2, Trash2, Search, ChevronLeft, BatteryFull, MapPin } from 'lucide-react-native';
 import { usePilas } from '../context/PilasContext';
 import { TIPOS_PILA, hoyISO } from '../casa/constants';
 import {
-  resumenPorTipo, sugerenciasDe, antiguedad, agruparPorEstancia, filtrar, describirMovimiento, normalizar,
+  resumenPorTipo, sugerenciasDe, antiguedad, ordenarPorAparato, filtrar, describirMovimiento, normalizar,
 } from '../casa/pilas';
 
 const ACCENT = '#5B3A8C';
@@ -53,7 +53,7 @@ function Asignaciones() {
   const [tipoEdit, setTipoEdit] = useState(null);
 
   const resumen = useMemo(() => resumenPorTipo(tipos, asignaciones), [tipos, asignaciones]);
-  const grupos = useMemo(() => agruparPorEstancia(filtrar(asignaciones, texto)), [asignaciones, texto]);
+  const filas = useMemo(() => ordenarPorAparato(filtrar(asignaciones, texto)), [asignaciones, texto]);
   const sugAparatos = useMemo(() => sugerenciasDe(asignaciones, movimientos, 'aparato'), [asignaciones, movimientos]);
   const sugEstancias = useMemo(() => sugerenciasDe(asignaciones, movimientos, 'estancia'), [asignaciones, movimientos]);
 
@@ -95,29 +95,28 @@ function Asignaciones() {
             placeholder="Buscar aparato, estancia o tipo…" placeholderTextColor="#AEAEB2" />
         </View>
 
-        {grupos.map(g => (
-          <View key={g.estancia}>
-            <Text style={styles.h4}>{g.estancia}</Text>
-            {g.items.map(a => (
-              <View key={a.id} style={styles.row}>
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={styles.aparato} numberOfLines={1}>{a.aparato}</Text>
-                  <View style={styles.sub}>
-                    <View style={styles.badge}><Text style={styles.badgeText}>{a.cantidad}× {a.tipo}</Text></View>
-                    <Text style={styles.subText}>{antiguedad(a.fechaColocacion)}</Text>
-                  </View>
+        <View style={{ marginTop: 10 }}>
+          {filas.map(a => (
+            <View key={a.id} style={styles.row}>
+              <View style={styles.badge}><Text style={styles.badgeText}>{a.cantidad}× {a.tipo}</Text></View>
+              <Text style={styles.aparato} numberOfLines={1}>{a.aparato}</Text>
+              {!!a.estancia && (
+                <View style={styles.tag}>
+                  <MapPin size={10} color="#3A3A3C" />
+                  <Text style={styles.tagText} numberOfLines={1}>{a.estancia}</Text>
                 </View>
-                <TouchableOpacity onPress={() => setForm({ initialData: a })} style={styles.actionBtn}>
-                  <Edit2 size={18} color="#6E6E73" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => confirmarQuitar(a)} style={styles.actionBtn}>
-                  <Trash2 size={18} color="#C0392B" />
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
-        ))}
-        {grupos.length === 0 && (
+              )}
+              <Text style={styles.subText}>{antiguedad(a.fechaColocacion)}</Text>
+              <TouchableOpacity onPress={() => setForm({ initialData: a })} style={styles.actionBtn} hitSlop={6}>
+                <Edit2 size={16} color="#6E6E73" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => confirmarQuitar(a)} style={styles.actionBtn} hitSlop={6}>
+                <Trash2 size={16} color="#C0392B" />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+        {filas.length === 0 && (
           <Text style={styles.empty}>
             {asignaciones.length === 0 ? 'No hay pilas puestas en ningún aparato' : 'Nada coincide con la búsqueda'}
           </Text>
@@ -330,16 +329,16 @@ const styles = StyleSheet.create({
   search: { flexDirection: 'row', alignItems: 'center', gap: 8, marginHorizontal: 12, paddingHorizontal: 12,
     borderRadius: 10, borderWidth: 1, borderColor: '#D2D2D7', backgroundColor: '#fff' },
   searchInput: { flex: 1, paddingVertical: 9, color: '#1D1D1F' },
-  h4: { marginHorizontal: 12, marginTop: 16, marginBottom: 6, fontSize: 12, color: '#6E6E73',
-    textTransform: 'uppercase', letterSpacing: 0.5 },
   row: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', marginHorizontal: 12,
-    marginBottom: 8, padding: 12, borderRadius: 12, gap: 8 },
-  aparato: { fontSize: 15, fontWeight: '600', color: '#1D1D1F' },
-  sub: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
-  subText: { color: '#6E6E73', fontSize: 12 },
+    marginBottom: 4, paddingVertical: 6, paddingLeft: 10, paddingRight: 4, borderRadius: 8, gap: 6 },
+  aparato: { flex: 1, fontSize: 14, fontWeight: '600', color: '#1D1D1F' },
+  tag: { flexDirection: 'row', alignItems: 'center', gap: 2, backgroundColor: '#EBEBED',
+    paddingVertical: 1, paddingHorizontal: 6, borderRadius: 10, maxWidth: 90 },
+  tagText: { color: '#3A3A3C', fontSize: 11, flexShrink: 1 },
+  subText: { color: '#6E6E73', fontSize: 11 },
   badge: { backgroundColor: ACCENT_BG, paddingVertical: 1, paddingHorizontal: 8, borderRadius: 12 },
   badgeText: { color: ACCENT, fontSize: 12, fontWeight: '600' },
-  actionBtn: { padding: 6 },
+  actionBtn: { padding: 4 },
   empty: { textAlign: 'center', color: '#AEAEB2', fontStyle: 'italic', marginTop: 30 },
   histRow: { backgroundColor: '#fff', marginHorizontal: 12, marginBottom: 6, padding: 10, borderRadius: 10 },
   histTxt: { color: '#1D1D1F', fontSize: 14 },

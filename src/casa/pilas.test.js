@@ -1,7 +1,7 @@
 // src/casa/pilas.test.js
 import { describe, it, expect } from 'vitest';
 import {
-  resumenPorTipo, sugerenciasDe, antiguedad, agruparPorEstancia, filtrar,
+  resumenPorTipo, sugerenciasDe, antiguedad, ordenarPorAparato, filtrar,
   detalleEdicion, describirMovimiento,
 } from './pilas';
 
@@ -66,16 +66,18 @@ describe('antiguedad', () => {
   });
 });
 
-describe('agruparPorEstancia', () => {
-  it('agrupa sin distinguir mayúsculas, ordena y deja "Sin estancia" al final', () => {
-    const grupos = agruparPorEstancia([
+describe('ordenarPorAparato', () => {
+  it('ordena por aparato y luego por estancia sin modificar la lista original', () => {
+    const lista = [
       asig({ aparato: 'Ratón', estancia: 'Despacho' }),
-      asig({ aparato: 'Linterna', estancia: '' }),
       asig({ aparato: 'Mando TV', estancia: 'Salón' }),
-      asig({ aparato: 'Mando aire', estancia: 'salón ' }),
-    ]);
-    expect(grupos.map(g => g.estancia)).toEqual(['Despacho', 'Salón', 'Sin estancia']);
-    expect(grupos[1].items.map(a => a.aparato)).toEqual(['Mando aire', 'Mando TV']);
+      asig({ aparato: 'Mando TV', estancia: 'Dormitorio' }),
+      asig({ aparato: 'Linterna', estancia: '' }),
+    ];
+    const r = ordenarPorAparato(lista);
+    expect(r.map(a => `${a.aparato}|${a.estancia}`))
+      .toEqual(['Linterna|', 'Mando TV|Dormitorio', 'Mando TV|Salón', 'Ratón|Despacho']);
+    expect(lista[0].aparato).toBe('Ratón');
   });
 });
 

@@ -5,8 +5,6 @@ export const COL_TIPOS = 'pilasTipos';
 export const COL_ASIGNACIONES = 'pilasAsignaciones';
 export const COL_MOVIMIENTOS = 'pilasMovimientos';
 
-export const SIN_ESTANCIA = 'Sin estancia';
-
 // Fecha local de hoy en formato "YYYY-MM-DD".
 export const hoyISO = () => {
   const d = new Date();

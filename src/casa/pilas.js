@@ -1,6 +1,6 @@
 // src/casa/pilas.js
 // Lógica pura del submódulo Pilas (sin Firestore ni React).
-import { TIPOS_PILA, SIN_ESTANCIA } from './constants';
+import { TIPOS_PILA } from './constants';
 
 // Minúsculas, sin tildes y sin espacios en los extremos (para comparar y buscar).
 export const normalizar = (s) => String(s || '')
@@ -55,22 +55,10 @@ export function antiguedad(fechaISO, hoy = new Date()) {
   return plural(Math.floor(meses / 12), 'año', 'años');
 }
 
-// [{ estancia, items }] ordenado por estancia ("Sin estancia" al final);
-// dentro de cada grupo, por aparato.
-export function agruparPorEstancia(asignaciones) {
-  const grupos = new Map();
-  for (const a of asignaciones) {
-    const key = normalizar(a.estancia);
-    if (!grupos.has(key)) grupos.set(key, { estancia: String(a.estancia || '').trim() || SIN_ESTANCIA, items: [] });
-    grupos.get(key).items.push(a);
-  }
-  const lista = [...grupos.entries()].map(([key, g]) => ({
-    ...g,
-    sin: key === '',
-    items: g.items.sort((a, b) => a.aparato.localeCompare(b.aparato, 'es')),
-  }));
-  lista.sort((a, b) => (a.sin - b.sin) || a.estancia.localeCompare(b.estancia, 'es'));
-  return lista.map(({ estancia, items }) => ({ estancia, items }));
+// Ordena por aparato y, a igualdad, por estancia.
+export function ordenarPorAparato(asignaciones) {
+  return [...asignaciones].sort((a, b) =>
+    a.aparato.localeCompare(b.aparato, 'es') || String(a.estancia || '').localeCompare(String(b.estancia || ''), 'es'));
 }
 
 // Filtra por aparato, estancia o tipo (sin tildes ni mayúsculas).

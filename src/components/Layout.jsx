@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { LayoutList, PieChart, Settings, TrendingUp, Moon, Sun, BarChart2, Wallet, Home, ChevronDown, ShieldCheck, Sofa, BatteryFull } from 'lucide-react';
+import { Outlet, NavLink, Link, useLocation } from 'react-router-dom';
+import { LayoutList, PieChart, Settings, TrendingUp, Moon, Sun, BarChart2, Wallet, Home, ChevronDown, ShieldCheck, Sofa, BatteryFull, House } from 'lucide-react';
 import { useData } from '../context/DataContext';
 
 import PullToRefresh from './PullToRefresh';
@@ -25,7 +25,11 @@ export default function Layout() {
   return (
     <div className="app-container">
       <nav className="top-nav">
-        <div className="nav-left"></div>
+        <div className="nav-left">
+          <Link to="/" className="icon-btn-nav" title="Inicio" aria-label="Inicio">
+            <House size={20} />
+          </Link>
+        </div>
 
         <div className="nav-center">
           <div className="nav-group">
@@ -262,9 +266,11 @@ export default function Layout() {
         
         /* Mobile adjustment */
         @media (max-width: 480px) {
-            .nav-link { font-size: 0.8rem; }
-            .nav-center { gap: 10px; }
-            .top-nav { padding: 0 8px; }
+            .nav-link { font-size: 0.75rem; padding: 4px 5px; }
+            .nav-center { gap: 2px; }
+            .nav-left, .nav-right { gap: 0; }
+            .icon-btn-nav { padding: 6px; }
+            .top-nav { padding: 0 4px; }
         }
 
         .content {

@@ -117,6 +117,7 @@ fuera del círculo (encima en los de arriba, debajo en los de abajo).
 
 ### Menú superior (web)
 
+Botón **Inicio** (casa) a la izquierda para volver a la home desde cualquier pantalla.
 Grupo **Casa** con una sola entrada, **Pilas**. El historial no tiene entrada
 propia: es una pestaña dentro de la pantalla de Pilas.
 
@@ -132,10 +133,9 @@ Página contenedora con una tarjeta por submódulo. De momento solo hay una:
    formulario para editar `total` y `capacidadMah`.
 2. **Buscador**: filtra asignaciones por aparato, estancia o tipo (sin
    distinguir mayúsculas ni tildes).
-3. **Lista de asignaciones agrupada por estancia** (las que no tienen estancia
-   van en el grupo "Sin estancia", al final), ordenadas por aparato:
-   `Mando TV — 2× AAA — hace 8 meses`, con acciones **Editar** y **Quitar**
-   (esta última pide confirmación).
+3. **Lista de asignaciones**: una fila estrecha por asignación, ordenadas por
+   aparato: `2× AAA · Mando TV · [Salón] · hace 8 meses`, con la estancia como
+   etiqueta y acciones **Editar** y **Quitar** (esta última pide confirmación).
 4. **Botón "Poner pilas"**: formulario con aparato (obligatorio, con
    sugerencias), estancia (opcional, con sugerencias), tipo (desplegable),
    cantidad (entero ≥ 1) y fecha (por defecto, hoy).
@@ -160,7 +160,7 @@ Mismo patrón que Seguros.
   - `resumenPorTipo(tipos, asignaciones)` → `{ tipo, capacidadMah, total, enUso, disponibles }[]`
   - `sugerencias(valores)` → lista sin duplicados (ver Sugerencias).
   - `antiguedad(fechaColocacion, hoy)` → texto.
-  - `agruparPorEstancia(asignaciones)` → grupos ordenados.
+  - `ordenarPorAparato(asignaciones)` → lista ordenada por aparato.
   - `filtrar(asignaciones, texto)`.
   - `describirMovimiento(mov)` → texto para el historial.
 - `src/casa/pilas.test.js`: tests de lo anterior (vitest).

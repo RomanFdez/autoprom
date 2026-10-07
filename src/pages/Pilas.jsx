@@ -1,12 +1,12 @@
 // src/pages/Pilas.jsx
 import { useState, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Search, ChevronLeft, BatteryFull } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, ChevronLeft, BatteryFull, MapPin } from 'lucide-react';
 import { usePilas } from '../context/PilasContext';
 import PilaAsignacionForm from '../components/PilaAsignacionForm';
 import PilaTipoForm from '../components/PilaTipoForm';
 import {
-  resumenPorTipo, sugerenciasDe, antiguedad, agruparPorEstancia, filtrar, describirMovimiento,
+  resumenPorTipo, sugerenciasDe, antiguedad, ordenarPorAparato, filtrar, describirMovimiento,
 } from '../casa/pilas';
 
 const ACCENT = '#5B3A8C';
@@ -47,7 +47,6 @@ export default function Pilas() {
           background: #EBEBED; color: #6E6E73; font-weight: 600; font-size: 0.85rem; }
         .pil-tabs button.active { background: ${ACCENT}; color: #fff; }
         .pil-empty { text-align: center; padding: 2rem; opacity: 0.5; font-style: italic; }
-        .pil-h4 { margin: 18px 0 8px; font-size: 0.8rem; color: #6E6E73; text-transform: uppercase; letter-spacing: .03em; }
 
         /* Modales (formularios) */
         .pil-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000;
@@ -71,7 +70,6 @@ export default function Pilas() {
 
         /* ---- Dark mode ---- */
         :root[data-theme='dark'] .pil-tabs button:not(.active) { background: #2c2c2e; color: #b0bec5; }
-        :root[data-theme='dark'] .pil-h4 { color: #b0bec5; }
         :root[data-theme='dark'] .pil-modal { background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
         :root[data-theme='dark'] .pil-modal-header { border-bottom-color: var(--md-sys-color-outline); }
         :root[data-theme='dark'] .pil-form label { color: #b0bec5; }
@@ -91,7 +89,7 @@ function AsignacionesView() {
   const [tipoEdit, setTipoEdit] = useState(null);
 
   const resumen = useMemo(() => resumenPorTipo(tipos, asignaciones), [tipos, asignaciones]);
-  const grupos = useMemo(() => agruparPorEstancia(filtrar(asignaciones, texto)), [asignaciones, texto]);
+  const filas = useMemo(() => ordenarPorAparato(filtrar(asignaciones, texto)), [asignaciones, texto]);
   const sugAparatos = useMemo(() => sugerenciasDe(asignaciones, movimientos, 'aparato'), [asignaciones, movimientos]);
   const sugEstancias = useMemo(() => sugerenciasDe(asignaciones, movimientos, 'estancia'), [asignaciones, movimientos]);
 
@@ -126,29 +124,23 @@ function AsignacionesView() {
           placeholder="Buscar aparato, estancia o tipo…" />
       </div>
 
-      {grupos.map(g => (
-        <div key={g.estancia}>
-          <h4 className="pil-h4">{g.estancia}</h4>
-          <div className="pil-list">
-            {g.items.map(a => (
-              <div key={a.id} className="pil-item">
-                <div className="pil-item-main">
-                  <span className="pil-aparato">{a.aparato}</span>
-                  <span className="pil-sub">
-                    <span className="pil-badge">{a.cantidad}× {a.tipo}</span>
-                    <span>{antiguedad(a.fechaColocacion)}</span>
-                  </span>
-                </div>
-                <div className="pil-actions">
-                  <button title="Editar" onClick={() => setForm({ initialData: a })}><Edit2 size={16} /></button>
-                  <button title="Quitar" className="danger" onClick={() => confirmarQuitar(a)}><Trash2 size={16} /></button>
-                </div>
-              </div>
-            ))}
+      <div className="pil-list">
+        {filas.map(a => (
+          <div key={a.id} className="pil-item">
+            <span className="pil-badge">{a.cantidad}× {a.tipo}</span>
+            <span className="pil-aparato">{a.aparato}</span>
+            <span className="pil-meta">
+              {!!a.estancia && <span className="pil-tag"><MapPin size={11} /><span>{a.estancia}</span></span>}
+              <span className="pil-age">{antiguedad(a.fechaColocacion)}</span>
+            </span>
+            <span className="pil-actions">
+              <button title="Editar" onClick={() => setForm({ initialData: a })}><Edit2 size={15} /></button>
+              <button title="Quitar" className="danger" onClick={() => confirmarQuitar(a)}><Trash2 size={15} /></button>
+            </span>
           </div>
-        </div>
-      ))}
-      {grupos.length === 0 && (
+        ))}
+      </div>
+      {filas.length === 0 && (
         <div className="pil-empty">
           {asignaciones.length === 0 ? 'No hay pilas puestas en ningún aparato' : 'Nada coincide con la búsqueda'}
         </div>
@@ -174,15 +166,21 @@ function AsignacionesView() {
           border: 1px solid var(--md-sys-color-outline); background: var(--md-sys-color-surface); opacity: 0.9; }
         .pil-search input { flex: 1; border: none; outline: none; background: transparent; font-size: 0.95rem;
           color: var(--md-sys-color-on-surface); min-width: 0; }
-        .pil-list { display: flex; flex-direction: column; gap: 8px; }
-        .pil-item { background: var(--md-sys-color-surface); padding: 10px 12px; border-radius: 12px;
-          display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .pil-item-main { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-        .pil-aparato { font-weight: 600; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .pil-sub { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; opacity: 0.75; }
-        .pil-badge { background: #F3EEFA; color: ${ACCENT}; padding: 1px 8px; border-radius: 20px; font-weight: 600; }
-        .pil-actions { display: flex; gap: 4px; }
-        .pil-actions button { border: none; background: none; padding: 6px; cursor: pointer;
+        .pil-list { display: flex; flex-direction: column; gap: 4px; margin-top: 12px; }
+        .pil-item { background: var(--md-sys-color-surface); padding: 4px 6px 4px 10px; border-radius: 8px;
+          display: flex; align-items: center; gap: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); min-height: 34px; }
+        .pil-aparato { flex: 1; font-weight: 600; font-size: 0.9rem; min-width: 0;
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pil-meta { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; white-space: nowrap; min-width: 0; }
+        .pil-tag { display: inline-flex; align-items: center; gap: 2px; padding: 1px 7px; border-radius: 20px;
+          background: #EBEBED; color: #3A3A3C; max-width: 140px; min-width: 0; }
+        .pil-tag svg { flex-shrink: 0; }
+        .pil-tag span { overflow: hidden; text-overflow: ellipsis; }
+        .pil-age { opacity: 0.65; }
+        .pil-badge { background: #F3EEFA; color: ${ACCENT}; padding: 1px 7px; border-radius: 20px; font-weight: 600;
+          font-size: 0.75rem; white-space: nowrap; flex-shrink: 0; }
+        .pil-actions { display: flex; gap: 0; flex-shrink: 0; }
+        .pil-actions button { border: none; background: none; padding: 5px; cursor: pointer; line-height: 0;
           color: var(--md-sys-color-on-surface); opacity: 0.6; }
         .pil-actions button.danger { color: #ef5350; opacity: 0.8; }
         .pil-fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 28px;
@@ -192,9 +190,11 @@ function AsignacionesView() {
           .pil-cards { gap: 6px; }
           .pil-card { padding: 10px; }
           .pil-card-tipo small { display: none; }
+          .pil-tag { max-width: 80px; }
         }
         :root[data-theme='dark'] .pil-card { background: #2E2540; border-color: #4A3B66; color: #C9B3EE; }
         :root[data-theme='dark'] .pil-badge { background: #2E2540; color: #C9B3EE; }
+        :root[data-theme='dark'] .pil-tag { background: #2c2c2e; color: #b0bec5; }
       `}</style>
     </div>
   );
