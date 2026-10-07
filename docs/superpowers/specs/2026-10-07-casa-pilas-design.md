@@ -115,11 +115,17 @@ Se añade un cuarto nodo **Casa** al anillo. Los cuatro nodos pasan del
 triángulo a las cuatro diagonales del anillo, para que las etiquetas queden
 fuera del círculo (encima en los de arriba, debajo en los de abajo).
 
-### Menú superior (web)
+### Navegación (web)
 
-Botón **Inicio** (casa) a la izquierda para volver a la home desde cualquier pantalla.
-Grupo **Casa** con una sola entrada, **Pilas**. El historial no tiene entrada
-propia: es una pestaña dentro de la pantalla de Pilas.
+Sustituye a los desplegables de la barra superior:
+
+- **Barra**: botón ☰ a la izquierda, en el centro la sección y página actual
+  ("Seguros · Listado") con el color de la sección, y el tema a la derecha.
+- **Menú lateral** (☰): Inicio y cada sección con su icono, su color y sus páginas
+  siempre visibles; la página actual va resaltada. Se cierra al tocar fuera, al
+  elegir una página o con Esc.
+- Secciones y páginas se definen en un único sitio, `src/navigation.js`, que
+  usan la home, la barra y el menú.
 
 ### Casa
 

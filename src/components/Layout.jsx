@@ -1,22 +1,18 @@
-import { useState } from 'react';
-import { Outlet, NavLink, Link, useLocation } from 'react-router-dom';
-import { LayoutList, PieChart, Settings, TrendingUp, Moon, Sun, BarChart2, Wallet, Home, ChevronDown, ShieldCheck, Sofa, BatteryFull, House } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import { Menu, Moon, Sun } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { ubicacion, varsTono } from '../navigation';
+import NavDrawer from './NavDrawer';
 
 import PullToRefresh from './PullToRefresh';
 
 export default function Layout() {
   const { refreshData, settings, updateSettings } = useData();
   const location = useLocation();
-  const [openMenu, setOpenMenu] = useState(null);
-  const toggleMenu = (name) => setOpenMenu(o => (o === name ? null : name));
-
-  const PSE_ROUTES = ['/reports', '/statistics', '/transactions', '/avance', '/admin'];
-  const pseActive = PSE_ROUTES.includes(location.pathname);
-  const finActive = location.pathname === '/finanzas';
-  const segActive = location.pathname === '/seguros';
-  const casaActive = location.pathname.startsWith('/casa');
-  const view = new URLSearchParams(location.search).get('v');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const cerrarMenu = useCallback(() => setMenuOpen(false), []);
+  const actual = ubicacion(location.pathname, location.search);
 
   const toggleTheme = () => {
     updateSettings({ darkMode: !settings.darkMode });
@@ -25,113 +21,27 @@ export default function Layout() {
   return (
     <div className="app-container">
       <nav className="top-nav">
-        <div className="nav-left">
-          <Link to="/" className="icon-btn-nav" title="Inicio" aria-label="Inicio">
-            <House size={20} />
-          </Link>
-        </div>
+        <button type="button" className="icon-btn-nav" onClick={() => setMenuOpen(true)}
+          aria-label="Abrir menú" aria-expanded={menuOpen}>
+          <Menu size={22} />
+        </button>
 
-        <div className="nav-center">
-          <div className="nav-group">
-            <button type="button" className={`nav-link nav-group-btn ${finActive ? 'active' : ''}`}
-              onClick={() => toggleMenu('fin')}>
-              <Wallet size={18} />
-              <span>Finanzas <ChevronDown size={11} style={{ verticalAlign: 'middle' }} /></span>
-            </button>
-            {openMenu === 'fin' && (
-              <>
-                <div className="nav-dropdown-backdrop" onClick={() => setOpenMenu(null)} />
-                <div className="nav-dropdown">
-                  <NavLink to="/finanzas?v=anual" className={() => `dd-link ${finActive && view !== 'mensual' ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
-                    <BarChart2 size={16} /><span>Anual</span>
-                  </NavLink>
-                  <NavLink to="/finanzas?v=mensual" className={() => `dd-link ${finActive && view === 'mensual' ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
-                    <LayoutList size={16} /><span>Mensual</span>
-                  </NavLink>
-                </div>
-              </>
-            )}
+        {actual ? (
+          <div className="nav-title" style={varsTono(actual.seccion)}>
+            <span className="nav-title-icon"><actual.seccion.Icon size={16} /></span>
+            <span className="nav-title-text">
+              <strong>{actual.seccion.label}</strong>
+              {actual.pagina && <span> · {actual.pagina.label}</span>}
+            </span>
           </div>
+        ) : <div className="nav-title" />}
 
-          <div className="nav-group">
-            <button type="button" className={`nav-link nav-group-btn ${segActive ? 'active' : ''}`}
-              onClick={() => toggleMenu('seg')}>
-              <ShieldCheck size={18} />
-              <span>Seguros <ChevronDown size={11} style={{ verticalAlign: 'middle' }} /></span>
-            </button>
-            {openMenu === 'seg' && (
-              <>
-                <div className="nav-dropdown-backdrop" onClick={() => setOpenMenu(null)} />
-                <div className="nav-dropdown">
-                  <NavLink to="/seguros?v=resumen" className={() => `dd-link ${segActive && view !== 'listado' ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
-                    <PieChart size={16} /><span>Resumen</span>
-                  </NavLink>
-                  <NavLink to="/seguros?v=listado" className={() => `dd-link ${segActive && view === 'listado' ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
-                    <LayoutList size={16} /><span>Listado</span>
-                  </NavLink>
-                </div>
-              </>
-            )}
-          </div>
-
-          <div className="nav-group">
-            <button type="button" className={`nav-link nav-group-btn ${casaActive ? 'active' : ''}`}
-              onClick={() => toggleMenu('casa')}>
-              <Sofa size={18} />
-              <span>Casa <ChevronDown size={11} style={{ verticalAlign: 'middle' }} /></span>
-            </button>
-            {openMenu === 'casa' && (
-              <>
-                <div className="nav-dropdown-backdrop" onClick={() => setOpenMenu(null)} />
-                <div className="nav-dropdown">
-                  <NavLink to="/casa/pilas" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
-                    <BatteryFull size={16} /><span>Pilas</span>
-                  </NavLink>
-                </div>
-              </>
-            )}
-          </div>
-
-          <div className="nav-group">
-            <button
-              type="button"
-              className={`nav-link nav-group-btn ${pseActive ? 'active' : ''}`}
-              onClick={() => toggleMenu('pse')}
-            >
-              <Home size={18} />
-              <span>P.S.Espada <ChevronDown size={11} style={{ verticalAlign: 'middle' }} /></span>
-            </button>
-            {openMenu === 'pse' && (
-              <>
-                <div className="nav-dropdown-backdrop" onClick={() => setOpenMenu(null)} />
-                <div className="nav-dropdown">
-                  <NavLink to="/reports" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
-                    <PieChart size={16} /><span>Resumen</span>
-                  </NavLink>
-                  <NavLink to="/statistics" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
-                    <BarChart2 size={16} /><span>Estadísticas</span>
-                  </NavLink>
-                  <NavLink to="/transactions" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
-                    <LayoutList size={16} /><span>Movimientos</span>
-                  </NavLink>
-                  <NavLink to="/avance" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
-                    <TrendingUp size={16} /><span>Avance</span>
-                  </NavLink>
-                  <NavLink to="/admin" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
-                    <Settings size={16} /><span>Admin P.SE</span>
-                  </NavLink>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="nav-right">
-          <button className="icon-btn-nav" onClick={toggleTheme}>
-            {settings.darkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
-        </div>
+        <button className="icon-btn-nav" onClick={toggleTheme} aria-label="Cambiar tema">
+          {settings.darkMode ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
       </nav>
+
+      <NavDrawer open={menuOpen} onClose={cerrarMenu} actual={actual} />
 
       <main className="content">
         <PullToRefresh onRefresh={refreshData}>
@@ -166,86 +76,14 @@ export default function Layout() {
           box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         
-        .nav-left, .nav-right {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .nav-center {
-            display: flex;
-            gap: 16px;
-        }
-
-        .nav-link {
-            text-decoration: none;
-            color: var(--md-sys-color-secondary);
-            font-weight: 500;
-            font-size: 0.75rem; /* Smaller font for icon label */
-            position: relative;
-            padding: 4px 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            transition: color 0.2s;
-        }
-        .nav-link.active {
-            color: var(--md-sys-color-primary);
-        }
-        .nav-group { position: relative; display: flex; }
-        .nav-group-btn {
-            background: none;
-            border: none;
-            font-family: inherit;
-            cursor: pointer;
-        }
-        .nav-dropdown-backdrop {
-            position: fixed;
-            inset: 0;
-            z-index: 1050;
-        }
-        .nav-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            margin-top: 10px;
-            background: var(--md-sys-color-surface);
-            border: 1px solid var(--md-sys-color-outline);
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-            display: flex;
-            flex-direction: column;
-            min-width: 190px;
-            padding: 6px;
-            z-index: 1100;
-        }
-        .dd-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 9px 12px;
-            border-radius: 8px;
-            text-decoration: none;
-            color: var(--md-sys-color-on-surface);
-            font-size: 0.85rem;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-        .dd-link:hover { background: rgba(0,0,0,0.05); }
-        .dd-link.active {
-            color: var(--md-sys-color-primary);
-            background: rgba(0,85,179,0.08);
-        }
-        .nav-link.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0; right: 0;
-            height: 2px;
-            background: var(--md-sys-color-primary);
-            border-radius: 2px;
-        }
+        .nav-title { --t-bg: var(--tono-bg); --t-ink: var(--tono-ink);
+          flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 8px;
+          color: var(--t-ink); font-size: 0.95rem; }
+        :root[data-theme='dark'] .nav-title { --t-bg: var(--tono-bg-d); --t-ink: var(--tono-ink-d); }
+        .nav-title-icon { width: 28px; height: 28px; border-radius: 50%; background: var(--t-bg);
+          display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .nav-title-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .nav-title-text span { font-weight: 500; opacity: 0.85; }
 
         .icon-btn-nav {
             background: none;
@@ -264,13 +102,8 @@ export default function Layout() {
         }
         .logout-btn { color: #d32f2f; }
         
-        /* Mobile adjustment */
         @media (max-width: 480px) {
-            .nav-link { font-size: 0.75rem; padding: 4px 5px; }
-            .nav-center { gap: 2px; }
-            .nav-left, .nav-right { gap: 0; }
-            .icon-btn-nav { padding: 6px; }
-            .top-nav { padding: 0 4px; }
+            .top-nav { padding: 0 6px; }
         }
 
         .content {
