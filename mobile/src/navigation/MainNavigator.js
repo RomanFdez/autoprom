@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, List, Settings, TrendingUp, BarChart2, Wallet, ShieldCheck } from 'lucide-react-native';
+import { Home, List, Settings, TrendingUp, BarChart2, Wallet, ShieldCheck, Sofa } from 'lucide-react-native';
 
 import HomeScreen from '../screens/HomeScreen';
 import StatisticsScreen from '../screens/StatisticsScreen';
@@ -9,10 +9,12 @@ import AdminScreen from '../screens/AdminScreen';
 import AvanceScreen from '../screens/AvanceScreen';
 import FinanzasScreen from '../screens/FinanzasScreen';
 import SegurosScreen from '../screens/SegurosScreen';
+import CasaScreen from '../screens/CasaScreen';
 
 import { useTheme } from '../context/ThemeContext';
 import { FinanzasProvider } from '../context/FinanzasContext';
 import { SegurosProvider } from '../context/SegurosContext';
+import { PilasProvider } from '../context/PilasContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -22,6 +24,7 @@ export default function MainNavigator() {
     return (
         <FinanzasProvider>
         <SegurosProvider>
+        <PilasProvider>
         <Tab.Navigator
             screenOptions={{
                 headerShown: false,
@@ -49,6 +52,14 @@ export default function MainNavigator() {
                 options={{
                     tabBarIcon: ({ color }) => <ShieldCheck color={color} size={24} />,
                     tabBarLabel: 'Seguros'
+                }}
+            />
+            <Tab.Screen
+                name="Casa"
+                component={CasaScreen}
+                options={{
+                    tabBarIcon: ({ color }) => <Sofa color={color} size={24} />,
+                    tabBarLabel: 'Casa'
                 }}
             />
             <Tab.Screen
@@ -92,6 +103,7 @@ export default function MainNavigator() {
                 }}
             />
         </Tab.Navigator>
+        </PilasProvider>
         </SegurosProvider>
         </FinanzasProvider>
     );

@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import { DataProvider } from './context/DataContext';
 import { FinanzasProvider } from './context/FinanzasContext';
 import { SegurosProvider } from './context/SegurosContext';
+import { PilasProvider } from './context/PilasContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
@@ -17,6 +18,8 @@ const Avance = lazy(() => import('./pages/Avance'));
 const Statistics = lazy(() => import('./pages/Statistics'));
 const Finanzas = lazy(() => import('./pages/Finanzas'));
 const Seguros = lazy(() => import('./pages/Seguros'));
+const Casa = lazy(() => import('./pages/Casa'));
+const Pilas = lazy(() => import('./pages/Pilas'));
 
 const LoadingFallback = () => (
   <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -55,6 +58,8 @@ function App() {
               <Route path="avance" element={<Avance />} />
               <Route path="finanzas" element={<FinanzasProvider><Finanzas /></FinanzasProvider>} />
               <Route path="seguros" element={<SegurosProvider><Seguros /></SegurosProvider>} />
+              <Route path="casa" element={<Casa />} />
+              <Route path="casa/pilas" element={<PilasProvider><Pilas /></PilasProvider>} />
               <Route path="admin" element={<Admin />} />
             </Route>
           </Routes>

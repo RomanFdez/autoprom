@@ -112,8 +112,13 @@ Cada asignación muestra el tiempo desde `fechaColocacion`: "hoy", "hace N días
 ### Home (web)
 
 Se añade un cuarto nodo **Casa** al anillo. Los cuatro nodos pasan del
-triángulo actual a los cuatro puntos cardinales (arriba, derecha, abajo,
-izquierda).
+triángulo a las cuatro diagonales del anillo, para que las etiquetas queden
+fuera del círculo (encima en los de arriba, debajo en los de abajo).
+
+### Menú superior (web)
+
+Grupo **Casa** con una sola entrada, **Pilas**. El historial no tiene entrada
+propia: es una pestaña dentro de la pantalla de Pilas.
 
 ### Casa
 

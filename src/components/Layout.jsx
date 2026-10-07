@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { LayoutList, PieChart, Settings, TrendingUp, Moon, Sun, BarChart2, Wallet, Home, ChevronDown, ShieldCheck } from 'lucide-react';
+import { LayoutList, PieChart, Settings, TrendingUp, Moon, Sun, BarChart2, Wallet, Home, ChevronDown, ShieldCheck, Sofa, BatteryFull } from 'lucide-react';
 import { useData } from '../context/DataContext';
 
 import PullToRefresh from './PullToRefresh';
@@ -15,6 +15,7 @@ export default function Layout() {
   const pseActive = PSE_ROUTES.includes(location.pathname);
   const finActive = location.pathname === '/finanzas';
   const segActive = location.pathname === '/seguros';
+  const casaActive = location.pathname.startsWith('/casa');
   const view = new URLSearchParams(location.search).get('v');
 
   const toggleTheme = () => {
@@ -63,6 +64,24 @@ export default function Layout() {
                   </NavLink>
                   <NavLink to="/seguros?v=listado" className={() => `dd-link ${segActive && view === 'listado' ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
                     <LayoutList size={16} /><span>Listado</span>
+                  </NavLink>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="nav-group">
+            <button type="button" className={`nav-link nav-group-btn ${casaActive ? 'active' : ''}`}
+              onClick={() => toggleMenu('casa')}>
+              <Sofa size={18} />
+              <span>Casa <ChevronDown size={11} style={{ verticalAlign: 'middle' }} /></span>
+            </button>
+            {openMenu === 'casa' && (
+              <>
+                <div className="nav-dropdown-backdrop" onClick={() => setOpenMenu(null)} />
+                <div className="nav-dropdown">
+                  <NavLink to="/casa/pilas" className={({ isActive }) => `dd-link ${isActive ? 'active' : ''}`} onClick={() => setOpenMenu(null)}>
+                    <BatteryFull size={16} /><span>Pilas</span>
                   </NavLink>
                 </div>
               </>

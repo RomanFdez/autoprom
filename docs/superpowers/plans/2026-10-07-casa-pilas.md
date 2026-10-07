@@ -95,8 +95,8 @@ Casos:
 **Files:** Create `src/pages/Casa.jsx`, `src/pages/Pilas.jsx`, `src/components/PilaAsignacionForm.jsx`, `src/components/PilaTipoForm.jsx`; Modify `src/App.jsx`, `src/components/Layout.jsx`, `src/pages/Home.jsx`.
 
 - Rutas: `casa` → `<Casa />`; `casa/pilas` → `<PilasProvider><Pilas /></PilasProvider>`.
-- `Layout`: grupo "Casa" (icono `Sofa`) con desplegable Pilas (`/casa/pilas`) e Historial (`/casa/pilas?v=historial`).
-- `Home`: 4 nodos en los puntos cardinales (top Finanzas, right Seguros, bottom Casa, left P.S. Espada); la etiqueta del nodo de abajo va debajo, como ahora.
+- `Layout`: grupo "Casa" (icono `Sofa`) con una sola entrada, Pilas (`/casa/pilas`); el historial es una pestaña dentro de Pilas.
+- `Home`: 4 nodos en las diagonales (Finanzas y Seguros arriba, Casa y P.S. Espada abajo); etiquetas fuera del anillo.
 - `Pilas.jsx`: pestañas Asignaciones/Historial (`?v=historial`), tarjetas por tipo (clic → `PilaTipoForm`), buscador, grupos por estancia con filas `aparato — N× tipo — antigüedad`, editar/quitar (con `confirm`), FAB "Poner pilas".
 - Formulario: aparato (obligatorio) y estancia con `<datalist>` de sugerencias; tipo (select); cantidad (`min=1`); fecha (por defecto hoy).
 - Estilos con variables `--md-sys-color-*` y modo oscuro como en Seguros.
