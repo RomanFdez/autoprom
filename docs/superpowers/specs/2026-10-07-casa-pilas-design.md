@@ -5,7 +5,7 @@ Estado: diseño funcional aprobado; pendiente revisión del spec.
 
 ## Objetivo
 
-Añadir una cuarta sección **Casa** (web y móvil) pensada como almacén de datos
+Añadir una cuarta sección **Casa** (web, usada también desde el navegador del móvil) pensada como almacén de datos
 del hogar, al estilo de un ERP sencillo. El primer submódulo es **Pilas**:
 saber **en qué aparato están puestas las pilas recargables**, cuántas y de qué
 tipo, y cuántas quedan disponibles en el cajón.
@@ -22,7 +22,7 @@ aparato) o está **disponible** (en el cajón). No hay estado "cargando".
   (no hay catálogo de aparatos que mantener).
 - Historial de movimientos.
 - Compartido entre toda la familia, igual que Finanzas y Seguros.
-- Web y móvil.
+- Solo web (desde el móvil se usa la web; la app Expo de `mobile/` se eliminó).
 
 Fuera de alcance: cargador como ubicación, pilas individuales numeradas,
 pilas desechables, avisos o bloqueos por falta de stock, integración con
@@ -148,12 +148,6 @@ Página contenedora con una tarjeta por submódulo. De momento solo hay una:
 5. **Pestaña Historial**: movimientos del más reciente al más antiguo, con
    fecha, usuario y descripción.
 
-### Móvil (Expo)
-
-Mismas pantallas y comportamiento. Se añade una pestaña **Casa** al
-`MainNavigator`. Desde ella se entra a Pilas con un stack o con una vista
-interna, siguiendo lo que resulte más sencillo con la navegación actual.
-
 ## Arquitectura
 
 Mismo patrón que Seguros.
@@ -164,7 +158,7 @@ Mismo patrón que Seguros.
   etiquetas.
 - `src/casa/pilas.js`: funciones puras:
   - `resumenPorTipo(tipos, asignaciones)` → `{ tipo, capacidadMah, total, enUso, disponibles }[]`
-  - `sugerencias(valores)` → lista sin duplicados (ver Sugerencias).
+  - `sugerenciasDe(asignaciones, movimientos, campo)` → lista sin duplicados (ver Sugerencias).
   - `antiguedad(fechaColocacion, hoy)` → texto.
   - `ordenarPorAparato(asignaciones)` → lista ordenada por aparato.
   - `filtrar(asignaciones, texto)`.
@@ -177,14 +171,6 @@ Mismo patrón que Seguros.
   `src/components/`.
 - `src/App.jsx`: rutas `/casa` y `/casa/pilas` con `PilasProvider`.
 - `src/pages/Home.jsx`: cuarto nodo.
-
-### Móvil
-
-- `mobile/src/casa/constants.js` y `mobile/src/casa/pilas.js`: copia de los
-  ficheros de la web (igual que `mobile/src/seguros/`).
-- `mobile/src/context/PilasContext.js`.
-- `mobile/src/screens/CasaScreen.js` y `mobile/src/screens/PilasScreen.js`.
-- `mobile/src/navigation/MainNavigator.js`: pestaña Casa y `PilasProvider`.
 
 ### Firestore
 

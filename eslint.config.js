@@ -5,8 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  // mobile/ es una app Expo con sus propias convenciones; queda fuera del lint raíz.
-  globalIgnores(['dist', 'mobile']),
+  globalIgnores(['dist']),
   // Ficheros Node (scripts de carga y servidor legacy): globals de Node, sin reglas de React.
   {
     files: ['scripts/**/*.{js,mjs,cjs}', 'server.js'],

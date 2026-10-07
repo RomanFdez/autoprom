@@ -10,6 +10,8 @@
 
 Spec: `docs/superpowers/specs/2026-10-07-casa-pilas-design.md`.
 
+> **Nota posterior:** la Task 4 (móvil) se implementó y después se retiró junto con toda la carpeta `mobile/`, que no se usaba: desde el móvil se accede a la web.
+
 ---
 
 ## Mapa de ficheros

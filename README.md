@@ -8,7 +8,6 @@ seguros y avance de obra.
 - **Frontend web**: React + Vite (`src/`). Desplegado en **Firebase Hosting**.
 - **Datos**: **Firestore** (tiempo real, con `onSnapshot`).
 - **Autenticación**: **Firebase Auth** (Google y email/contraseña).
-- **App móvil**: Expo / React Native (`mobile/`), contra el mismo Firebase.
 - **CI/CD**: GitHub Actions (`.github/workflows/deploy.yml`) — tests, build y
   deploy a Firebase Hosting en cada push a `main`.
 
@@ -28,7 +27,6 @@ No hace falta backend propio: la app habla directamente con Firebase.
 - `src/` — Código fuente React (páginas, contextos, lógica de finanzas y seguros).
 - `src/finanzas/` — Lógica pura de finanzas (resumen anual, constantes) con tests.
 - `src/seguros/` — Lógica pura de seguros con tests.
-- `mobile/` — App móvil Expo/React Native.
 - `scripts/finanzas/` — Carga mensual de apuntes clasificados a Firestore
   (`loadMonthly.mjs`). Los JSON de datos bancarios están gitignorados.
 - `scripts/seguros/`, `scripts/restore*.js` — Utilidades de migración/restore.
