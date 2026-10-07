@@ -30,6 +30,6 @@ describe('urlPagina / inicioSeccion', () => {
   it('construye las URLs', () => {
     expect(urlPagina({ path: '/seguros', v: 'listado' })).toBe('/seguros?v=listado');
     expect(urlPagina({ path: '/reports' })).toBe('/reports');
-    expect(SECCIONES.map(inicioSeccion)).toEqual(['/finanzas?v=anual', '/seguros?v=resumen', '/casa', '/reports']);
+    expect(SECCIONES.map(inicioSeccion)).toEqual(['/finanzas?v=anual', '/casa', '/seguros?v=resumen', '/reports']);
   });
 });

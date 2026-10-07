@@ -18,15 +18,6 @@ export const SECCIONES = [
     ],
   },
   {
-    key: 'seguros', label: 'Seguros', Icon: ShieldCheck,
-    rutas: ['/seguros'],
-    tono: { bg: '#DFF2E4', edge: '#C2E3CC', ink: '#1E6B3A', bgD: '#22402C', edgeD: '#335C41', inkD: '#94D8A8' },
-    paginas: [
-      { label: 'Resumen', path: '/seguros', v: 'resumen' },
-      { label: 'Listado', path: '/seguros', v: 'listado' },
-    ],
-  },
-  {
     key: 'casa', label: 'Casa', Icon: Sofa,
     rutas: ['/casa'],
     inicio: '/casa',
@@ -36,7 +27,16 @@ export const SECCIONES = [
     ],
   },
   {
-    key: 'pse', label: 'P.S. Espada', Icon: HomeIcon,
+    key: 'seguros', label: 'Seguros', Icon: ShieldCheck,
+    rutas: ['/seguros'],
+    tono: { bg: '#DFF2E4', edge: '#C2E3CC', ink: '#1E6B3A', bgD: '#22402C', edgeD: '#335C41', inkD: '#94D8A8' },
+    paginas: [
+      { label: 'Resumen', path: '/seguros', v: 'resumen' },
+      { label: 'Listado', path: '/seguros', v: 'listado' },
+    ],
+  },
+  {
+    key: 'pse', label: 'Autopromoción', Icon: HomeIcon,
     rutas: ['/reports', '/statistics', '/transactions', '/avance', '/admin'],
     tono: { bg: '#FCEEDC', edge: '#F0DBBB', ink: '#8A5A16', bgD: '#453520', edgeD: '#614B2D', inkD: '#EBC386' },
     paginas: [
